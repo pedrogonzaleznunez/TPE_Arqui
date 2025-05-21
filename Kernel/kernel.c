@@ -3,6 +3,9 @@
 #include <lib.h>
 #include <moduleLoader.h>
 #include <naiveConsole.h>
+#include <videoDriver.h> 
+#include <font.h>
+#include <idtLoader.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -35,71 +38,42 @@ void * getStackBase()
 
 void * initializeKernelBinary()
 {
-	// char buffer[10];
 
-	// ncPrint("[x64BareBones]");
-	// ncNewline();
-
-	// ncPrint("CPU Vendor:");
-	// ncPrint(cpuVendor(buffer));
-	// ncNewline();
-
-	// ncPrint("[Loading modules]");
-	// ncNewline();
 	void * moduleAddresses[] = {
 		sampleCodeModuleAddress,
 		sampleDataModuleAddress
 	};
 
 	loadModules(&endOfKernelBinary, moduleAddresses);
-	// ncPrint("[Done]");
-	// ncNewline();
-	// ncNewline();
-
-	// ncPrint("[Initializing kernel's binary]");
-	// ncNewline();
-
+	
 	clearBSS(&bss, &endOfKernel - &bss);
 
-	// ncPrint("  text: 0x");
-	// ncPrintHex((uint64_t)&text);
-	// ncNewline();
-	// ncPrint("  rodata: 0x");
-	// ncPrintHex((uint64_t)&rodata);
-	// ncNewline();
-	// ncPrint("  data: 0x");
-	// ncPrintHex((uint64_t)&data);
-	// ncNewline();
-	// ncPrint("  bss: 0x");
-	// ncPrintHex((uint64_t)&bss);
-	// ncNewline();
-
-	// ncPrint("[Done]");
-	// ncNewline();
-	// ncNewline();
 	return getStackBase();
+}
+
+void printSystemTime()
+{
+	// uint64_t time = getSystemTime();
+	// ncPrint("System time: ");
+	// ncPrintDec(time);
+	// ncNewline();
 }
 
 int main()
 {	
+	load_idt();
+	// Inicio kernel
+	//putString("Bienvenido a x64BareBones!", 0xFF00FF);
+	//newLine();
 	
-	// ncPrint("[Kernel Main]");
-	// ncNewline();
-	// ncPrint(" Sample code module at 0x");
-	// ncPrintHex((uint64_t)sampleCodeModuleAddress);
-	// ncNewline();
-	// ncPrint("  Calling the sample code module returned: ");
-	// ncPrintHex(((EntryPoint)sampleCodeModuleAddress)());
-	// ncNewline();
-	// ncNewline();
+	//printSystemTime();
+	
+	while (1);
+	
+	
+	// putString("Hola mundo!", 0xFF00FF);
+	// newLine();
+	// putString("Hola mundo x2!", 0xFF00FF);
 
-	// ncPrint("  Sample data module at 0x");
-	// ncPrintHex((uint64_t)sampleDataModuleAddress);
-	// ncNewline();
-	// ncPrint("  Sample data module contents: ");
-	// ncPrint((char*)sampleDataModuleAddress);
-	// ncNewline();
-
-	// ncPrint("[Finished]");
 	return 0;
 }
