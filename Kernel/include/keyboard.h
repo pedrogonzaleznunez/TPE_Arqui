@@ -7,7 +7,11 @@ void printPressedKey();
 // imprime el valor dado si es que es imprimible
 void printKey(char key);
 
+char getChar(char scanCode);
+
 // devuelve el valor de la tecla presionada
 char getKey();
+
+void keyboardHandler();
 
 #endif

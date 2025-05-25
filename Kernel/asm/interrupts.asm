@@ -56,6 +56,7 @@ SECTION .text
 	pop rax
 %endmacro
 
+; Interruption handler
 %macro irqHandlerMaster 1
 	pushState
 
@@ -71,7 +72,7 @@ SECTION .text
 %endmacro
 
 
-
+; Exceptions handler
 %macro exceptionHandler 1
 	pushState
 

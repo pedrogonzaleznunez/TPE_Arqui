@@ -2,6 +2,9 @@
     "files.associations": {
         "videodriver.h": "c",
         "font.h": "c",
-        "moduleloader.h": "c"
+        "moduleloader.h": "c",
+        "idtloader.h": "c",
+        "syscalls.h": "c",
+        "stdint.h": "c"
     }
 }

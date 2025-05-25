@@ -52,6 +52,8 @@ void putPixel(uint32_t hexColor, uint64_t x, uint64_t y) {
     framebuffer[offset]     =  (hexColor) & 0xFF;
     framebuffer[offset+1]   =  (hexColor >> 8) & 0xFF; 
     framebuffer[offset+2]   =  (hexColor >> 16) & 0xFF;
+
+	return;
 }
 
 void putCharInPos(char c, uint32_t hexColor, uint64_t x, uint64_t y){
@@ -71,6 +73,8 @@ void putCharInPos(char c, uint32_t hexColor, uint64_t x, uint64_t y){
 			}
 		}
 	}
+	
+	return;
 }
 
 void putStringInPos(char* str, uint32_t hexColor, uint64_t x, uint64_t y){
@@ -85,17 +89,20 @@ void putStringInPos(char* str, uint32_t hexColor, uint64_t x, uint64_t y){
 		str++;
 	}
 	
+	return;
 }
 
 void newLine(){
 	grl_y = grl_y % (VBE_mode_info->width) + getFontHeight();
 	grl_x = 0;
+	return;
 }
 
 void putChar(char c, uint32_t hexColor){
 	putCharInPos(c, hexColor, grl_x, grl_y);
 	grl_x += getFontWidth();
 	// Agregar si llega al final de la pantalla. (Para que baje de línea si es necesario)
+	return;
 }
 
 void putString(char *str, uint32_t hexColor){
@@ -106,6 +113,5 @@ void putString(char *str, uint32_t hexColor){
 		putChar(*str, hexColor);
 		str++;
 	}
+	return;
 }
-
-

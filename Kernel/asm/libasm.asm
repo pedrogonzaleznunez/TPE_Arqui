@@ -59,7 +59,7 @@ getKey:
     mov rbp, rsp
 
     mov rax, 0
-
+	
 .loop_2: 
     in al, 0x64
     mov cl, al

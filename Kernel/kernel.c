@@ -59,8 +59,8 @@ void printSystemTime()
 	// ncNewline();
 }
 
-int main()
-{	
+int main(){	
+	
 	load_idt();
 	// Inicio kernel
 	//putString("Bienvenido a x64BareBones!", 0xFF00FF);
@@ -68,12 +68,36 @@ int main()
 	
 	//printSystemTime();
 	
+	// ncPrint("[Kernel Main]");
+  	// ncNewline();
+  	// ncPrint("  Sample code module at 0x");
+  	// ncPrintHex((uint64_t)sampleCodeModuleAddress);
+  	// ncNewline();
+  	// ncPrint("  Calling the sample code module returned: ");
+	putString("Entra al Userland:", 0xFF00FF);
+	newLine();
+  	
+	ncPrintHex(((EntryPoint)sampleCodeModuleAddress)());
+  	
+	newLine();
+	putString("Termina el modulo de Userland", 0xFF00FF);
+  	// ncNewline();
+
+	// ncPrint("  Sample data module at 0x");
+	// ncPrintHex((uint64_t)sampleDataModuleAddress);
+	// ncNewline();
+	// ncPrint("  Sample data module contents: ");
+	// ncPrint((char *)sampleDataModuleAddress);
+	// ncNewline();
+
+	//call the main from the 
+
+	putString("Hola mundo!", 0xFF00FF);
+	newLine();
+	putString("Hola mundo x2!", 0xFF00FF);
+
+
 	while (1);
 	
-	
-	// putString("Hola mundo!", 0xFF00FF);
-	// newLine();
-	// putString("Hola mundo x2!", 0xFF00FF);
-
 	return 0;
 }

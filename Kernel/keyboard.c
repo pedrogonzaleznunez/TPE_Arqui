@@ -2,12 +2,15 @@
 #include <naiveConsole.h>
 #include <videoDriver.h>
 
-// tengo una función getKey que me devuelve un hexa.
-// Como se guarda varias veces la misma, me fijo que la nueva
-// sea distinta de la anterior le hago un ncPrintHex(tecla)
+#define BUFFER_DEFAULT_SIZE 1024
 
-void printKey(char key) {
-  // valores sacados de Scan Code Set 1 en https://wiki.osdev.org/PS/2_Keyboard
+
+static char buffer[BUFFER_DEFAULT_SIZE];
+static int i = 0;
+static int j = 0;
+
+char getChar(char scanCode){
+// valores sacados de Scan Code Set 1 en https://wiki.osdev.org/PS/2_Keyboard
   int printable[] = {
       [0x01] = -1, // escape no tiene carácter imprimible
       [0x02] = '1',  [0x03] = '2', [0x04] = '3',  [0x05] = '4',
@@ -36,10 +39,19 @@ void printKey(char key) {
       [0x3C] = -1,  // F2 no es imprimible
       [0x53] = '.', // imprimible
   };
+  if(scanCode > 0 && scanCode < 0x53){
+    return printable[scanCode];
+  } else {
+    return -1;
+  }
+}
 
-  if (key > 0 && key < 0x53 && printable[key] != -1) {
-    ncPrintChar(printable[key]);
-    putChar(printable[key], 0xFFFFFF);
+void printKey(char key) {
+  char c = getChar(key);
+
+  if (c != -1) {
+    ncPrintChar(c);
+    putChar(c, 0xFFFFFF);
   } else {
     switch (key) {
     case 0x0E:
@@ -68,5 +80,13 @@ void printPressedKey() {
   aux = key;
   if (!(aux >> 7)) {
     printKey(key);
+  }
+}
+
+void keyboardHandler(){
+  while (1){
+    buffer[i] = getKey();
+    i += 1;
+    i %= BUFFER_DEFAULT_SIZE;
   }
 }
