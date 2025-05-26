@@ -55,12 +55,13 @@ getTimeFragment:
 
 
 getKey:
-    push rbp
-    mov rbp, rsp
+   push rbp
+   mov rbp, rsp
 
-    in al, 0x60
+   	in al, 0x60
 	movzx rax, al
     
 	mov rsp, rbp
-    pop rbp
-    ret
+   pop rbp
+   ret
+
