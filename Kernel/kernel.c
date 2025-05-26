@@ -1,11 +1,11 @@
-#include <stdint.h>
-#include <string.h>
+#include <font.h>
+#include <idtLoader.h>
 #include <lib.h>
 #include <moduleLoader.h>
 #include <naiveConsole.h>
-#include <videoDriver.h> 
-#include <font.h>
-#include <idtLoader.h>
+#include <stdint.h>
+#include <string.h>
+#include <videoDriver.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -16,88 +16,76 @@ extern uint8_t endOfKernel;
 
 static const uint64_t PageSize = 0x1000;
 
-static void * const sampleCodeModuleAddress = (void*)0x400000;
-static void * const sampleDataModuleAddress = (void*)0x500000;
+static void *const sampleCodeModuleAddress = (void *)0x400000;
+static void *const sampleDataModuleAddress = (void *)0x500000;
 
 typedef int (*EntryPoint)();
 
-
-void clearBSS(void * bssAddress, uint64_t bssSize)
-{
-	memset(bssAddress, 0, bssSize);
+void clearBSS(void *bssAddress, uint64_t bssSize) {
+  memset(bssAddress, 0, bssSize);
 }
 
-void * getStackBase()
-{
-	return (void*)(
-		(uint64_t)&endOfKernel
-		+ PageSize * 8				//The size of the stack itself, 32KiB
-		- sizeof(uint64_t)			//Begin at the top of the stack
-	);
+void *getStackBase() {
+  return (void *)((uint64_t)&endOfKernel +
+                  PageSize * 8       // The size of the stack itself, 32KiB
+                  - sizeof(uint64_t) // Begin at the top of the stack
+  );
 }
 
-void * initializeKernelBinary()
-{
+void *initializeKernelBinary() {
 
-	void * moduleAddresses[] = {
-		sampleCodeModuleAddress,
-		sampleDataModuleAddress
-	};
+  void *moduleAddresses[] = {sampleCodeModuleAddress, sampleDataModuleAddress};
 
-	loadModules(&endOfKernelBinary, moduleAddresses);
-	
-	clearBSS(&bss, &endOfKernel - &bss);
+  loadModules(&endOfKernelBinary, moduleAddresses);
 
-	return getStackBase();
+  clearBSS(&bss, &endOfKernel - &bss);
+
+  return getStackBase();
 }
 
-void printSystemTime()
-{
-	// uint64_t time = getSystemTime();
-	// ncPrint("System time: ");
-	// ncPrintDec(time);
-	// ncNewline();
+void printSystemTime() {
+  // uint64_t time = getSystemTime();
+  // ncPrint("System time: ");
+  // ncPrintDec(time);
+  // ncNewline();
 }
 
-int main(){	
-	
-	load_idt();
-	// Inicio kernel
-	//putString("Bienvenido a x64BareBones!", 0xFF00FF);
-	//newLine();
-	
-	//printSystemTime();
-	
-	// ncPrint("[Kernel Main]");
-  	// ncNewline();
-  	// ncPrint("  Sample code module at 0x");
-  	// ncPrintHex((uint64_t)sampleCodeModuleAddress);
-  	// ncNewline();
-  	// ncPrint("  Calling the sample code module returned: ");
-	putString("Entra al Userland:", 0xFF00FF);
-	newLine();
-  	
-	ncPrintHex(((EntryPoint)sampleCodeModuleAddress)());
-  	
-	newLine();
-	putString("Termina el modulo de Userland", 0xFF00FF);
-  	// ncNewline();
+int main() {
 
-	// ncPrint("  Sample data module at 0x");
-	// ncPrintHex((uint64_t)sampleDataModuleAddress);
-	// ncNewline();
-	// ncPrint("  Sample data module contents: ");
-	// ncPrint((char *)sampleDataModuleAddress);
-	// ncNewline();
+  load_idt();
+  // Inicio kernel
+  // putString("Bienvenido a x64BareBones!", 0xFF00FF);
+  // newLine();
 
-	//call the main from the 
+  // printSystemTime();
 
-	putString("Hola mundo!", 0xFF00FF);
-	newLine();
-	putString("Hola mundo x2!", 0xFF00FF);
+  // ncPrint("[Kernel Main]");
+  // ncNewline();
+  // ncPrint("  Sample code module at 0x");
+  // ncPrintHex((uint64_t)sampleCodeModuleAddress);
+  // ncNewline();
+  // ncPrint("  Calling the sample code module returned: ");
+  putString("Entra al Userland:", 0xFF00FF);
+  newLine();
 
+  ((EntryPoint)sampleCodeModuleAddress)();
 
-	while (1);
-	
-	return 0;
+  newLine();
+  newLine();
+  putString("Termina el módulo de Userland", 0xFF00FF);
+  //  ncNewline();
+
+  // ncPrint("  Sample data module at 0x");
+  // ncPrintHex((uint64_t)sampleDataModuleAddress);
+  // ncNewline();
+  // ncPrint("  Sample data module contents: ");
+  // ncPrint((char *)sampleDataModuleAddress);
+  // ncNewline();
+
+  // call the main from the
+
+  while (1)
+    ;
+
+  return 0;
 }

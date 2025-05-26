@@ -1,28 +1,30 @@
+#include <interrupts.h>
 #include <keyboard.h>
 #include <naiveConsole.h>
 #include <videoDriver.h>
 
 #define BUFFER_DEFAULT_SIZE 1024
 
+static char buffer[BUFFER_DEFAULT_SIZE] = {0};
+static int writeIdx = 0;
+static int readIdx = 0;
 
-static char buffer[BUFFER_DEFAULT_SIZE];
-static int i = 0;
-static int j = 0;
-
-char getChar(char scanCode){
-// valores sacados de Scan Code Set 1 en https://wiki.osdev.org/PS/2_Keyboard
-  int printable[] = {
+char getChar(char scanCode) {
+  // valores sacados de Scan Code Set 1 en https://wiki.osdev.org/PS/2_Keyboard
+  // Se podría agregar que el driver de video haga la parte de impresión de
+  // caracteres especiales En printable guardemos '\n', '\t'...
+  char printable[] = {
       [0x01] = -1, // escape no tiene carácter imprimible
       [0x02] = '1',  [0x03] = '2', [0x04] = '3',  [0x05] = '4',
       [0x06] = '5',  [0x07] = '6', [0x08] = '7',  [0x09] = '8',
       [0x0A] = '9',  [0x0B] = '0', [0x0C] = '-',  [0x0D] = '=',
-      [0x0E] = -1, // backspace no es imprimible
-      [0x0F] = -1, // tab no es imprimible
+      [0x0E] = -1,   // backspace no es imprimible
+      [0x0F] = '\t', // tab
       [0x10] = 'q',  [0x11] = 'w', [0x12] = 'e',  [0x13] = 'r',
       [0x14] = 't',  [0x15] = 'y', [0x16] = 'u',  [0x17] = 'i',
       [0x18] = 'o',  [0x19] = 'p', [0x1A] = '[',  [0x1B] = ']',
-      [0x1C] = -1, // enter no es imprimible
-      [0x1D] = -1, // left control no es imprimible
+      [0x1C] = '\n', // enter
+      [0x1D] = -1,   // left control no es imprimible
       [0x1E] = 'a',  [0x1F] = 's', [0x20] = 'd',  [0x21] = 'f',
       [0x22] = 'g',  [0x23] = 'h', [0x24] = 'j',  [0x25] = 'k',
       [0x26] = 'l',  [0x27] = ';', [0x28] = '\'', [0x29] = '`',
@@ -39,10 +41,10 @@ char getChar(char scanCode){
       [0x3C] = -1,  // F2 no es imprimible
       [0x53] = '.', // imprimible
   };
-  if(scanCode > 0 && scanCode < 0x53){
+  if (scanCode > 0 && scanCode < 0x53) {
     return printable[scanCode];
   } else {
-    return -1;
+    return 0;
   }
 }
 
@@ -74,19 +76,29 @@ void printKey(char key) {
   }
 }
 
-void printPressedKey() {
-  char aux, key;
-  key = getKey();
-  aux = key;
+void keyboardHandler() {
+  char key = getKey();
+  char aux = key;
   if (!(aux >> 7)) {
+    char c = getChar(key);
+    if (!isBufferFull() && c != -1) {
+      buffer[writeIdx++] = c;
+      writeIdx %= BUFFER_DEFAULT_SIZE;
+    }
     printKey(key);
   }
 }
 
-void keyboardHandler(){
-  while (1){
-    buffer[i] = getKey();
-    i += 1;
-    i %= BUFFER_DEFAULT_SIZE;
+char bufferRead() {
+  if (!isBufferEmpty()) {
+    char toRet = buffer[readIdx++];
+    readIdx %= BUFFER_DEFAULT_SIZE;
+    return toRet;
   }
+
+  return -1;
 }
+
+int isBufferEmpty() { return writeIdx == readIdx; }
+
+int isBufferFull() { return (writeIdx + 1) % BUFFER_DEFAULT_SIZE == readIdx; }

@@ -1,40 +1,45 @@
-#include <stdint.h>
-#include <stdarg.h>
-#include <naiveConsole.h>
-#include <videoDriver.h>
 #include <keyboard.h>
+#include <naiveConsole.h>
+#include <stdarg.h>
+#include <stdint.h>
+#include <videoDriver.h>
 
-static int32_t sys_write(int64_t fd, const char * buf, int64_t count); // write video
-static int32_t sys_read(int64_t fd, char * buf, int64_t count); //read
+#include <interrupts.h>
 
-// las funciones devuelven un int, deberia devolver un int? 
+#include <stddef.h> // para el NULL
+
+static int32_t sys_write(int64_t fd, const char *buf,
+                         int64_t count);                       // write video
+static int32_t sys_read(int64_t fd, char *buf, int64_t count); // read
+
+// las funciones devuelven un int, deberia devolver un int?
 // syscalls del kernel
 // https://www.programacionenc.net/index.php?option=com_content&view=article&id=61:funciones-en-c-con-lista-de-argumentos-variable&catid=37:programacion-cc&Itemid=55
 
 void syscallDispatcher(uint64_t syscallId, ...) {
-    va_list arguments; //lista de argumentos
-    va_start(arguments, syscallId);  //ultimo argumento que no es variable
+  va_list arguments;              // lista de argumentos
+  va_start(arguments, syscallId); // ultimo argumento que no es variable
 
-    // syscallId es el numero de syscall
-  	switch (syscallId) {
+  // syscallId es el numero de syscall
+  switch (syscallId) {
 
-        case 0:
-            int64_t fd = va_arg(arguments, int64_t);
-    		const char * buf = va_arg(arguments, const char *);
-            int64_t count = va_arg(arguments, int64_t);
-            sys_write(fd, buf, count); 
-            break;
-        case 1:
-            int64_t fd1 = va_arg(arguments, int64_t);
-    		char * buf1 = va_arg(arguments, char *);
-            int64_t count1 = va_arg(arguments, int64_t);
-            sys_read(fd1, buf1, count1);
-            break;
-	}
-  	
-    va_end(arguments);
+  case 0:
+    int64_t fd = va_arg(arguments, int64_t);
+    const char *buf = va_arg(arguments, const char *);
+    int64_t count = va_arg(arguments, int64_t);
+    sys_write(fd, buf, count);
+    break;
+  case 1:
+    int64_t fd1 = va_arg(arguments, int64_t);
+    char *buf1 = va_arg(arguments, char *);
+    int64_t count1 = va_arg(arguments, int64_t);
+    sys_read(fd1, buf1, count1);
+    break;
+  }
 
-	return;
+  va_end(arguments);
+
+  return;
 }
 
 // int32_t sys_write(int64_t fd, const void * buf, int64_t count);
@@ -42,39 +47,47 @@ void syscallDispatcher(uint64_t syscallId, ...) {
 // int32_t sys_start_beep(uint32_t frecuence);
 // int32_t sys_stop_beep(void);
 
-int32_t sys_write(int64_t fd, const char * buf, int64_t count) {
+int32_t sys_write(int64_t fd, const char *buf, int64_t count) {
   // handler de la syscall de write video
-    int format = 0x0F;  // provisiorio como default
-    
-    if(fd){
-        format = 0x0C; // por enunciado la salida de error es escribir en pantalla con color rojo
-    }
+  int format = 0x0F; // provisiorio como default
 
-    for(int64_t i = 0; i < count; i++){
-        putChar(buf[i], format);
-    }
-    
-    return 0;
+  if (fd) {
+    format = 0x0C; // por enunciado del tp5, la salida de error es escribir en
+                   // pantalla con color rojo
+  }
+
+  for (int64_t i = 0; i < count; i++) {
+    putChar(buf[i], format);
+  }
+
+  return 0;
 }
 
-int32_t sys_read(int64_t fd, char * buf, int64_t count) {
+int32_t sys_read(int64_t fd, char *buf, int64_t count) {
   // handler de la syscall de lectura
-    
-    int64_t i = 0;
-    char key = 0;
+  if (buf == NULL || count < 0) {
+    return -1;
+  }
 
-    while(i < count && key != 0x1C){
-        char aux;
-        key = getKey();
-        aux = key;
-        if (!(aux >> 7)) { // el bit mas significativo debe ser cero
-            char c = getChar(key);
-            buf[i] = c;
-            putPixel(0x00FF00, 100 + i, 100 + i); // color verde
-            putChar(c, 0x00FF00);
-            i++;
-        }
+  // Por alguna razón, no estaban habilitadas las interrupciones al entrar a la
+  // syscall
+  _sti();
+
+  int64_t bytesRead = 0;
+
+  while (bytesRead < count) {
+    char c = bufferRead();
+    if (c != -1) {
+      if (c == '\n' || c == 0) {
+        break;
+      }
+      buf[bytesRead++] = c;
+      // putChar(c, 0x00FF00);
+      putPixel(0x123456, 100 + bytesRead, 100 + bytesRead);
     }
-    putString("Fin de lectura", 0xFF00FF);
-    return 0;
+  }
+
+  putString("\nFin de lectura\n", 0xFF0000);
+
+  return bytesRead;
 }

@@ -58,16 +58,8 @@ getKey:
     push rbp
     mov rbp, rsp
 
-    mov rax, 0
-	
-.loop_2: 
-    in al, 0x64
-    mov cl, al
-    and al, 0x01
-    cmp al, 0
-    je .loop_2
-    
     in al, 0x60
+	movzx rax, al
     
 	mov rsp, rbp
     pop rbp
