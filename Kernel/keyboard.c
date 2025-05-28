@@ -9,8 +9,8 @@ static char buffer[BUFFER_DEFAULT_SIZE] = {0};
 static int writeIdx = 0;
 static int readIdx = 0;
 
-int shift_pressed = 0; 
-int caps_lock_on = 0; 
+static int shift_pressed = 0; 
+static int caps_lock_on = 0; 
 
 
 // valores sacados de Scan Code Set 1 en https://wiki.osdev.org/PS/2_Keyboard
