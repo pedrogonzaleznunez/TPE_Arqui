@@ -1,19 +1,31 @@
 #include <stdarg.h>
-#include <stdio.h>
 #include <stdint.h>
+#include "include/stdio.h"
+#include "include/syscalls.h"
 
 static char buffer[64] = {0};
 
-//usamos unitToBase de naiveConsole.c
-static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 static void printBase(int fd, int num, int base);
-
+void vfprintf(int fd, const char * format, va_list args);
+static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 
 void puts(const char *str) {
     while (*str) {
         putchar(*str++);
     }
     putchar('\n');
+}
+
+void putchar(const char c) {
+    // sys_write(FD_STDOUT, &c, 1);
+    sys_call(0, FD_STDOUT, &c, 1); // syscall para escribir un caracter
+}
+
+int getchar() {
+    char c;
+    // sys_read(FD_STDIN, &c, 1);
+    sys_call(1, FD_STDIN, &c, 1); // syscall para leer un caracter
+    return c;
 }
 
 void printf(const char * format, ...) {
@@ -51,18 +63,31 @@ void vfprintf(int fd, const char * format, va_list args) {
                 // case 'f': printFloat(fd, va_arg(args, double)); break ;
                 case 'c': {
                     char c = (char) va_arg(args, int);
-                    sys_write(fd, &c, 1);
+                    //sys_write(fd, &c, 1);
+                    sys_call(0, fd, &c, 1); // syscall para escribir un caracter
+                    
                     break ;
                 }
                 case 's': fprintf(fd, va_arg(args, char *)); break ;
-                case '%': sys_write(fd, "%", 1); break ;
-            }
+                case '%': 
+                    // sys_write(fd, "%", 1); 
+                    sys_call(0, fd, "%", 1); // syscall para escribir un caracter
+                    break ;
+                }
             i++;
             break ;
         
         // Si no es un caracter de formato, lo imprimimos directamente
+        case '\n':
+            //sys_write(fd, "\n", 1);
+            sys_call(0, fd, '\r', 1); // syscall para escribir un retorno de carro
+            sys_call(0, fd, (const char *)'\n', 1); // syscall para escribir un salto de línea
+            i++;
+            break ;
+
         default:
-            sys_write(fd, &format[i], 1);
+            //sys_write(fd, &format[i], 1);
+            sys_call(0, fd, &format[i], 1);
             i++;
             break ;
         }
@@ -191,4 +216,40 @@ static void printBase(int fd, int num, int base) {
     if (num < 0) fprintf(fd, "-");
     uintToBase(num, buffer, base);
     fprintf(fd, buffer);
+}
+
+static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base) {
+    char *p = buffer;
+    char digits[] = "0123456789ABCDEF";
+    uint32_t length = 0;
+
+    if (base < 2 || base > 16) {
+        *p = 0;
+        return 0;
+    }
+
+    // Handle 0 explicitly
+    if (value == 0) {
+        *p++ = '0';
+        *p = 0;
+        return 1;
+    }
+
+    char temp[65];
+    int i = 0;
+
+    while (value > 0) {
+        temp[i++] = digits[value % base];
+        value /= base;
+    }
+
+    length = i;
+
+    // Reverse the string into buffer
+    while (i > 0) {
+        *p++ = temp[--i];
+    }
+    *p = 0;
+
+    return length;
 }
