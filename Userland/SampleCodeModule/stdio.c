@@ -180,7 +180,6 @@ int vsscanf(const char * buffer, const char * format, va_list args) {
                         char * str = va_arg(args, char *);
                         while (buffer[buf_i] != ' ' && buffer[buf_i] != '\n' && buffer[buf_i] != 0) {
                             *(str++) = buffer[buf_i];
-                            str++;
                             buf_i++;
                         }
                         *str = 0;
