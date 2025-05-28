@@ -127,7 +127,7 @@ void keyboardHandler() {
   unsigned char key = getKey(); // importante que sea unsigned char para detectar el release
   char aux = key;
 
-  if(key == 0xAA || key == 0xB6) { // L or R Shift released
+  if(key == SHIFT_RELEASED_LEFT || key == SHIFT_RELEASED_RIGHT) { // L or R Shift released
     shift_pressed = 0;
     return;
   } 
