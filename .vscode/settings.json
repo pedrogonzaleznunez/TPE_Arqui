@@ -5,6 +5,7 @@
         "moduleloader.h": "c",
         "idtloader.h": "c",
         "syscalls.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "stdio.h": "c"
     }
 }
