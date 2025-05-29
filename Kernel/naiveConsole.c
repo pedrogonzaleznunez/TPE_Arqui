@@ -7,9 +7,9 @@
 */
 
 // Funciones agregadas internas
-void moveLine(int target, int source);
-void reposition();
-void checkEndOfScreen();
+void ncMoveLine(int target, int source);
+void ncScrollUp();
+void ncCheckEndOfScreen();
 
 static uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
 
@@ -33,7 +33,7 @@ void ncNewline() {
   do {
     ncPrintChar(' ');
   } while ((uint64_t)(currentVideo - video) % (width * 2) != 0);
-  checkEndOfScreen();
+  ncCheckEndOfScreen();
 }
 
 void ncPrintDec(uint64_t value) { ncPrintBase(value, 10); }
@@ -97,14 +97,14 @@ void ncPrintColor(const char *string, const int format) {
 }
 
 void ncPrintCharColor(char character, const int format) {
-  checkEndOfScreen();
+  ncCheckEndOfScreen();
   *currentVideo++ = character;
   *currentVideo++ = format;
 }
 
-void reposition() {
+void ncScrollUp() {
   for (int i = 0; i < height - 1; i++) {
-    moveLine(i, i + 1);
+    ncMoveLine(i, i + 1);
   } // limpia la última línea antes de seguir.
   for (int i = 0; i < width; i++) {
     int idx = ((height - 1) * width + i) * 2;
@@ -114,7 +114,7 @@ void reposition() {
   currentVideo -= width * 2;
 }
 
-void moveLine(int target, int source) {
+void ncMoveLine(int target, int source) {
   for (int i = 0; i < width; i++) {
     int srcIdx = (source * width + i) * 2;
     int tgtIdx = (target * width + i) * 2;
@@ -130,8 +130,8 @@ void ncDeleteChar(char amount) {
   }
 }
 
-void checkEndOfScreen() {
+void ncCheckEndOfScreen() {
   if (currentVideo == video + width * height * 2) {
-    reposition();
+    ncScrollUp();
   }
 }

@@ -82,8 +82,6 @@ int main() {
   // ncPrint((char *)sampleDataModuleAddress);
   // ncNewline();
 
-  // call the main from the
-
   while (1)
     ;
 

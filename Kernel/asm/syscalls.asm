@@ -5,7 +5,6 @@ EXTERN syscallDispatcher
 SECTION .text
 
 %macro pushState 0
-	push rax
 	push rbx
 	push rcx
 	push rdx
@@ -37,13 +36,14 @@ SECTION .text
 	pop rdx
 	pop rcx
 	pop rbx
-	pop rax
 %endmacro
 
 _syscallHandler:
 	push rbp
 	mov rbp, rsp
     
+	; CAMBIO: ahora rax no se preserva en el pushState -> necesito el valor de retorno
+
 	pushState
 
 	mov r9, r8

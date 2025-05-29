@@ -1,7 +1,7 @@
 /* sampleCodeModule.c */
 
-#include "./include/syscalls.h"
 #include "./include/stdio.h"
+#include "./include/syscalls.h"
 
 char *v = (char *)0xB8000 + 79 * 2;
 
@@ -10,18 +10,17 @@ static int var2 = 0;
 
 int main() {
 
-printf("[TEST] for printf\n");
-printf("next line");
-// puts("\n");
-// puts("[TEST] for puts");
-// puts("[TEST] for putchar A,B,C\n");
-// putchar('A');
-// putchar('B');
-// putchar('C');
-
+  printf("[TEST] for printf\n");
+  printf("next line");
+  puts("\n");
+  puts("[TEST] for puts");
+  puts("[TEST] for putchar A,B,C\n");
+  putchar('A');
+  putchar('B');
+  putchar('C');
 
   // int64_t fd = 0;
-  
+
   // const char *buf = "Hola mundo?\n";
   // int64_t count = 12;
 
@@ -33,7 +32,7 @@ printf("next line");
 
   // // Read
   // char buffer[20];
-  // count = 15;
+  // count = 20;
 
   // int64_t bytes_read = sys_call(1, fd, buffer, count);
 
