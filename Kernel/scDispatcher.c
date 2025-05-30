@@ -8,9 +8,9 @@
 
 #include <stddef.h> // para el NULL
 
-static int64_t sys_write(int64_t fd, const char *buf,
-                         int64_t count);                       // write video
+static int64_t sys_write(int64_t fd, const char *buf, int64_t count);                       // write video
 static int64_t sys_read(int64_t fd, char *buf, int64_t count); // read
+static int64_t sys_get_registers(uint64_t rdi, uint64_t rsi, uint64_t rdx);
 
 // las funciones devuelven un int, deberia devolver un int?
 // syscalls del kernel
@@ -34,6 +34,12 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
     char *buf1 = va_arg(arguments, char *);
     int64_t count1 = va_arg(arguments, int64_t);
     return sys_read(fd1, buf1, count1);
+    break;
+  case 2:
+    int64_t rdi = va_arg(arguments, int64_t);
+    int64_t rsi = va_arg(arguments, int64_t);
+    int64_t rdx = va_arg(arguments, int64_t);
+    return sys_get_registers( rdi,  rsi,  rdx);
     break;
   }
 

@@ -2,6 +2,10 @@
 #include <keyboard.h>
 #include <naiveConsole.h>
 #include <videoDriver.h>
+#include <registers.h>
+
+
+static register_set_t saved_registers;
 
 #define BUFFER_DEFAULT_SIZE 1024
 
@@ -112,15 +116,19 @@ void keyboardHandler() {
     return;
   }
 
-  if (key == 0x2A || key == 0x36) { // L or R Shift pressed
+  if (key == SHIFT_PRESSED_LEFT || key == SHIFT_PRESSED_RIGHT) { // L or R Shift pressed
     shift_pressed = 1;
     return;
   }
 
-  if (key == 0x3A) { // Caps Lock (el release de caps lock no lo manejo, solo me
+  if (key == CAPS_LOCK_PRESSED) { // Caps Lock (el release de caps lock no lo manejo, solo me
                      // importa cuando se apreta)
     caps_lock_on = !caps_lock_on;
     return;
+  }
+
+  if(key == F1_REGISTER_BACKUP){
+        memcpy(&saved_registers, regs, sizeof(register_set_t));
   }
 
   if (!(aux >> 7)) {
