@@ -67,9 +67,19 @@ SECTION .text
     mov al, byte [save_registers_flag]
     cmp al, 0
     je .skip_save
+	; save:
 	popState ; restauro
-	mov [saved_registers.rsp], rsp; ??
 	mov [saved_registers.rax], rax
+
+	mov rax, [rsp+8*2] ; rflags
+	mov [saved_registers.rflags], rax 
+
+	mov rax, [rsp+8*3] ; rsp de donde vengo
+	mov [saved_registers.rsp], rax 
+
+	mov rax, [rsp] ; eip de donde vengo
+	mov [saved_registers.rip], rax ; guardo la direccion de retorno
+
     mov [saved_registers.rbx], rbx
     mov [saved_registers.rcx], rcx
     mov [saved_registers.rdx], rdx
@@ -84,6 +94,7 @@ SECTION .text
     mov [saved_registers.r13], r13
     mov [saved_registers.r14], r14    
 	mov [saved_registers.r15], r15
+	mov rax, [saved_registers.rax]
 
 .skips_save:
 	pushState
