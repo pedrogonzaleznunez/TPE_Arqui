@@ -8,6 +8,10 @@
 #define CAPS_LOCK_PRESSED 0x3A
 #define F1_REGISTER_BACKUP 0x3B
 
+extern uint8_t save_registers_flag;
+extern register_set_t last_saved_regs;
+
+
 // imprime el valor dado si es que es imprimible
 void printKey(char key);
 

@@ -4,8 +4,7 @@
 #include <videoDriver.h>
 #include <registers.h>
 
-
-static register_set_t saved_registers;
+static uint8_t save_registers_flag = 0;
 
 #define BUFFER_DEFAULT_SIZE 1024
 
@@ -105,7 +104,7 @@ void printKey(char key) {
   }
 }
 
-void keyboardHandler() {
+uint8_t keyboardHandler() {
   unsigned char key =
       getKey(); // importante que sea unsigned char para detectar el release
   char aux = key;
@@ -128,7 +127,8 @@ void keyboardHandler() {
   }
 
   if(key == F1_REGISTER_BACKUP){
-        memcpy(&saved_registers, regs, sizeof(register_set_t));
+      save_registers_flag = 1;
+      return;
   }
 
   if (!(aux >> 7)) {

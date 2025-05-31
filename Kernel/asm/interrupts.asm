@@ -17,7 +17,8 @@ GLOBAL _exception0Handler
 
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
-
+EXTERN save_registers_flag
+EXTERN saved_registers
 SECTION .text
 
 %macro pushState 0
@@ -59,9 +60,34 @@ SECTION .text
 ; Interruption handler
 %macro irqHandlerMaster 1
 	pushState
-
 	mov rdi, %1 ; pasaje de parametro
 	call irqDispatcher
+
+	; check por si tengo que guardar los registros
+    mov al, byte [save_registers_flag]
+    cmp al, 0
+    je .skip_save
+	popState ; restauro
+	mov [saved_registers.rsp], rsp; ??
+	mov [saved_registers.rax], rax
+    mov [saved_registers.rbx], rbx
+    mov [saved_registers.rcx], rcx
+    mov [saved_registers.rdx], rdx
+    mov [saved_registers.rsi], rsi
+    mov [saved_registers.rdi], rdi
+    mov [saved_registers.rbp], rbp
+    mov [saved_registers.r8], r8
+    mov [saved_registers.r9], r9
+    mov [saved_registers.r10], r10
+    mov [saved_registers.r11], r11
+    mov [saved_registers.r12], r12
+    mov [saved_registers.r13], r13
+    mov [saved_registers.r14], r14    
+	mov [saved_registers.r15], r15
+
+.skips_save:
+	pushState
+	mov byte [save_registers_flag], 0
 
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
