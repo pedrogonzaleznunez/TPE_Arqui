@@ -3,8 +3,8 @@
 #include <lib.h>
 #include <moduleLoader.h>
 #include <naiveConsole.h>
+#include <sounds.h>
 #include <stdint.h>
-#include <string.h>
 #include <videoDriver.h>
 
 extern uint8_t text;
@@ -82,6 +82,10 @@ int main() {
     // ncPrint("  Sample data module contents: ");
     // ncPrint((char *)sampleDataModuleAddress);
     // ncNewline();
+
+    // Prueba del driver de sonidos
+    // SE ESCUCHA UN POCO ALTO
+    // beep();
 
     while (1);
 

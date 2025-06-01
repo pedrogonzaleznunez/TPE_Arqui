@@ -1,6 +1,8 @@
 GLOBAL cpuVendor
 GLOBAL getTimeFragment
 GLOBAL getKey
+GLOBAL inb
+GLOBAL outb
 
 section .text
 	
@@ -55,13 +57,32 @@ getTimeFragment:
 
 
 getKey:
-   push rbp
-   mov rbp, rsp
+   	push rbp
+   	mov rbp, rsp
 
    	in al, 0x60
 	movzx rax, al
     
 	mov rsp, rbp
-   pop rbp
-   ret
+   	pop rbp
+   	ret
 
+; funciones agregadas usar en el manejo de sonidos
+; en sounds.h
+; void outb(uint16_t port, uint8_t val);
+outb:
+	mov dx, di
+	mov al, sil
+	; escribe al en dx
+	out dx, al
+
+	ret
+
+; uint8_t inb(uint16_t port);
+inb:
+	mov dx, di
+	; guarda lo leído de dx en al
+	in al, dx
+	movzx rax, al
+
+	ret

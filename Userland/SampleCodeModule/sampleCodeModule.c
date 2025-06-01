@@ -27,7 +27,7 @@ int main() {
     // sys_call(0, fd, buf, count);
 
     // const char *msg = "Ingrese texto: ";
-    // sys_call(0, fd, msg, (int64_t)15);
+    // sys_call(0, fd, msg, (int64_t) 15);
 
     // // Read
     // char buffer[20];
@@ -40,7 +40,7 @@ int main() {
     // sys_call(0, fd, msg2, 8);
 
     // // Mostrar lo que se leyó
-    // fd = 1; // stdout
+    // fd = 1;// stdout
     // sys_call(0, fd, buffer, bytes_read);
 
     // Test if BSS is properly set up
