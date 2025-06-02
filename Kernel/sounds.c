@@ -25,7 +25,7 @@ void noSound() {
 }
 
 //Make a beep
-void beep() {
+void beep(void) {
     playSound(440);
     timerWait(40);
     noSound();

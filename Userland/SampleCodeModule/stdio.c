@@ -16,13 +16,13 @@ void puts(const char *str) {
 
 void putchar(const char c) {
     // sys_write(FD_STDOUT, &c, 1);
-    sys_call(0, FD_STDOUT, &c, 1);// syscall para escribir un caracter
+    sys_write(FD_STDOUT, &c, 1);// syscall para escribir un caracter
 }
 
 int getchar() {
     char c;
     // sys_read(FD_STDIN, &c, 1);
-    sys_call(1, FD_STDIN, &c, 1);// syscall para leer un caracter
+    sys_read(FD_STDIN, &c, 1);// syscall para leer un caracter
     return c;
 }
 
@@ -70,18 +70,14 @@ void vfprintf(int fd, const char *format, va_list args) {
                     case 'c': {
                         char c = (char) va_arg(args, int);
                         // sys_write(fd, &c, 1);
-                        sys_call(0, fd, &c,
-                                 1);// syscall para escribir un caracter
-
+                        sys_write(fd, &c, 1);// syscall para escribir un caracter
                         break;
                     }
                     case 's':
                         fprintf(fd, va_arg(args, char *));
                         break;
                     case '%':
-                        // sys_write(fd, "%", 1);
-                        sys_call(0, fd, "%",
-                                 1);// syscall para escribir un caracter
+                        sys_write(fd, "%", 1);// syscall para escribir un caracter
                         break;
                 }
                 i++;
@@ -89,8 +85,7 @@ void vfprintf(int fd, const char *format, va_list args) {
 
             // Si no es un caracter de formato, lo imprimimos directamente
             default:
-                // sys_write(fd, &format[i], 1);
-                sys_call(0, fd, &format[i], 1);
+                sys_write(fd, &format[i], 1);
                 i++;
                 break;
         }
