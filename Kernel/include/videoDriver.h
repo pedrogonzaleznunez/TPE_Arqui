@@ -22,4 +22,6 @@ void putChar(char c, uint32_t hexColor);
 void clearScreen();
 void deleteChar();
 
+void drawCircle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexColor);
+
 #endif

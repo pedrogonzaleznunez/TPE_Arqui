@@ -9,14 +9,19 @@ static int var1 = 0;
 static int var2 = 0;
 
 int main() {
-    printf("[TEST] for printf\n");
-    printf("next line");
-    puts("\n");
-    puts("[TEST] for puts");
-    puts("[TEST] for putchar A,B,C\n");
-    putchar('A');
-    putchar('B');
-    putchar('C');
+
+    // printf("[TEST] for printf\n");
+    // printf("next line");
+    // puts("\n");
+    // puts("[TEST] for puts");
+    // puts("[TEST] for putchar A,B,C\n");
+    // putchar('A');
+    // putchar('B');
+    // putchar('C');
+
+    // test to draw a circle
+    
+    sys_draw_circle(100, 100, 50, 0xFF0000);
 
     // int64_t fd = 0;
 

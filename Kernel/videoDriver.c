@@ -282,3 +282,30 @@ int checkSpecialCharacter(char c) {
 
     return 1;
 }
+
+void drawCircle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexColor){
+    
+    uint64_t aux_x, aux_y;
+    aux_x = pos_x - radius;
+    aux_y = pos_y - radius;
+
+    if (radius == 0) {
+        return;
+    }
+
+    while( aux_x < pos_x + radius && aux_y < pos_y + radius) {
+
+        uint64_t dx = aux_x - pos_x;
+        uint64_t dy = aux_y - pos_y;
+
+        if (dx * dx + dy * dy < radius * radius) {
+            putPixel(hexColor, aux_x, aux_y);
+        }
+        aux_x++;
+        if (aux_x >= pos_x + radius) {
+            aux_x = pos_x - radius;
+            aux_y++;
+        }
+    } 
+    return;
+}
