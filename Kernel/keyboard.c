@@ -2,6 +2,9 @@
 #include <keyboard.h>
 #include <naiveConsole.h>
 #include <videoDriver.h>
+#include <registers.h>
+
+static uint8_t save_registers_flag = 0;
 
 #define BUFFER_DEFAULT_SIZE 1024
 
@@ -102,36 +105,39 @@ void printKey(char key) {
     }
 }
 
-void keyboardHandler() {
-    unsigned char key =
-        getKey();// importante que sea unsigned char para detectar el release
-    char aux = key;
+uint8_t keyboardHandler() {
+  unsigned char key =
+      getKey(); // importante que sea unsigned char para detectar el release
+  char aux = key;
 
-    if (key == SHIFT_RELEASED_LEFT ||
-        key == SHIFT_RELEASED_RIGHT) {// L or R Shift released
-        shift_pressed = 0;
-        return;
-    }
+  if (key == SHIFT_RELEASED_LEFT ||
+      key == SHIFT_RELEASED_RIGHT) { // L or R Shift released
+    shift_pressed = 0;
+    return;
+  }
 
-    if (key == 0x2A || key == 0x36) {// L or R Shift pressed
-        shift_pressed = 1;
-        return;
-    }
+  if (key == SHIFT_PRESSED_LEFT || key == SHIFT_PRESSED_RIGHT) { // L or R Shift pressed
+    shift_pressed = 1;
+    return;
+  }
 
-    if (key ==
-        0x3A) {// Caps Lock (el release de caps lock no lo manejo, solo me
-               // importa cuando se apreta)
-        caps_lock_on = !caps_lock_on;
-        return;
-    }
+  if (key == CAPS_LOCK_PRESSED) { // Caps Lock (el release de caps lock no lo manejo, solo me
+                     // importa cuando se apreta)
+    caps_lock_on = !caps_lock_on;
+    return;
+  }
 
-    if (!(aux >> 7)) {
-        char c = getChar(key);
-        if (!isBufferFull() && c != -1) {
-            buffer[writeIdx++] = c;
-            writeIdx %= BUFFER_DEFAULT_SIZE;
-        }
-        printKey(key);
+  if(key == F1_REGISTER_BACKUP){
+      save_registers_flag = 1;
+      return;
+  }
+
+  if (!(aux >> 7)) {
+    char c = getChar(key);
+    if (!isBufferFull() && c != -1) {
+      buffer[writeIdx++] = c;
+      writeIdx %= BUFFER_DEFAULT_SIZE;
+
     }
 }
 

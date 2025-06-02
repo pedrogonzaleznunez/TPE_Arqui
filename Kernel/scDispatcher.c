@@ -10,6 +10,7 @@
 
 #include <stddef.h>// para el NULL
 
+
 static int64_t sys_write(int64_t fd, const char *buf, int64_t count);                      // write video
 static int64_t sys_read(int64_t fd, char *buf, int64_t count); // read
 static int64_t sys_draw_circle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexColor);
@@ -95,6 +96,7 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
     va_end(arguments);
 
     return -1;
+
 }
 
 
