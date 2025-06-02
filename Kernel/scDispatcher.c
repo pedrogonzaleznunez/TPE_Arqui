@@ -3,88 +3,162 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <videoDriver.h>
+#include <sounds.h>
+#include <time.h>
 
 #include <interrupts.h>
 
-#include <stddef.h> // para el NULL
+#include <stddef.h>// para el NULL
 
-static int64_t sys_write(int64_t fd, const char *buf, int64_t count);                       // write video
+
+static int64_t sys_write(int64_t fd, const char *buf, int64_t count);                      // write video
 static int64_t sys_read(int64_t fd, char *buf, int64_t count); // read
-static int64_t sys_get_registers(uint64_t rdi, uint64_t rsi, uint64_t rdx);
+static int64_t sys_draw_circle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexColor);
+static int64_t sys_start_beep(uint32_t frecuency);
+static int64_t sys_stop_beep(void);
+static int64_t sys_sleep(int64_t ticks);
+static int64_t sys_clear_screen(void);
+static int64_t sys_beep(uint32_t frecuency, int64_t ticks);
 
 // las funciones devuelven un int, deberia devolver un int?
 // syscalls del kernel
 // https://www.programacionenc.net/index.php?option=com_content&view=article&id=61:funciones-en-c-con-lista-de-argumentos-variable&catid=37:programacion-cc&Itemid=55
 
 int64_t syscallDispatcher(uint64_t syscallId, ...) {
-  va_list arguments;              // lista de argumentos
-  va_start(arguments, syscallId); // ultimo argumento que no es variable
+    va_list arguments;             // lista de argumentos
+    va_start(arguments, syscallId);// ultimo argumento que no es variable
 
-  // syscallId es el numero de syscall
-  switch (syscallId) {
+    // syscallId es el numero de syscall
+    switch (syscallId) {
 
-  case 0:
-    int64_t fd = va_arg(arguments, int64_t);
-    const char *buf = va_arg(arguments, const char *);
-    int64_t count = va_arg(arguments, int64_t);
-    return sys_write(fd, buf, count);
-    break;
-  case 1:
-    int64_t fd1 = va_arg(arguments, int64_t);
-    char *buf1 = va_arg(arguments, char *);
-    int64_t count1 = va_arg(arguments, int64_t);
-    return sys_read(fd1, buf1, count1);
-    break;
-  case 2:
-    int64_t rdi = va_arg(arguments, int64_t);
-    int64_t rsi = va_arg(arguments, int64_t);
-    int64_t rdx = va_arg(arguments, int64_t);
-    return sys_get_registers( rdi,  rsi,  rdx);
-    break;
-  }
+        //write
+        case 0:
+            int64_t fd = va_arg(arguments, int64_t);
+            const char *buf = va_arg(arguments, const char *);
+            int64_t count = va_arg(arguments, int64_t);
+            return sys_write(fd, buf, count);
+            break;
+        //read
+        case 1:
+            int64_t fd1 = va_arg(arguments, int64_t);
+            char *buf1 = va_arg(arguments, char *);
+            int64_t count1 = va_arg(arguments, int64_t);
+            return sys_read(fd1, buf1, count1);
+            break;
 
-  va_end(arguments);
+        // get regs
+		case 2: {
+			// hay que agrearlo
+			return -1;
+		}
+		// start beep
+		case 3: {
+			uint32_t frecuency = va_arg(arguments, uint32_t);
+			return sys_start_beep(frecuency);
+		}
+		
+		// stop beep
+		case 21: {
+			return sys_stop_beep();
+		}
+		
+		// beep
+		case 22: {
+			uint32_t frecuency = va_arg(arguments, uint32_t);
+			int64_t ticks = va_arg(arguments, int64_t);
+			return sys_beep(frecuency, ticks);
+		}
 
-  return -1;
+		// sleep
+		case 23: {
+			int64_t ticks = va_arg(arguments, int64_t);
+			return sys_sleep(ticks);
+		}
+
+		// clear screen
+		case 30:
+			return sys_clear_screen();
+
+		// clear screen
+
+        // draw circle
+        case 31: {
+            uint64_t pos_x = va_arg(arguments, uint64_t);
+            uint64_t pos_y = va_arg(arguments, uint64_t);
+            uint64_t radius = va_arg(arguments, uint64_t);
+            uint32_t hexColor = va_arg(arguments, uint32_t);
+            return sys_draw_circle(pos_x, pos_y, radius, hexColor);
+        }
+      
+
+    }
+
+    va_end(arguments);
+
+    return -1;
+
 }
 
-// int32_t sys_write(int64_t fd, const void * buf, int64_t count);
-// int32_t sys_read(int64_t fd, void * buf, int64_t count);
-// int32_t sys_start_beep(uint32_t frecuence);
-// int32_t sys_stop_beep(void);
 
 int64_t sys_write(int64_t fd, const char *buf, int64_t count) {
-  // handler de la syscall de write video
-  int format = fd ? ERROR_CHAR_COLOR : DEFAULT_CHAR_COLOR;
+    // handler de la syscall de write video
+    int format = fd ? ERROR_CHAR_COLOR : DEFAULT_CHAR_COLOR;
 
-  for (int64_t i = 0; i < count; i++) {
-    putChar(buf[i], format);
-  }
+    for (int64_t i = 0; i < count; i++) { putChar(buf[i], format); }
 
-  return 0;
+    return 0;
 }
 
 int64_t sys_read(int64_t fd, char *buf, int64_t count) {
-  // handler de la syscall de lectura
-  if (buf == NULL || count < 0) {
-    return -1;
-  }
+    // handler de la syscall de lectura
+    if (buf == NULL || count < 0) { return -1; }
 
-  // Por alguna razón, no estaban habilitadas las interrupciones al entrar a la
-  // syscall
-  _sti();
+    // Por alguna razón, no estaban habilitadas las interrupciones al entrar a
+    // la syscall
+    _sti();
 
-  int64_t bytesRead = 0;
+    int64_t bytesRead = 0;
 
-  while (bytesRead < count) {
-    char c = bufferRead();
-    if (c != -1) {
-      if (c == '\n' || c == 0) {
-        break;
-      }
-      buf[bytesRead++] = c;
+    while (bytesRead < count) {
+        char c = bufferRead();
+        if (c != -1) {
+            if (c == '\n' || c == 0) { break; }
+            buf[bytesRead++] = c;
+        }
     }
-  }
 
-  return bytesRead;
+    return bytesRead;
+}
+
+int64_t sys_draw_circle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexColor) {
+    // handler de la syscall de dibujar un círculo
+    drawCircle(pos_x, pos_y, radius, hexColor);
+    return 0;
+}
+
+int64_t sys_start_beep(uint32_t frecuency){
+    playSound(frecuency);
+    return 1;
+}
+
+int64_t sys_stop_beep(void){
+    noSound();
+    return 1;
+}
+
+int64_t sys_sleep(int64_t ticks){
+    timerWait(ticks);
+    return 1;
+}
+
+int64_t sys_clear_screen(void){
+    clearScreen();
+    return 1;
+}
+
+int64_t sys_beep(uint32_t frecuency, int64_t ticks){
+	playSound(frecuency);
+    timerWait(ticks);
+    noSound();
+	return 1;
 }

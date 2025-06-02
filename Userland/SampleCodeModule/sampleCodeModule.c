@@ -3,50 +3,53 @@
 #include "./include/stdio.h"
 #include "./include/syscalls.h"
 
-char *v = (char *)0xB8000 + 79 * 2;
+char *v = (char *) 0xB8000 + 79 * 2;
 
 static int var1 = 0;
 static int var2 = 0;
 
 int main() {
 
-  printf("[TEST] for printf\n");
-  printf("next line");
-  puts("\n");
-  puts("[TEST] for puts");
-  puts("[TEST] for putchar A,B,C\n");
-  putchar('A');
-  putchar('B');
-  putchar('C');
+    // printf("[TEST] for printf\n");
+    // printf("next line");
+    // puts("\n");
+    // puts("[TEST] for puts");
+    // puts("[TEST] for putchar A,B,C\n");
+    // putchar('A');
+    // putchar('B');
+    // putchar('C');
 
-  // int64_t fd = 0;
+    // test to draw a circle
+    
+    sys_draw_circle(100, 100, 50, 0xFF0000);
 
-  // const char *buf = "Hola mundo?\n";
-  // int64_t count = 12;
+    // int64_t fd = 0;
 
-  // // Write inicial
-  // sys_call(0, fd, buf, count);
+    // const char *buf = "Hola mundo?\n";
+    // int64_t count = 12;
 
-  // const char *msg = "Ingrese texto: ";
-  // sys_call(0, fd, msg, (int64_t)15);
+    // // Write inicial
+    // sys_call(0, fd, buf, count);
 
-  // // Read
-  // char buffer[20];
-  // count = 20;
+    // const char *msg = "Ingrese texto: ";
+    // sys_call(0, fd, msg, (int64_t) 15);
 
-  // int64_t bytes_read = sys_call(1, fd, buffer, count);
+    // // Read
+    // char buffer[20];
+    // count = 20;
 
-  // // Verificar si realmente leyó algo
-  // const char *msg2 = "\nLeido: ";
-  // sys_call(0, fd, msg2, 8);
+    // int64_t bytes_read = sys_call(1, fd, buffer, count);
 
-  // // Mostrar lo que se leyó
-  // fd = 1; // stdout
-  // sys_call(0, fd, buffer, bytes_read);
+    // // Verificar si realmente leyó algo
+    // const char *msg2 = "\nLeido: ";
+    // sys_call(0, fd, msg2, 8);
 
-  // Test if BSS is properly set up
-  if (var1 == 0 && var2 == 0)
-    return 0xDEADC0DE;
+    // // Mostrar lo que se leyó
+    // fd = 1;// stdout
+    // sys_call(0, fd, buffer, bytes_read);
 
-  return 0xDEADBEEF;
+    // Test if BSS is properly set up
+    if (var1 == 0 && var2 == 0) return 0xDEADC0DE;
+
+    return 0xDEADBEEF;
 }

@@ -4,17 +4,27 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-// int32_t sys_call(int64_t fd, const void * buf, int64_t count, int sysId);
-// algo asi pero argumentos variables
+// Our syscalls prototypes
 
-int64_t sys_call(int64_t id, ...);
+int64_t sys_write(int64_t fd, const void * buf, int64_t count);
 
-// poner en el manual para que el usuario sepa con que argumentos debe llamar a
-// cada syscall ? Our syscalls prototypes
+int64_t sys_read(int64_t fd, void * buf, int64_t count);
 
-// int32_t sys_write(int64_t fd, const void * buf, int64_t count);
-// int32_t sys_read(int64_t fd, void * buf, int64_t count);
-// int32_t sys_start_beep(uint32_t frecuence);
-// int32_t sys_stop_beep(void);
+// ##################### sound syscalls ######################
+
+//pending
+int64_t sys_start_beep(uint32_t frecuence);
+
+int64_t sys_beep(uint32_t frecuence, int64_t ticks);
+//pending
+int64_t sys_stop_beep(void);
+
+int64_t sys_sleep(int64_t ticks);
+
+// ##################### video syscalls ######################
+
+int64_t sys_clear_screen(void);
+
+int64_t sys_draw_circle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexColor);
 
 #endif

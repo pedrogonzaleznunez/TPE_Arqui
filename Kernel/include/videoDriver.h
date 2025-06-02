@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 
-#define DEFAULT_BGR_COLOR 0x000000
+#define DEFAULT_BGR_COLOR  0x000000
 #define DEFAULT_CHAR_COLOR 0xFFFFFF
-#define ERROR_CHAR_COLOR 0xFF0000
+#define ERROR_CHAR_COLOR   0xFF0000
 
 void putPixel(uint32_t hexColor, uint64_t x, uint64_t y);
 
@@ -21,5 +21,7 @@ void putChar(char c, uint32_t hexColor);
 
 void clearScreen();
 void deleteChar();
+
+void drawCircle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexColor);
 
 #endif
