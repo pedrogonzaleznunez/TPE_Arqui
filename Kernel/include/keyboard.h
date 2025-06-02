@@ -1,5 +1,8 @@
+
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
+
+#include <registers.h>
 
 #define SHIFT_RELEASED_LEFT  0xAA
 #define SHIFT_RELEASED_RIGHT 0xB6
@@ -8,8 +11,8 @@
 #define CAPS_LOCK_PRESSED 0x3A
 #define F1_REGISTER_BACKUP 0x3B
 
-extern uint8_t save_registers_flag;
-extern register_set_t last_saved_regs;
+// extern uint8_t save_registers_flag;
+// extern register_set_t last_saved_regs;
 
 
 // imprime el valor dado si es que es imprimible

@@ -1,7 +1,7 @@
+#include <stdint.h>
+
 #ifndef REGISTERS_H
 #define REGISTERS_H
-
-#include <stdint.h>
 
 typedef struct register_set{
     uint64_t rax;
@@ -30,8 +30,8 @@ typedef struct register_set{
     uint64_t rip;
 } register_set_t;
 
-extern register_set_t saved_registers;
-extern uint8_t save_registers_flag;
+// extern register_set_t saved_registers;
+// extern uint8_t save_registers_flag;
 
 
 #endif /* REGISTERS_H */
