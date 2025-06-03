@@ -68,14 +68,15 @@ int main() {
     // ncPrintHex((uint64_t)sampleCodeModuleAddress);
     // ncNewline();
     // ncPrint("  Calling the sample code module returned: ");
-    putString("Entra al Userland:", 0xFF00FF);
-    newLine();
+    // putString("Entra al Userland:", 0xFF00FF);
+    // newLine();
 
+    // ###### entrada al Userland ######
     ((EntryPoint) sampleCodeModuleAddress)();
 
-    newLine();
-    newLine();
-    putString("Termina el módulo de Userland", 0xFF00FF);
+    // newLine();
+    // newLine();
+    // putString("Termina el módulo de Userland", 0xFF00FF);
     //  ncNewline();
 
     // ncPrint("  Sample data module at 0x");

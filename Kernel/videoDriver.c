@@ -283,29 +283,50 @@ int checkSpecialCharacter(char c) {
     return 1;
 }
 
-void drawCircle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexColor){
-    
-    uint64_t aux_x, aux_y;
-    aux_x = pos_x - radius;
-    aux_y = pos_y - radius;
+void drawCircle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexColor) {
+    if (radius == 0) return;
 
-    if (radius == 0) {
-        return;
+    // Calculamos el rectángulo de exploración acotado a la pantalla
+    uint64_t min_x = pos_x > radius ? pos_x - radius : 0;
+    uint64_t max_x = (pos_x + radius < VBE_mode_info->width) ? pos_x + radius : VBE_mode_info->width - 1;
+    uint64_t min_y = pos_y > radius ? pos_y - radius : 0;
+    uint64_t max_y = (pos_y + radius < VBE_mode_info->height) ? pos_y + radius : VBE_mode_info->height - 1;
+
+    for (uint64_t x = min_x; x <= max_x; x++) {
+        for (uint64_t y = min_y; y <= max_y; y++) {
+            int64_t dx = (int64_t)x - (int64_t)pos_x;
+            int64_t dy = (int64_t)y - (int64_t)pos_y;
+            if (dx * dx + dy * dy <= (int64_t)radius * radius) {
+                putPixel(hexColor, x, y);
+            }
+        }
     }
-
-    while( aux_x < pos_x + radius && aux_y < pos_y + radius) {
-
-        uint64_t dx = aux_x - pos_x;
-        uint64_t dy = aux_y - pos_y;
-
-        if (dx * dx + dy * dy < radius * radius) {
-            putPixel(hexColor, aux_x, aux_y);
-        }
-        aux_x++;
-        if (aux_x >= pos_x + radius) {
-            aux_x = pos_x - radius;
-            aux_y++;
-        }
-    } 
     return;
+}
+
+void drawRec(uint64_t from_x, uint64_t from_y, uint64_t to_x, uint64_t to_y, uint32_t hexColor) {
+    if (from_x > to_x || from_y > to_y) return;
+
+    // Clamp de los límites para no salirnos de la pantalla
+    uint64_t start_x = from_x < VBE_mode_info->width ? from_x : VBE_mode_info->width;
+    uint64_t end_x   = to_x   < VBE_mode_info->width ? to_x   : VBE_mode_info->width - 1;
+    uint64_t start_y = from_y < VBE_mode_info->height ? from_y : VBE_mode_info->height;
+    uint64_t end_y   = to_y   < VBE_mode_info->height ? to_y   : VBE_mode_info->height - 1;
+
+    for (uint64_t x = start_x; x <= end_x; x++) {
+        for (uint64_t y = start_y; y <= end_y; y++) {
+            putPixel(hexColor, x, y);
+        }
+    }
+    return;
+}
+
+void fillScreen(uint32_t hexColor) {
+    for (uint64_t x = 0; x < VBE_mode_info->width; x++) {
+        for (uint64_t y = 0; y < VBE_mode_info->height; y++) {
+            putPixel(hexColor, x, y);
+        }
+    }
+    currentX = LEFT_MARGIN;
+    currentY = TOP_MARGIN;
 }
