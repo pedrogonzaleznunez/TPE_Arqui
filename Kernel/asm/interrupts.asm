@@ -12,13 +12,14 @@ GLOBAL _irq02Handler
 GLOBAL _irq03Handler
 GLOBAL _irq04Handler
 GLOBAL _irq05Handler
+GLOBAL save_registers_flag
+EXTERN saved_registers
 
 GLOBAL _exception0Handler
 
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
-EXTERN save_registers_flag
-EXTERN saved_registers
+
 SECTION .text
 
 %macro pushState 0
@@ -60,45 +61,50 @@ SECTION .text
 ; Interruption handler
 %macro irqHandlerMaster 1
 	pushState
+
 	mov rdi, %1 ; pasaje de parametro
 	call irqDispatcher
 
-	; check por si tengo que guardar los registros
+
+ ; check por si tengo que guardar los registros
     mov al, byte [save_registers_flag]
     cmp al, 0
     je .skip_save
-	; save:
-	popState ; restauro
-	mov [saved_registers.rax], rax
+    ; save:
+    popState ; restauro
 
-	mov rax, [rsp+8*2] ; rflags
-	mov [saved_registers.rflags], rax 
+    mov [saved_registers + 8*0], rax
+    mov [saved_registers + 8*1], rbx
+    mov [saved_registers + 8*2], rcx
+    mov [saved_registers + 8*3], rdx
+    mov [saved_registers + 8*4], rsi
+    mov [saved_registers + 8*5], rdi
 
-	mov rax, [rsp+8*3] ; rsp de donde vengo
-	mov [saved_registers.rsp], rax 
+    mov rax, [rsp+8*3] ; rsp de donde vengo
+    mov [saved_registers + 8*6], rax 
 
-	mov rax, [rsp] ; eip de donde vengo
-	mov [saved_registers.rip], rax ; guardo la direccion de retorno
+    mov [saved_registers + 8*7], rbp
+    mov [saved_registers + 8*8], r8
+    mov [saved_registers + 8*9], r9
+    mov [saved_registers + 8*10], r10
+    mov [saved_registers + 8*11], r11
+    mov [saved_registers + 8*12], r12
+    mov [saved_registers + 8*13], r13
+    mov [saved_registers + 8*14], r14    
+    mov [saved_registers + 8*15], r15
+    mov rax, [rsp+8*2] ; rflags
+    mov [saved_registers + 8*16], rax 
+    
+    mov rax, [rsp] ; eip de donde vengo
+    mov [saved_registers + 8*17], rax ; guardo la direccion de retorno
 
-    mov [saved_registers.rbx], rbx
-    mov [saved_registers.rcx], rcx
-    mov [saved_registers.rdx], rdx
-    mov [saved_registers.rsi], rsi
-    mov [saved_registers.rdi], rdi
-    mov [saved_registers.rbp], rbp
-    mov [saved_registers.r8], r8
-    mov [saved_registers.r9], r9
-    mov [saved_registers.r10], r10
-    mov [saved_registers.r11], r11
-    mov [saved_registers.r12], r12
-    mov [saved_registers.r13], r13
-    mov [saved_registers.r14], r14    
-	mov [saved_registers.r15], r15
-	mov rax, [saved_registers.rax]
-
-.skips_save:
+    mov rax, [saved_registers + 8*0]
 	pushState
-	mov byte [save_registers_flag], 0
+	
+.skip_save:
+    
+    mov byte [save_registers_flag], 0
+
 
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
@@ -190,3 +196,6 @@ haltcpu:
 
 SECTION .bss
 	aux resq 1
+
+SECTION .data
+    save_registers_flag db 0

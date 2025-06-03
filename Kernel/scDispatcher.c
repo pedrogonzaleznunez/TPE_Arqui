@@ -13,12 +13,17 @@
 
 static int64_t sys_write(int64_t fd, const char *buf, int64_t count);                      // write video
 static int64_t sys_read(int64_t fd, char *buf, int64_t count); // read
-static int64_t sys_draw_circle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexColor);
 static int64_t sys_start_beep(uint32_t frecuency);
 static int64_t sys_stop_beep(void);
 static int64_t sys_sleep(int64_t ticks);
 static int64_t sys_clear_screen(void);
 static int64_t sys_beep(uint32_t frecuency, int64_t ticks);
+
+static int64_t sys_draw_circle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexColor);
+static int64_t sys_draw_rec(uint64_t from_x, uint64_t from_y, uint64_t to_x, uint64_t to_y , uint32_t hexColor);
+static int64_t sys_fill_screen(uint32_t hexColor); 
+static int64_t sys_draw_pixel(uint64_t pos_x, uint64_t pos_y, uint32_t hexColor); 
+
 
 // las funciones devuelven un int, deberia devolver un int?
 // syscalls del kernel
@@ -89,6 +94,30 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
             uint32_t hexColor = va_arg(arguments, uint32_t);
             return sys_draw_circle(pos_x, pos_y, radius, hexColor);
         }
+
+        // draw rectangle
+        case 32: {
+            uint64_t from_x = va_arg(arguments, uint64_t);
+            uint64_t from_y = va_arg(arguments, uint64_t);
+            uint64_t to_x = va_arg(arguments, uint64_t);
+            uint64_t to_y = va_arg(arguments, uint64_t);
+            uint32_t hexColor = va_arg(arguments, uint32_t);
+            return sys_draw_rec(from_x, from_y, to_x, to_y, hexColor);
+        }
+
+        // fill screen
+        case 33: {
+            uint32_t hexColor = va_arg(arguments, uint32_t);
+            return sys_fill_screen(hexColor);
+        }
+
+        // draw pixel
+        case 34: {
+            uint64_t pos_x = va_arg(arguments, uint64_t);
+            uint64_t pos_y = va_arg(arguments, uint64_t);
+            uint32_t hexColor = va_arg(arguments, uint32_t);
+            return sys_draw_pixel(pos_x, pos_y, hexColor);
+        }
       
 
     }
@@ -136,6 +165,24 @@ int64_t sys_draw_circle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_
     return 0;
 }
 
+int64_t sys_draw_rec(uint64_t from_x, uint64_t from_y, uint64_t to_x, uint64_t to_y , uint32_t hexColor){
+    // handler de la syscall de dibujar un cuadrado
+    drawRec(from_x, from_y, to_x, to_y, hexColor);
+    return 0;
+}
+
+int64_t sys_draw_pixel(uint64_t pos_x, uint64_t pos_y, uint32_t hexColor){
+    // handler de la syscall de dibujar un pixel
+    putPixel(hexColor, pos_x, pos_y);
+    return 0;
+}
+
+int64_t sys_fill_screen(uint32_t hexColor){
+    // handler de la syscall de llenar la pantalla
+    fillScreen(hexColor);
+    return 0;
+}
+
 int64_t sys_start_beep(uint32_t frecuency){
     playSound(frecuency);
     return 1;
@@ -162,3 +209,4 @@ int64_t sys_beep(uint32_t frecuency, int64_t ticks){
     noSound();
 	return 1;
 }
+

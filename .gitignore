@@ -5,6 +5,7 @@
 *.img
 .DS_Store
 .vscode
+.venv
 
 Image/x64BareBonesImage.qcow2
 Image/x64BareBonesImage.vmdk

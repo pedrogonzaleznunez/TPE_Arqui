@@ -6,6 +6,9 @@ GLOBAL sys_stop_beep
 GLOBAL sys_sleep
 GLOBAL sys_clear_screen
 GLOBAL sys_draw_circle
+GLOBAL sys_draw_rec
+GLOBAL sys_fill_screen
+GLOBAL sys_draw_pixel
 
 SECTION .text
 
@@ -24,7 +27,7 @@ sys_write:
 sys_read:
     sysCallMaster 1
 
-sys_get_regs
+sys_get_regs:
     sysCallMaster 2
 
 ; ################ SOUND SYS_CALLS ################
@@ -43,3 +46,12 @@ sys_clear_screen:
 
 sys_draw_circle:
     sysCallMaster 31
+
+sys_draw_rec:
+    sysCallMaster 32
+
+sys_fill_screen:
+    sysCallMaster 33
+
+sys_draw_pixel:
+    sysCallMaster 34
