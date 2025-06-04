@@ -12,6 +12,8 @@ static int readIdx = 0;
 static int shift_pressed = 0;
 static int caps_lock_on = 0;
 
+extern char save_registers_flag;
+
 // valores sacados de Scan Code Set 1 en https://wiki.osdev.org/PS/2_Keyboard
 // Se podría agregar que el driver de video haga la parte de impresión de
 // caracteres especiales En printable guardemos '\n', '\t'...
@@ -123,6 +125,10 @@ void keyboardHandler() {
                // importa cuando se apreta)
         caps_lock_on = !caps_lock_on;
         return;
+    }
+
+    if(key == 0x10){
+        save_registers_flag = 1;
     }
 
     if (!(aux >> 7)) {

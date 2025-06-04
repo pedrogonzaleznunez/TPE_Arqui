@@ -5,6 +5,7 @@
 #include <videoDriver.h>
 #include <sounds.h>
 #include <time.h>
+#include <registers.h>
 
 #include <interrupts.h>
 
@@ -18,6 +19,8 @@ static int64_t sys_stop_beep(void);
 static int64_t sys_sleep(int64_t ticks);
 static int64_t sys_clear_screen(void);
 static int64_t sys_beep(uint32_t frecuency, int64_t ticks);
+
+static int64_t sys_print_regs(void);
 
 static int64_t sys_draw_circle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexColor);
 static int64_t sys_draw_rec(uint64_t from_x, uint64_t from_y, uint64_t to_x, uint64_t to_y , uint32_t hexColor);
@@ -38,47 +41,41 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
 
         //write
         case 0:
-            int64_t fd = va_arg(arguments, int64_t);
-            const char *buf = va_arg(arguments, const char *);
-            int64_t count = va_arg(arguments, int64_t);
-            return sys_write(fd, buf, count);
-            break;
+            int64_t fd_write = va_arg(arguments, int64_t);
+            const char *buf_write = va_arg(arguments, const char *);
+            int64_t count_write = va_arg(arguments, int64_t);
+            return sys_write(fd_write, buf_write, count_write);
+    
         //read
         case 1:
-            int64_t fd1 = va_arg(arguments, int64_t);
-            char *buf1 = va_arg(arguments, char *);
-            int64_t count1 = va_arg(arguments, int64_t);
-            return sys_read(fd1, buf1, count1);
-            break;
+            int64_t fd_read = va_arg(arguments, int64_t);
+            char *buf_read = va_arg(arguments, char *);
+            int64_t count_read = va_arg(arguments, int64_t);
+            return sys_read(fd_read, buf_read, count_read);
 
         // get regs
-		case 2: {
-			// hay que agrearlo
-			return -1;
-		}
+		case 2: 
+			return sys_print_regs();
+
 		// start beep
-		case 3: {
-			uint32_t frecuency = va_arg(arguments, uint32_t);
-			return sys_start_beep(frecuency);
-		}
+		case 3:
+			uint32_t frecuency_start_beep = va_arg(arguments, uint32_t);
+			return sys_start_beep(frecuency_start_beep);
 		
 		// stop beep
-		case 21: {
+		case 21: 
 			return sys_stop_beep();
-		}
 		
 		// beep
-		case 22: {
-			uint32_t frecuency = va_arg(arguments, uint32_t);
-			int64_t ticks = va_arg(arguments, int64_t);
-			return sys_beep(frecuency, ticks);
-		}
+		case 22:
+			uint32_t frecuency_beep = va_arg(arguments, uint32_t);
+			int64_t ticks_beep = va_arg(arguments, int64_t);
+			return sys_beep(frecuency_beep, ticks_beep);
 
 		// sleep
-		case 23: {
-			int64_t ticks = va_arg(arguments, int64_t);
-			return sys_sleep(ticks);
-		}
+		case 23:
+			int64_t ticks_sleep = va_arg(arguments, int64_t);
+			return sys_sleep(ticks_sleep);
 
 		// clear screen
 		case 30:
@@ -87,39 +84,34 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
 		// clear screen
 
         // draw circle
-        case 31: {
-            uint64_t pos_x = va_arg(arguments, uint64_t);
-            uint64_t pos_y = va_arg(arguments, uint64_t);
-            uint64_t radius = va_arg(arguments, uint64_t);
-            uint32_t hexColor = va_arg(arguments, uint32_t);
-            return sys_draw_circle(pos_x, pos_y, radius, hexColor);
-        }
+        case 31:
+            uint64_t pos_x_circle = va_arg(arguments, uint64_t);
+            uint64_t pos_y_circle = va_arg(arguments, uint64_t);
+            uint64_t radius_circle = va_arg(arguments, uint64_t);
+            uint32_t hexColor_circle = va_arg(arguments, uint32_t);
+            return sys_draw_circle(pos_x_circle, pos_y_circle, radius_circle, hexColor_circle);
 
         // draw rectangle
-        case 32: {
-            uint64_t from_x = va_arg(arguments, uint64_t);
-            uint64_t from_y = va_arg(arguments, uint64_t);
-            uint64_t to_x = va_arg(arguments, uint64_t);
-            uint64_t to_y = va_arg(arguments, uint64_t);
-            uint32_t hexColor = va_arg(arguments, uint32_t);
-            return sys_draw_rec(from_x, from_y, to_x, to_y, hexColor);
-        }
+        case 32:
+            uint64_t from_x_rec = va_arg(arguments, uint64_t);
+            uint64_t from_y_rec = va_arg(arguments, uint64_t);
+            uint64_t to_x_rec = va_arg(arguments, uint64_t);
+            uint64_t to_y_rec = va_arg(arguments, uint64_t);
+            uint32_t hexColor_rec = va_arg(arguments, uint32_t);
+            return sys_draw_rec(from_x_rec, from_y_rec, to_x_rec, to_y_rec, hexColor_rec);
 
         // fill screen
-        case 33: {
-            uint32_t hexColor = va_arg(arguments, uint32_t);
-            return sys_fill_screen(hexColor);
-        }
+        case 33:
+            uint32_t hexColor_screen = va_arg(arguments, uint32_t);
+            return sys_fill_screen(hexColor_screen);
 
         // draw pixel
-        case 34: {
-            uint64_t pos_x = va_arg(arguments, uint64_t);
-            uint64_t pos_y = va_arg(arguments, uint64_t);
-            uint32_t hexColor = va_arg(arguments, uint32_t);
-            return sys_draw_pixel(pos_x, pos_y, hexColor);
-        }
-      
-
+        case 34:
+            uint64_t pos_x_pixel = va_arg(arguments, uint64_t);
+            uint64_t pos_y_pixel = va_arg(arguments, uint64_t);
+            uint32_t hexColor_pixel = va_arg(arguments, uint32_t);
+            return sys_draw_pixel(pos_x_pixel, pos_y_pixel, hexColor_pixel);
+    
     }
 
     va_end(arguments);
@@ -210,3 +202,7 @@ int64_t sys_beep(uint32_t frecuency, int64_t ticks){
 	return 1;
 }
 
+int64_t sys_print_regs(void){
+    regs_print();
+    return 1;
+}

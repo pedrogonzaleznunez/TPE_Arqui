@@ -34,4 +34,6 @@ typedef struct register_set{
 // extern uint8_t save_registers_flag;
 
 
+void regs_print(void);
+
 #endif /* REGISTERS_H */

@@ -93,7 +93,8 @@ void drawCharacter(uint64_t startX, uint64_t startY) {
 void newLevel(int level) {
 
     // Fondo
-    sys_fill_screen(BACKGROUND_COLOR); // Limpia la pantalla
+    // sys_fill_screen(BACKGROUND_COLOR); // Limpia la pantalla
+    sys_clear_screen();
     // Obstaculos
     sys_draw_circle(100,100,200, OBSTABLES_COLOR); // Dibuja un circulo rojo en la pantalla
     sys_draw_circle(800,200,100, OBSTABLES_COLOR); // Dibuja un circulo rojo en la pantalla

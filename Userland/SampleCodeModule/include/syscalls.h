@@ -10,6 +10,8 @@ int64_t sys_write(int64_t fd, const void * buf, int64_t count);
 
 int64_t sys_read(int64_t fd, void * buf, int64_t count);
 
+int64_t sys_print_regs(void);
+
 // ##################### sound syscalls ######################
 
 //pending
@@ -28,5 +30,7 @@ int64_t sys_clear_screen(void);
 int64_t sys_draw_circle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexColor);
 
 int64_t sys_draw_rec(uint64_t from_x, uint64_t from_y, uint64_t to_x, uint64_t to_y , uint32_t hexColor);
+
+int64_t sys_draw_pixel(uint64_t pos_x, uint64_t pos_y, uint32_t hexColor);
 
 #endif
