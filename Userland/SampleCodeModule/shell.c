@@ -9,8 +9,8 @@ void shell(){
       int64_t fd = 0;
 
     while(1){
-        const char *msg = "activar shell ";
-        sys_write(fd, msg, (int64_t) 15);
+        // const char *msg = "activar shell ";
+        // sys_write(fd, msg, (int64_t) 15);
         activate_shell();
     }
     
@@ -22,10 +22,8 @@ void activate_shell(){
 
     int64_t bytes_read = sys_read(0, shell_buffer, MAX_COMMAND_LENGTH);
 
-    int i = 0;
-    char c;
-
-
+    //int i = 0;
+    // char c;
     // while((c = getchar()) != '\n' && i < MAX_COMMAND_LENGTH - 1){
     //     // manejar back space
     //     if( c >= 32 && c <= 126){
@@ -35,16 +33,27 @@ void activate_shell(){
     // }
 
     //shell_buffer[i] = '\0';
-    puts("Termino de leer\n");
+    //puts("Termino de leer\n");
 
-    process_commands(shell_buffer, i);
+    if(bytes_read == MAX_COMMAND_LENGTH){
+        shell_buffer[bytes_read - 1 ] = 0;
+    } else{
+        shell_buffer[bytes_read] = 0;
+    }
+
+    process_commands(shell_buffer);
     
+
+    // manejar borrado desde aca 
+
+
+
 }
 
 // ojo que cuando borro ya no me lo toma como valido 
 
-void process_commands(char * command, int length){
-
+void process_commands(char * command){
+    
     if(strcmp(command, "help") == 0){
         help();
     } else {
@@ -56,7 +65,7 @@ void process_commands(char * command, int length){
 // cuando ingresa un comando no valido
 void invalid_command(){
     puts(INVALID_COMMAND_MESSAGE);
-    help();
+    //help();
 }
 
 // cuando solo ingresa espacios, tabs o nada
