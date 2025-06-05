@@ -3,6 +3,8 @@
 
 #include <stdarg.h>
 #include <string.h>
+#include <stdint.h>
+
 
 #define FD_STDIN  0
 #define FD_STDOUT 1
@@ -23,5 +25,7 @@ int sscanf(const char *str, const char *format, ...);
 void puts(const char *str);
 int getchar();
 void putchar(const char c);
+
+
 
 #endif

@@ -90,7 +90,7 @@ int main() {
     // SE ESCUCHA UN POCO ALTO
     // beep();
 
-    while (1);
+    //while (1);
 
     return 0;
 }
