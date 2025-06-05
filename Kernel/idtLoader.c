@@ -23,11 +23,12 @@ DESCR_INT *idt = (DESCR_INT *) 0;// IDT de 255 entradas
 void load_idt() {
 
     // interrupciones propias
-    setup_IDT_entry(0x00, (uint64_t) &_exception0Handler);
-    
+    setup_IDT_entry(0x00, (uint64_t) &_exception00Handler);
+    setup_IDT_entry(0x06, (uint64_t) &_exception06Handler);
+
     setup_IDT_entry(0x20, (uint64_t) &_irq00Handler);
     setup_IDT_entry(0x21, (uint64_t) &_irq01Handler);
-    
+
     // syscalls propias
     setup_IDT_entry(0x80, (uint64_t) &_syscallHandler);
 

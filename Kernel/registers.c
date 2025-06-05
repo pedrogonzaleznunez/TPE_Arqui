@@ -1,33 +1,36 @@
 #include <registers.h>
 #include <videoDriver.h>
 
-register_set_t saved_registers;
-static uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
-void printReg(char * name, int64_t value);
+register_set_t saved_registers, saved_registers_on_exception;
 
-void regs_print(void){
-    printReg("RAX: ", saved_registers.rax);
-    printReg("RBX: ", saved_registers.rbx);
-    printReg("RCX: ", saved_registers.rcx);
-    printReg("RDX: ", saved_registers.rdx);
-    printReg("RSI: ", saved_registers.rsi);
-    printReg("RDI: ", saved_registers.rdi);
-    printReg("RSP: ", saved_registers.rsp);
-    printReg("RBP: ", saved_registers.rbp);
-    printReg("R8: ", saved_registers.r8);
-    printReg("R9: ", saved_registers.r9);
-    printReg("R10: ", saved_registers.r10);
-    printReg("R11: ", saved_registers.r11);
-    printReg("R12: ", saved_registers.r12);
-    printReg("R13: ", saved_registers.r13);
-    printReg("R14: ", saved_registers.r14);
-    printReg("R15: ", saved_registers.r15);
-    printReg("RFLAGS: ", saved_registers.rflags);
-    printReg("RIP: ", saved_registers.rip);
+static uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
+void printReg(char *name, int64_t value);
+
+void regs_print(uint32_t error) {
+    register_set_t toPrint =
+        error ? saved_registers_on_exception : saved_registers;
+    printReg("RAX: ", toPrint.rax);
+    printReg("RBX: ", toPrint.rbx);
+    printReg("RCX: ", toPrint.rcx);
+    printReg("RDX: ", toPrint.rdx);
+    printReg("RSI: ", toPrint.rsi);
+    printReg("RDI: ", toPrint.rdi);
+    printReg("RSP: ", toPrint.rsp);
+    printReg("RBP: ", toPrint.rbp);
+    printReg("R8: ", toPrint.r8);
+    printReg("R9: ", toPrint.r9);
+    printReg("R10: ", toPrint.r10);
+    printReg("R11: ", toPrint.r11);
+    printReg("R12: ", toPrint.r12);
+    printReg("R13: ", toPrint.r13);
+    printReg("R14: ", toPrint.r14);
+    printReg("R15: ", toPrint.r15);
+    printReg("RFLAGS: ", toPrint.rflags);
+    printReg("RIP: ", toPrint.rip);
     return;
 }
 
-void printReg(char * name, int64_t value){
+void printReg(char *name, int64_t value) {
     char numBuffer[20] = {0};
     putString(name, 0x00FF00);
     uintToBase(value, numBuffer, 16);

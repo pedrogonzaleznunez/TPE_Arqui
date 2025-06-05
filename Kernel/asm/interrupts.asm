@@ -1,4 +1,3 @@
-
 GLOBAL _cli
 GLOBAL _sti
 GLOBAL picMasterMask
@@ -13,12 +12,16 @@ GLOBAL _irq03Handler
 GLOBAL _irq04Handler
 GLOBAL _irq05Handler
 GLOBAL save_registers_flag
-EXTERN saved_registers
 
-GLOBAL _exception0Handler
+EXTERN saved_registers
+EXTERN saved_registers_on_exception
+
+GLOBAL _exception00Handler
+GLOBAL _exception06Handler
 
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
+EXTERN getStackBase
 
 SECTION .text
 
@@ -58,6 +61,35 @@ SECTION .text
 	pop rax
 %endmacro
 
+%macro saveRegisters 1
+	mov [%1 + 8*0], rax
+    mov [%1 + 8*1], rbx
+    mov [%1 + 8*2], rcx
+    mov [%1 + 8*3], rdx
+    mov [%1 + 8*4], rsi
+    mov [%1 + 8*5], rdi
+    
+	mov rax, [rsp+8*3] ; rsp de donde vengo
+    mov [%1 + 8*6], rax 
+
+    mov [%1 + 8*7], rbp
+    mov [%1 + 8*8], r8
+    mov [%1 + 8*9], r9
+    mov [%1 + 8*10], r10
+    mov [%1 + 8*11], r11
+    mov [%1 + 8*12], r12
+    mov [%1 + 8*13], r13
+    mov [%1 + 8*14], r14    
+    mov [%1 + 8*15], r15
+    mov rax, [rsp+8*2] ; rflags
+    mov [%1 + 8*16], rax 
+    
+    mov rax, [rsp] ; eip de donde vengo
+    mov [%1 + 8*17], rax ; guardo la direccion de retorno
+
+    mov rax, [%1 + 8*0]
+%endmacro
+
 ; Interruption handler
 %macro irqHandlerMaster 1
 	pushState
@@ -65,46 +97,19 @@ SECTION .text
 	mov rdi, %1 ; pasaje de parametro
 	call irqDispatcher
 
-
- ; check por si tengo que guardar los registros
+ 		; check por si tengo que guardar los registros
     mov al, byte [save_registers_flag]
     cmp al, 0
-    je .skip_save
-    ; save:
+   
+    je .skip_save 
+		; save:
     popState ; restauro
-
-    mov [saved_registers + 8*0], rax
-    mov [saved_registers + 8*1], rbx
-    mov [saved_registers + 8*2], rcx
-    mov [saved_registers + 8*3], rdx
-    mov [saved_registers + 8*4], rsi
-    mov [saved_registers + 8*5], rdi
-
-    mov rax, [rsp+8*3] ; rsp de donde vengo
-    mov [saved_registers + 8*6], rax 
-
-    mov [saved_registers + 8*7], rbp
-    mov [saved_registers + 8*8], r8
-    mov [saved_registers + 8*9], r9
-    mov [saved_registers + 8*10], r10
-    mov [saved_registers + 8*11], r11
-    mov [saved_registers + 8*12], r12
-    mov [saved_registers + 8*13], r13
-    mov [saved_registers + 8*14], r14    
-    mov [saved_registers + 8*15], r15
-    mov rax, [rsp+8*2] ; rflags
-    mov [saved_registers + 8*16], rax 
-    
-    mov rax, [rsp] ; eip de donde vengo
-    mov [saved_registers + 8*17], rax ; guardo la direccion de retorno
-
-    mov rax, [saved_registers + 8*0]
+	saveRegisters saved_registers
 	pushState
 	
 .skip_save:
     
     mov byte [save_registers_flag], 0
-
 
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
@@ -117,12 +122,23 @@ SECTION .text
 
 ; Exceptions handler
 %macro exceptionHandler 1
-	pushState
+	saveRegisters saved_registers_on_exception
+
+	; también se puede tener una única estructura
+	; y que si hay una excepción, se pierden valores
+	; guardados previos
 
 	mov rdi, %1 ; pasaje de parametro
 	call exceptionDispatcher
 
-	popState
+	; llamar a getStackBase y volver
+	call getStackBase
+	mov [rsp + 8*3], rax	; se guarda el rsp 
+	mov rax, userland
+	mov [rsp], rax			; se guarda el rip
+	
+	; rflags, cs y ss quedan como estaban
+	
 	iretq
 %endmacro
 
@@ -184,8 +200,12 @@ _irq05Handler:
 
 
 ;Zero Division Exception
-_exception0Handler:
+_exception00Handler:
 	exceptionHandler 0
+
+;Invalid Opcode Exception
+_exception06Handler:
+	exceptionHandler 6
 
 haltcpu:
 	cli
@@ -197,3 +217,4 @@ SECTION .bss
 
 SECTION .data
     save_registers_flag db 0
+	userland equ 0x400000

@@ -25,9 +25,9 @@ void deleteChar();
 
 void drawCircle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexColor);
 
-void drawRec(uint64_t from_x, uint64_t from_y, uint64_t to_x, uint64_t to_y , uint32_t hexColor);
+void drawRec(uint64_t from_x, uint64_t from_y, uint64_t to_x, uint64_t to_y,
+             uint32_t hexColor);
 
 void fillScreen(uint32_t hexColor);
-
 
 #endif
