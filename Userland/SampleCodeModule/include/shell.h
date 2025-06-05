@@ -6,7 +6,7 @@
 #define INVALID_COMMAND_MESSAGE "Invalid command.\n"
 #define MAX_COMMAND_LENGTH 50
 
-void process_commands(char * command, int length);
+void process_commands(char * command);
 
 // cuando ingresa un comando no valido
 void invalid_command();
