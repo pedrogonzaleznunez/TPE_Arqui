@@ -123,7 +123,8 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
 
 int64_t sys_write(int64_t fd, const char *buf, int64_t count) {
     // handler de la syscall de write video
-    int format = fd ? ERROR_CHAR_COLOR : DEFAULT_CHAR_COLOR;
+
+    int format = (fd == 1 ? DEFAULT_CHAR_COLOR : ERROR_CHAR_COLOR);
 
     for (int64_t i = 0; i < count; i++) { putChar(buf[i], format); }
 
