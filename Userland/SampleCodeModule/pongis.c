@@ -1,8 +1,7 @@
-
 #include <pongis.h>
 #include <stdio.h>
 #include <syscalls.h>
-#include "character_data.h"
+#include <character_data.h>
 
 // ################################# CONSTANTES #################################
 
@@ -17,8 +16,7 @@
 #define INITIAL_DIR_2_X 1
 #define INITIAL_DIR_2_Y 0
 
-#define CHARACTER_WIDTH 248
-#define CHARACTER_HEIGHT 248
+
 #define FIXED_POINT 1024 // para representar 1.0 como 1024
 
 #define TOTAL_DIRECTIONS 36
@@ -43,6 +41,8 @@ typedef struct pongis {
 typedef struct {
     int x, y; // posicion 
     int dx, dy; // dirreccion y sentido actual
+    int speed; // velocidad de movimiento
+    int score; // puntaje del jugador
 } Player;
 
 typedef struct {
@@ -91,36 +91,69 @@ void drawCharacter(uint64_t startX, uint64_t startY) {
 }
 
 void newLevel(int level) {
-
-    // Fondo
-    sys_fill_screen(BACKGROUND_COLOR); // Limpia la pantalla
+    
+    
+    sys_fill_screen(BACKGROUND_COLOR); 
     // Obstaculos
-    sys_draw_circle(100,100,200, OBSTABLES_COLOR); // Dibuja un circulo rojo en la pantalla
-    sys_draw_circle(800,200,100, OBSTABLES_COLOR); // Dibuja un circulo rojo en la pantalla
-
+    sys_draw_circle(100,100,200, OBSTABLES_COLOR); 
+    sys_draw_circle(800,200,100, OBSTABLES_COLOR); 
+    
     // Hole
-    hole.x = 700; // Posicion del hoyo
-    hole.y = 500; // Posicion del hoyo
-    sys_draw_circle(hole.x, hole.y, 22, SHADOW_COLOR); // Dibuja la sombra del hoyo
+    hole.x = 900; // Posicion del hoyo
+    hole.y = 400; // Posicion del hoyo
+
+    sys_draw_circle(hole.x, hole.y, 24, SHADOW_COLOR); // Dibuja la sombra del hoyo
     sys_draw_circle(hole.x, hole.y, 20, HOLE_COLOR); // Dibuja el hoyo
 
+    int64_t arrows;
 
+    const int speed = 5; // Velocidad de movimiento del jugador
+    player.x = 500;
+    player.y = 500;
+    
+    drawCharacter(player.x, player.y); // Dibujar posición inicial
 
-    drawCharacter(500, 500); // Dibuja el personaje 1
+    while (!end_game) {
+       
 
+        int64_t arrows = sys_get_arrow();  // Lee estado actual
 
-    int dir_index = 0;
-
-    // while (1) {
-    //     int angle = dir_index * ANGLE_STEP_FIXED;
-
-    //     clearCharacterArea(500, 500);
-    //     drawCharacterRotated(500, 500, angle);
+        // Procesa movimiento...
+    
         
-    //     dir_index = (dir_index + 1) % TOTAL_DIRECTIONS;
+        // Guarda posición anterior para limpiar
+        int oldX = player.x;
+        int oldY = player.y;
+        
+        // mover jugador
+        if (arrows & ARROW_UP)    {
+            player.y -= speed;
+            sys_draw_rec(100,100,200,200, 0xFFFFFF ); // Limpia el área del obstáculo
+        }
+        if (arrows & ARROW_DOWN)  {
+            player.y += speed;
+            printf("Arriba\n");
+        }
+        if (arrows & ARROW_LEFT)  {
+            player.x -= speed;
+            printf("Arriba\n");
+        }
+        if (arrows & ARROW_RIGHT) {
+            player.x += speed;
+            printf("Arriba\n");
+        }
+        
+        // Solo redibuja si la posición cambió
+        if (oldX != player.x || oldY != player.y) {
+            clearCharacterArea(oldX, oldY);     // Limpia posición anterior
+            drawCharacter(player.x, player.y);  // Dibuja nueva posición
+        }
+        
+        sys_sleep(1);
+    }
 
-    //     // sys_sleep();
-    // }
+    // printf("Player position: (%d, %d)\n", player.x, player.y);
+        
 
 }
 
