@@ -1,20 +1,21 @@
 #include <shell.h>
 #include <syscalls.h>
 
-void shell(){
+#define printReg(x, y) printf("%s: %x\n", x, y)
+
+void shell() {
     puts(WELCOME_MESSAGE);
     help();
-      int64_t fd = 0;
+    int64_t fd = 0;
 
-    while(1){
+    while (1) {
         // const char *msg = "activar shell ";
         // sys_write(fd, msg, (int64_t) 15);
         activate_shell();
     }
-    
 }
 
-void activate_shell2(){
+void activate_shell2() {
     putchar(PROMPT_SYMBOL);
     char shell_buffer[MAX_COMMAND_LENGTH] = {0};
 
@@ -27,26 +28,22 @@ void activate_shell2(){
     //     if( c >= 32 && c <= 126){
     //         shell_buffer[i++] = c;
     //         putchar(c);
-    //     } 
+    //     }
     // }
 
     //shell_buffer[i] = '\0';
     //puts("Termino de leer\n");
 
-    if(bytes_read == MAX_COMMAND_LENGTH){
-        shell_buffer[bytes_read - 1 ] = 0;
-    } 
+    if (bytes_read == MAX_COMMAND_LENGTH) { shell_buffer[bytes_read - 1] = 0; }
 
     sys_write(1, shell_buffer, bytes_read);
 
     process_commands(shell_buffer);
 
-    // manejar borrado desde aca 
-
-
+    // manejar borrado desde aca
 }
 
-void activate_shell(){
+void activate_shell() {
     putchar(PROMPT_SYMBOL);
 
     char shell_buffer[MAX_COMMAND_LENGTH] = {0};
@@ -55,93 +52,81 @@ void activate_shell(){
     char c;
     int read = 1;
 
-    while(read && i < MAX_COMMAND_LENGTH){
-        int64_t ret = sys_read(0, &c, 1); // leer un carácter
+    while (read && i < MAX_COMMAND_LENGTH) {
+        int64_t ret = sys_read(0, &c, 1);// leer un carácter
 
         //if(ret <= 0) continue;
 
-        if(c == '\n') { // dejar de leer y procesar
+        if (c == '\n') {// dejar de leer y procesar
             shell_buffer[i] = '\0';
             read = 0;
-        } else if(c == '\b') { // backspace
-            if(i > 0){
+        } else if (c == '\b') {// backspace
+            if (i > 0) {
                 i--;
-                shell_buffer[i] = '\0';                
+                shell_buffer[i] = '\0';
             }
-        } else { 
+        } else {
             //if(i < MAX_COMMAND_LENGTH - 1){
-                shell_buffer[i++] = c;
-             //   putchar(c); // mostrar en pantalla
-           // }
+            shell_buffer[i++] = c;
+            //   putchar(c); // mostrar en pantalla
+            // }
         }
         // ignorar otros caracteres
-        
     }
 
     shell_buffer[i] = '\0';
-    if(i == MAX_COMMAND_LENGTH){
-        shell_buffer[i - 1 ] = 0;
-    } 
+    if (i == MAX_COMMAND_LENGTH) { shell_buffer[i - 1] = 0; }
 
 
     process_commands(shell_buffer);
 }
 
 
+// ojo que cuando borro ya no me lo toma como valido
 
+void process_commands(char *command) {
 
-
-
-
-
-// ojo que cuando borro ya no me lo toma como valido 
-
-void process_commands(char * command){
-    
-    if(strcmp(command, "help") == 0){
+    if (strcmp(command, "help") == 0) {
         help();
-    } else if(strcmp(command, "zoomin") == 0 ){
+    } else if (strcmp(command, "zoomin") == 0) {
         zoom_in();
-    } else if(strcmp(command, "zoomout") == 0 ){
+    } else if (strcmp(command, "zoomout") == 0) {
         zoom_out();
-    } else if(strcmp(command, "registers") == 0 ){
+    } else if (strcmp(command, "registers") == 0) {
         get_regs();
-    } else if(strcmp(command, "clear") == 0 ){
+    } else if (strcmp(command, "clear") == 0) {
         clear();
-    } else if(strcmp(command, "time") == 0 ){
+    } else if (strcmp(command, "time") == 0) {
         get_time();
-    } else if(strcmp(command, "divzero") == 0 ){
+    } else if (strcmp(command, "divzero") == 0) {
         invalid_command();
-    } else if(strcmp(command, "opcode") == 0 ){
-        invalid_command(); 
-    } else if(strcmp(command, "pongis") == 0 ){
+    } else if (strcmp(command, "opcode") == 0) {
         invalid_command();
-    } else if(is_empty(command)) {
+    } else if (strcmp(command, "pongis") == 0) {
+        invalid_command();
+    } else if (is_empty(command)) {
         return;
     } else {
         invalid_command();
     }
-        
 }
 
-int is_empty(char * command){
-    while(*command == ' ' || *command == '\t'){
-        command++;
-    }
+int is_empty(char *command) {
+    while (*command == ' ' || *command == '\t') { command++; }
     return *command == '\0';
 }
 
 // cuando ingresa un comando no valido
-void invalid_command(){
+void invalid_command() {
     puts(INVALID_COMMAND_MESSAGE);
     //help();
 }
 
 
 /* Commands */
-    
 
-void help(){
+
+void help() {
     puts("\nAvailable commands:\n");
     puts("\nclear: clear terminal.");
     puts("\ndivzero: prompts zero division exception.");
@@ -152,82 +137,65 @@ void help(){
     puts("\ntime: displays current time.");
     puts("\nzoomin: zooms in text on the screen.");
     puts("\nzoomout: zooms out text on the screen.");
-    
 }
 
-void zoom_in(){
-
+void zoom_in() {
 }
 
-void zoom_out(){
-
+void zoom_out() {
 }
-    
-void get_regs(){
+
+void get_regs() {
     register_set_t regs;
-    puts("\nsys call que imprime:\n");
-    sys_print_regs();
-    puts("\nsys call que los carga\n");
-    sys_get_regs(&regs);
-    print_regs(regs);
-
+    // puts("\nsys call que imprime:\n");   // Doy de baja la syscall que los imprime directamente
+    // sys_print_regs();
+    // puts("\nsys call que los carga\n");
+    if (sys_get_regs(&regs)) {
+        print_regs(regs);
+    } else {
+        puts("Registers must be saved before printing. To save press 'q'");
+    }
 }
 
 
 void print_regs(register_set_t regs) {
-    printReg("RAX: ", regs.rax);
-    printReg("RBX: ", regs.rbx);
-    printReg("RCX: ", regs.rcx);
-    printReg("RDX: ", regs.rdx);
-    printReg("RSI: ", regs.rsi);
-    printReg("RDI: ", regs.rdi);
-    printReg("RSP: ", regs.rsp);
-    printReg("RBP: ", regs.rbp);
-    printReg("R8: ", regs.r8);
-    printReg("R9: ", regs.r9);
-    printReg("R10: ", regs.r10);
-    printReg("R11: ", regs.r11);
-    printReg("R12: ", regs.r12);
-    printReg("R13: ", regs.r13);
-    printReg("R14: ", regs.r14);
-    printReg("R15: ", regs.r15);
-    printReg("RFLAGS: ", regs.rflags);
-    printReg("RIP: ", regs.rip);
+    printReg("RAX", regs.rax);
+    printReg("RBX", regs.rbx);
+    printReg("RCX", regs.rcx);
+    printReg("RDX", regs.rdx);
+    printReg("RSI", regs.rsi);
+    printReg("RDI", regs.rdi);
+    printReg("RSP", regs.rsp);
+    printReg("RBP", regs.rbp);
+    printReg("R8", regs.r8);
+    printReg("R9", regs.r9);
+    printReg("R10", regs.r10);
+    printReg("R11", regs.r11);
+    printReg("R12", regs.r12);
+    printReg("R13", regs.r13);
+    printReg("R14", regs.r14);
+    printReg("R15", regs.r15);
+    printReg("RFLAGS", regs.rflags);
+    printReg("RIP", regs.rip);
     return;
 }
 
-void printReg(char *name, int64_t value) {
-    char numBuffer[20] = {0};
-    puts(name);
-    uintToBase(value, numBuffer, 16);
-    puts(numBuffer);
-    return;
-}
+// Pasó a ser una macro.
+// void printReg(char *name, int64_t value) {
+//     printf("%s: %x\n", name, value);
+//     return;
+// }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-void clear(){
-
+void clear() {
 }
 
 // nos piden la hora del sistema
-void get_time(){
+void get_time() {
     time_t time;
     sys_get_time(&time);
-    printf("Local time: %d/%d/%d %d:%d:%d ", time.day, time.month, time.year, time.hours, time.minutes, time.seconds);
+    printf("Local time: %d/%d/%d %d:%d:%d ", time.day, time.month, time.year, time.hours,
+           time.minutes, time.seconds);
     putchar('\n');
 }
 
@@ -236,7 +204,5 @@ int strcmp(const char *str1, const char *str2) {
         str1++;
         str2++;
     }
-    return *(unsigned char *)str1 - *(unsigned char *)str2;
+    return *(unsigned char *) str1 - *(unsigned char *) str2;
 }
-    
-    

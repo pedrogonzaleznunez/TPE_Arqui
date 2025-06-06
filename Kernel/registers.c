@@ -2,13 +2,13 @@
 #include <videoDriver.h>
 
 register_set_t saved_registers, saved_registers_on_exception;
+extern uint8_t saved_registers_flag;
 
 static uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
 void printReg(char *name, int64_t value);
 
-void regs_print(uint32_t error) {
-    register_set_t toPrint =
-        error ? saved_registers_on_exception : saved_registers;
+void printAllRegs(uint32_t error) {
+    register_set_t toPrint = error ? saved_registers_on_exception : saved_registers;
     printReg("RAX: ", toPrint.rax);
     printReg("RBX: ", toPrint.rbx);
     printReg("RCX: ", toPrint.rcx);
@@ -70,7 +70,9 @@ static uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
 }
 
 
-void set_registers(register_set_t * regs){
+int64_t set_registers(register_set_t *regs) {
+    if (!saved_registers_flag) { return 0; }
+
     regs->rax = saved_registers.rax;
     regs->rbx = saved_registers.rbx;
     regs->rcx = saved_registers.rcx;
@@ -81,8 +83,8 @@ void set_registers(register_set_t * regs){
     regs->rsp = saved_registers.rsp;
     regs->rbp = saved_registers.rbp;
 
-    regs->r8  = saved_registers.r8;
-    regs->r9  = saved_registers.r9;
+    regs->r8 = saved_registers.r8;
+    regs->r9 = saved_registers.r9;
     regs->r10 = saved_registers.r10;
     regs->r11 = saved_registers.r11;
     regs->r12 = saved_registers.r12;
@@ -91,5 +93,6 @@ void set_registers(register_set_t * regs){
     regs->r15 = saved_registers.r15;
 
     regs->rflags = saved_registers.rflags;
-    regs->rip    = saved_registers.rip;
+    regs->rip = saved_registers.rip;
+    return 1;
 }

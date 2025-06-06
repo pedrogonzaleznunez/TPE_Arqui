@@ -12,7 +12,7 @@ static int readIdx = 0;
 static int shift_pressed = 0;
 static int caps_lock_on = 0;
 
-extern char save_registers_flag;
+extern uint8_t save_registers_flag;
 
 // valores sacados de Scan Code Set 1 en https://wiki.osdev.org/PS/2_Keyboard
 // Se podría agregar que el driver de video haga la parte de impresión de

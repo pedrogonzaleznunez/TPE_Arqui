@@ -25,13 +25,14 @@ void exceptionDispatcher(int exception) {
 void exceptionHelper(char *msg) {
     putString(msg, 0xFF0000);
     putString("Registers at exception show: \n", 0xFF0000);
-    regs_print(1);// 1 para que imprima en error
+    printAllRegs(1);// 1 para que imprima en error
 
+    while (!isBufferEmpty()) { bufferRead(); }// vacío el buffer
+
+    char c = 0;
+    putString("\nPress enter to return to main\n", 0xFF0000);
     // Volver a habilitar interrupciones
     _sti();
-    char c = 0;
-    while (!isBufferEmpty()) { bufferRead(); }// vacío el buffer
-    putString("\nPress enter to return to main\n", 0xFF0000);
     while (sys_read(1, &c, 1));// espero un \n
     clearScreen();
     return;

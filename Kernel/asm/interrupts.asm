@@ -11,8 +11,13 @@ GLOBAL _irq02Handler
 GLOBAL _irq03Handler
 GLOBAL _irq04Handler
 GLOBAL _irq05Handler
-GLOBAL save_registers_flag
 
+; flags que indican:
+; i) si se debe guardar el estado
+; ii) si el estado se guardó
+GLOBAL save_registers_flag
+GLOBAL saved_registers_flag
+; structs de los registros
 EXTERN saved_registers
 EXTERN saved_registers_on_exception
 
@@ -103,10 +108,12 @@ SECTION .text
    
     je .skip_save 
 		; save:
-    popState ; restauro
+    popState		; restauro
 	saveRegisters saved_registers
 	pushState
 	
+	mov byte[saved_registers_flag], 1		;indico que se guardaron
+
 .skip_save:
     
     mov byte [save_registers_flag], 0
@@ -127,6 +134,7 @@ SECTION .text
 	; también se puede tener una única estructura
 	; y que si hay una excepción, se pierden valores
 	; guardados previos
+	mov byte[saved_registers_flag], 0
 
 	mov rdi, %1 ; pasaje de parametro
 	call exceptionDispatcher
@@ -217,4 +225,5 @@ SECTION .bss
 
 SECTION .data
     save_registers_flag db 0
+	saved_registers_flag db 0
 	userland equ 0x400000

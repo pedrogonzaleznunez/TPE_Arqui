@@ -1,16 +1,15 @@
 #include <keyboard.h>
 #include <naiveConsole.h>
 #include <registers.h>
+#include <rtc.h>
 #include <sounds.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <time.h>
 #include <videoDriver.h>
-#include <rtc.h>
 
 #include <interrupts.h>
 #include <syscalls.h>
-#include <rtc.h>
 
 #include <stddef.h>// para el NULL
 
@@ -61,11 +60,12 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
 
         // get regs
         case 2:
-            return sys_print_regs();
+            register_set_t *regs = va_arg(arguments, register_set_t *);
+            return sys_get_regs(regs);
 
         // get time
         case 3:
-            time_t * time = va_arg(arguments, time_t *);
+            time_t *time = va_arg(arguments, time_t *);
             return sys_get_time(time);
 
         // start beep
@@ -160,7 +160,7 @@ int64_t sys_read(int64_t fd, char *buf, int64_t count) {
         }
     }
 
-    
+
     return bytesRead;
 }
 
@@ -217,17 +217,16 @@ int64_t sys_beep(uint32_t frecuency, int64_t ticks) {
     return 1;
 }
 
-int64_t sys_print_regs(void) {
-    regs_print(0);
-    return 1;
-}
+// int64_t sys_print_regs(void) {
+//     regs_print(0);
+//     return 1;
+// }
 
-int64_t sys_get_time(time_t * time){
+int64_t sys_get_time(time_t *time) {
     set_time(time);
     return 1;
 }
 
-int64_t sys_get_regs(register_set_t * registers){
-    set_registers(registers);
-    return 1;
+int64_t sys_get_regs(register_set_t *registers) {
+    return set_registers(registers);
 }
