@@ -2,7 +2,7 @@
 #define _STDIO_H_
 
 #include <stdarg.h>
-#include <string.h>
+#include <myStrings.h>
 #include <stdint.h>
 
 

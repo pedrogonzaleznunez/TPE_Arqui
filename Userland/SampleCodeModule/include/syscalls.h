@@ -5,6 +5,11 @@
 #ifndef SYSCALLS_H
 #define SYSCALLS_H
 
+#define ARROW_DOWN_CODE 17
+#define ARROW_UP_CODE 18
+#define ARROW_LEFT_CODE 19
+#define ARROW_RIGHT_CODE 20
+
 typedef struct time {
     uint64_t seconds;
     uint64_t minutes;
@@ -46,6 +51,8 @@ int64_t sys_read(int64_t fd, void *buf, int64_t count);
 int64_t sys_get_regs(register_set_t *registers);
 
 int64_t sys_get_time(time_t *time);
+
+int64_t sys_delete_char(void);
 
 // ##################### sound syscalls ######################
 

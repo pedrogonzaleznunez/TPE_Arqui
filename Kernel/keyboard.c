@@ -20,15 +20,15 @@ extern uint8_t save_registers_flag;
 static char printable[] = {
     // podemos sacar las entradas de -1 y automaticamente se ponen en cero (y
     // cambiar el checkeo)
-    [0x01] = -1,// escape no tiene carácter imprimible
+    [0x01] = 27,// escape ASCII 27 \e
     [0x02] = '1',  [0x03] = '2', [0x04] = '3', [0x05] = '4', [0x06] = '5',  [0x07] = '6',
     [0x08] = '7',  [0x09] = '8', [0x0A] = '9', [0x0B] = '0', [0x0C] = '-',  [0x0D] = '=',
-    [0x0E] = '\b',// backspace
+    [0x0E] = '\b',// backspace (8)
     [0x0F] = '\t',// tab
     [0x10] = 'q',  [0x11] = 'w', [0x12] = 'e', [0x13] = 'r', [0x14] = 't',  [0x15] = 'y',
     [0x16] = 'u',  [0x17] = 'i', [0x18] = 'o', [0x19] = 'p', [0x1A] = '[',  [0x1B] = ']',
     [0x1C] = '\n',// enter
-    [0x1D] = -1,  // left control no es imprimible
+    [0x1D] = 0,  // left control no es imprimible
     [0x1E] = 'a',  [0x1F] = 's', [0x20] = 'd', [0x21] = 'f', [0x22] = 'g',  [0x23] = 'h',
     [0x24] = 'j',  [0x25] = 'k', [0x26] = 'l', [0x27] = ';', [0x28] = '\'', [0x29] = '`',
     [0x2A] = -1,// left shift no es imprimible
@@ -53,7 +53,7 @@ static char printable[] = {
 };
 
 static char printable_shift[] = {
-    [0x01] = -1,// escape no tiene carácter imprimible
+    [0x01] = 27,// escape no tiene carácter imprimible
     [0x02] = '!', [0x03] = '@', [0x04] = '#', [0x05] = '$', [0x06] = '%', [0x07] = '^',
     [0x08] = '&', [0x09] = '*', [0x0A] = '(', [0x0B] = ')', [0x0C] = '_', [0x0D] = '+',
     [0x27] = ':',// ; pero con Shift
@@ -81,6 +81,14 @@ char getChar(uint8_t scanCode) {
 
         if (shift_pressed && scanCode <= 0x0D) { return printable_shift[scanCode]; }
         return aux;
+    } else if(scanCode == ARROW_UP){
+        return ARROW_UP_CODE;
+    } else if (scanCode == ARROW_DOWN){
+        return ARROW_DOWN_CODE;
+    } else if(scanCode == ARROW_LEFT){
+        return ARROW_LEFT_CODE;
+    } else if (scanCode == ARROW_RIGHT){
+        return ARROW_RIGHT_CODE;
     } else {
         return 0;
     }
@@ -119,6 +127,7 @@ void keyboardHandler() {
     }
 
     if (key == 0x10) { save_registers_flag = 1; }
+
 
     if (!(aux >> 7)) {
         char c = getChar(key);
