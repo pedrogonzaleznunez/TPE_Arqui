@@ -154,7 +154,8 @@ int64_t sys_read(int64_t fd, char *buf, int64_t count) {
     while (bytesRead < count) {
         char c = bufferRead();
         if (c != -1) {
-            if (c == '\n' || c == 0) { break; }
+            //if (c == '\n' || c == 0) { break; }
+            if (c == 0) { break; }
             buf[bytesRead++] = c;
         }
     }

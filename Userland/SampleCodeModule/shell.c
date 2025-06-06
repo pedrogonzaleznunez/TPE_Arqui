@@ -14,7 +14,7 @@ void shell(){
     
 }
 
-void activate_shell(){
+void activate_shell2(){
     putchar(PROMPT_SYMBOL);
     char shell_buffer[MAX_COMMAND_LENGTH] = {0};
 
@@ -37,14 +37,62 @@ void activate_shell(){
         shell_buffer[bytes_read - 1 ] = 0;
     } 
 
+    sys_write(1, shell_buffer, bytes_read);
+
     process_commands(shell_buffer);
-    
 
     // manejar borrado desde aca 
 
 
-
 }
+
+void activate_shell(){
+    putchar(PROMPT_SYMBOL);
+
+    char shell_buffer[MAX_COMMAND_LENGTH] = {0};
+
+    int i = 0;
+    char c;
+    int read = 1;
+
+    while(read && i < MAX_COMMAND_LENGTH){
+        int64_t ret = sys_read(0, &c, 1); // leer un carácter
+
+        //if(ret <= 0) continue;
+
+        if(c == '\n') { // dejar de leer y procesar
+            shell_buffer[i] = '\0';
+            read = 0;
+        } else if(c == '\b') { // backspace
+            if(i > 0){
+                i--;
+                shell_buffer[i] = '\0';                
+            }
+        } else { 
+            //if(i < MAX_COMMAND_LENGTH - 1){
+                shell_buffer[i++] = c;
+             //   putchar(c); // mostrar en pantalla
+           // }
+        }
+        // ignorar otros caracteres
+        
+    }
+
+    shell_buffer[i] = '\0';
+    if(i == MAX_COMMAND_LENGTH){
+        shell_buffer[i - 1 ] = 0;
+    } 
+
+
+    process_commands(shell_buffer);
+}
+
+
+
+
+
+
+
 
 // ojo que cuando borro ya no me lo toma como valido 
 

@@ -22,32 +22,34 @@ int main() {
 
     //    }
 
-    int64_t fd = 0;
 
-    const char *buf = "Hola mundo?\n";
-    int64_t count = 12;
+// esto ya no funciona del todo bien porque el sys_read ahora retorna en el buffer en \n (necesitamos esto para q ande bien la shell)
+    // int64_t fd = 0;
 
-    // Write inicial
-    sys_write(fd, buf, count);
+    // const char *buf = "Hola mundo?\n";
+    // int64_t count = 12;
 
-    const char *msg = "Ingrese texto: ";
-    sys_write(fd, msg, (int64_t) 15);
+    // // Write inicial
+    // sys_write(fd, buf, count);
 
-    // Read
-    char buffer[20];
-    count = 20;
+    // const char *msg = "Ingrese texto: ";
+    // sys_write(fd, msg, (int64_t) 15);
 
-    int64_t bytes_read = sys_read(fd, buffer, count);
+    // // Read
+    // char buffer[20];
+    // count = 20;
 
-    // Verificar si realmente leyó algo
-    const char *msg2 = "\nLeido: ";
-    sys_write(fd, msg2, 8);
+    // int64_t bytes_read = sys_read(fd, buffer, count);
 
-    // Mostrar lo que se leyó
-    fd = 1;// stdout
-    sys_write(fd, buffer, bytes_read);
+    // // Verificar si realmente leyó algo
+    // const char *msg2 = "\nLeido: ";
+    // sys_write(fd, msg2, 8);
 
-    sys_write(fd, &"\n", 1);
+    // // Mostrar lo que se leyó
+    // fd = 1;// stdout
+    // sys_write(fd, buffer, bytes_read);
+
+    // sys_write(fd, &"\n", 1);
 
     // if (bytes_read % 2) {
     //     throw_invalid_opcode();
