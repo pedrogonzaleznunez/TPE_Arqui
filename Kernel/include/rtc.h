@@ -12,6 +12,14 @@
 #define MONTH 0x08
 #define DAY 0x07
 
+typedef struct time {
+    uint64_t seconds;
+    uint64_t minutes;
+    uint64_t hours;
+    uint64_t day;
+    uint64_t month;
+    uint64_t year;
+} time_t;
 
 // hace la interrupción. Según el descriptor
 // devuelve un campo del tiempo
@@ -28,6 +36,8 @@ int64_t get_year();
 void printTime(); 
 
 unsigned int rtcTypeToDecimal(unsigned char time);
+
+void set_time(time_t * time);
 
 
 #endif

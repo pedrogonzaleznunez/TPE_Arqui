@@ -15,6 +15,29 @@ typedef struct time {
     uint64_t year;
 } time_t;
 
+typedef struct register_set {
+    uint64_t rax;
+    uint64_t rbx;
+    uint64_t rcx;
+    uint64_t rdx;
+
+    uint64_t rsi;
+    uint64_t rdi;
+    uint64_t rsp;
+    uint64_t rbp;
+
+    uint64_t r8;
+    uint64_t r9;
+    uint64_t r10;
+    uint64_t r11;
+    uint64_t r12;
+    uint64_t r13;
+    uint64_t r14;
+    uint64_t r15;
+
+    uint64_t rflags;// Flags register
+    uint64_t rip;   // Instruction pointer
+} register_set_t;
 // Our syscalls prototypes
 
 int64_t sys_write(int64_t fd, const void * buf, int64_t count);
@@ -22,6 +45,7 @@ int64_t sys_write(int64_t fd, const void * buf, int64_t count);
 int64_t sys_read(int64_t fd, void * buf, int64_t count);
 
 int64_t sys_print_regs(void);
+int64_t sys_get_regs(register_set_t * registers);
 
 int64_t sys_get_time(time_t * time);
 

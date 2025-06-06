@@ -1,7 +1,6 @@
 #include <shell.h>
 #include <syscalls.h>
 
-
 void shell(){
     puts(WELCOME_MESSAGE);
     help();
@@ -117,8 +116,60 @@ void zoom_out(){
 }
     
 void get_regs(){
+    register_set_t regs;
+    puts("\nsys call que imprime:\n");
     sys_print_regs();
+    puts("\nsys call que los carga\n");
+    sys_get_regs(&regs);
+    print_regs(regs);
+
 }
+
+
+void print_regs(register_set_t regs) {
+    printReg("RAX: ", regs.rax);
+    printReg("RBX: ", regs.rbx);
+    printReg("RCX: ", regs.rcx);
+    printReg("RDX: ", regs.rdx);
+    printReg("RSI: ", regs.rsi);
+    printReg("RDI: ", regs.rdi);
+    printReg("RSP: ", regs.rsp);
+    printReg("RBP: ", regs.rbp);
+    printReg("R8: ", regs.r8);
+    printReg("R9: ", regs.r9);
+    printReg("R10: ", regs.r10);
+    printReg("R11: ", regs.r11);
+    printReg("R12: ", regs.r12);
+    printReg("R13: ", regs.r13);
+    printReg("R14: ", regs.r14);
+    printReg("R15: ", regs.r15);
+    printReg("RFLAGS: ", regs.rflags);
+    printReg("RIP: ", regs.rip);
+    return;
+}
+
+void printReg(char *name, int64_t value) {
+    char numBuffer[20] = {0};
+    puts(name);
+    uintToBase(value, numBuffer, 16);
+    puts(numBuffer);
+    return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void clear(){
 

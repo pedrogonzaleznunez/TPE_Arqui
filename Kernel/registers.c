@@ -68,3 +68,28 @@ static uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
 
     return digits;
 }
+
+
+void set_registers(register_set_t * regs){
+    regs->rax = saved_registers.rax;
+    regs->rbx = saved_registers.rbx;
+    regs->rcx = saved_registers.rcx;
+    regs->rdx = saved_registers.rdx;
+
+    regs->rsi = saved_registers.rsi;
+    regs->rdi = saved_registers.rdi;
+    regs->rsp = saved_registers.rsp;
+    regs->rbp = saved_registers.rbp;
+
+    regs->r8  = saved_registers.r8;
+    regs->r9  = saved_registers.r9;
+    regs->r10 = saved_registers.r10;
+    regs->r11 = saved_registers.r11;
+    regs->r12 = saved_registers.r12;
+    regs->r13 = saved_registers.r13;
+    regs->r14 = saved_registers.r14;
+    regs->r15 = saved_registers.r15;
+
+    regs->rflags = saved_registers.rflags;
+    regs->rip    = saved_registers.rip;
+}

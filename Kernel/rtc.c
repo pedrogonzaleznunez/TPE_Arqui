@@ -76,3 +76,12 @@ int64_t get_year(){
 unsigned int rtcTypeToDecimal(unsigned char time){
     return (unsigned int) ((time >> 4) * 10 + (time & 0x0F));
 }
+
+void set_time(time_t * time){
+    time->seconds = get_seconds();
+    time->minutes = get_minutes();
+    time->hours = get_hours();
+    time->day = get_day();
+    time->month = get_month();
+    time->year = get_year();
+}

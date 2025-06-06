@@ -29,4 +29,6 @@ typedef struct register_set {
 
 void regs_print(uint32_t error);
 
+void set_registers(register_set_t * regs);
+
 #endif /* REGISTERS_H */

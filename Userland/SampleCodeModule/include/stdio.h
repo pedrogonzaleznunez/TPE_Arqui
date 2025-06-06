@@ -26,6 +26,7 @@ void puts(const char *str);
 int getchar();
 void putchar(const char c);
 
+uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
 
 
 #endif

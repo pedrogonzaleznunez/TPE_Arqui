@@ -10,6 +10,7 @@
 
 #include <interrupts.h>
 #include <syscalls.h>
+#include <rtc.h>
 
 #include <stddef.h>// para el NULL
 
@@ -221,11 +222,11 @@ int64_t sys_print_regs(void) {
 }
 
 int64_t sys_get_time(time_t * time){
-    time->seconds = get_seconds();
-    time->minutes = get_minutes();
-    time->hours = get_hours();
-    time->day = get_day();
-    time->month = get_month();
-    time->year = get_year();
+    set_time(time);
+    return 1;
+}
+
+int64_t sys_get_regs(register_set_t * registers){
+    set_registers(registers);
     return 1;
 }

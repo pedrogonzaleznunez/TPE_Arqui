@@ -3,11 +3,15 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+
+// todo manejar colores ??
+
 static char buffer[64] = {0};
 
 static void printBase(int fd, int num, int base);
 void vfprintf(int fd, const char *format, va_list args);
-static uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
+//static 
+uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
 
 void puts(const char *str) {
     while (*str) { putchar(*str++); }
@@ -222,7 +226,8 @@ static void printBase(int fd, int num, int base) {
     fprintf(fd, buffer);
 }
 
-static uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
+//static 
+uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
     char *p = buffer;
     char digits[] = "0123456789ABCDEF";
     uint32_t length = 0;

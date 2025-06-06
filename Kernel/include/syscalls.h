@@ -2,22 +2,15 @@
 #define __SYSCALLS__H_
 
 #include <stdint.h>
-
-typedef struct time {
-    uint64_t seconds;
-    uint64_t minutes;
-    uint64_t hours;
-    uint64_t day;
-    uint64_t month;
-    uint64_t year;
-} time_t;
-
+#include <registers.h>
+#include <rtc.h>
 
 void _syscallHandler(void);
 
 int64_t sys_write(int64_t fd, const char *buf, int64_t count);// write video
 int64_t sys_read(int64_t fd, char *buf, int64_t count);       // read
 int64_t sys_print_regs(void);
+int64_t sys_get_regs(register_set_t * registers);
 int64_t sys_get_time(time_t * time);
 int64_t sys_start_beep(uint32_t frecuency);
 int64_t sys_stop_beep(void);
