@@ -5,7 +5,6 @@
 #ifndef SYSCALLS_H
 #define SYSCALLS_H
 
-
 typedef struct time {
     uint64_t seconds;
     uint64_t minutes;

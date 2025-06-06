@@ -122,11 +122,11 @@ void keyboardHandler() {
 
     if (!(aux >> 7)) {
         char c = getChar(key);
-        if (!isBufferFull() && c != -1) {
+        if (!isBufferFull()) {
             buffer[writeIdx++] = c;
             writeIdx %= BUFFER_DEFAULT_SIZE;
         }
-        printKey(key);
+       // printKey(key);
     }
 }
 

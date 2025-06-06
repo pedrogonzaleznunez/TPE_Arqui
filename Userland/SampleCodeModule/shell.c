@@ -157,7 +157,6 @@ void get_regs() {
     }
 }
 
-
 void print_regs(register_set_t regs) {
     printReg("RAX", regs.rax);
     printReg("RBX", regs.rbx);
@@ -179,13 +178,6 @@ void print_regs(register_set_t regs) {
     printReg("RIP", regs.rip);
     return;
 }
-
-// Pasó a ser una macro.
-// void printReg(char *name, int64_t value) {
-//     printf("%s: %x\n", name, value);
-//     return;
-// }
-
 
 void clear() {
 }

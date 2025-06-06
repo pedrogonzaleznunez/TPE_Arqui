@@ -145,21 +145,17 @@ int64_t sys_read(int64_t fd, char *buf, int64_t count) {
     // handler de la syscall de lectura
     if (buf == NULL || count < 0) { return -1; }
 
-    // Por alguna razón, no estaban habilitadas las interrupciones al entrar a
-    // la syscall
     _sti();
 
     int64_t bytesRead = 0;
 
     while (bytesRead < count) {
-        char c = bufferRead();
-        if (c != -1) {
-            //if (c == '\n' || c == 0) { break; }
+        int8_t c = bufferRead();
+        if(c != -1){
             if (c == 0) { break; }
             buf[bytesRead++] = c;
         }
     }
-
 
     return bytesRead;
 }
@@ -216,11 +212,6 @@ int64_t sys_beep(uint32_t frecuency, int64_t ticks) {
     noSound();
     return 1;
 }
-
-// int64_t sys_print_regs(void) {
-//     regs_print(0);
-//     return 1;
-// }
 
 int64_t sys_get_time(time_t *time) {
     set_time(time);
