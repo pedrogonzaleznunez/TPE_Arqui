@@ -29,7 +29,7 @@ void exceptionHelper(char *msg) {
 
     // Volver a habilitar interrupciones
     _sti();
-    uint32_t c = 0;
+    char c = 0;
     while (!isBufferEmpty()) { bufferRead(); }// vacío el buffer
     putString("\nPress enter to return to main\n", 0xFF0000);
     while (sys_read(1, &c, 1));// espero un \n
