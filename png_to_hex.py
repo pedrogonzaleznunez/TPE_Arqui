@@ -12,10 +12,11 @@ ignored_base_colors = [
     (0x9A, 0xE7, 0xD9),  # #9ae7d9
     (0x66, 0xDC, 0xC8),  # #66dcc8
     (0x99, 0xD8, 0xC9),  # #99d8c9
+    (0x66,0xCA,0xC7)    #67CAC7
 ]
 
 # Tolerancia para colores similares
-TOLERANCE = 30
+TOLERANCE = 26
 
 # Función para verificar si un color está dentro del rango de tolerancia
 def is_ignored_color(r, g, b):
@@ -25,7 +26,7 @@ def is_ignored_color(r, g, b):
     return False
 
 # Crear archivo .h
-with open("character_data.h", "w") as f:
+with open("Userland/SampleCodeModule/include/character_data.h", "w") as f:
     f.write(f"#define CHARACTER_WIDTH {width}\n")
     f.write(f"#define CHARACTER_HEIGHT {height}\n")
     f.write("uint32_t characterPixels[] = {\n")
