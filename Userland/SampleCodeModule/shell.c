@@ -1,6 +1,5 @@
 #include <shell.h>
-#include <stdio.h>
-#include <string.h>
+#include <syscalls.h>
 
 
 void shell(){
@@ -18,7 +17,7 @@ void shell(){
 
 void activate_shell(){
     putchar(PROMPT_SYMBOL);
-    char shell_buffer[MAX_COMMAND_LENGTH];
+    char shell_buffer[MAX_COMMAND_LENGTH] = {0};
 
     int64_t bytes_read = sys_read(0, shell_buffer, MAX_COMMAND_LENGTH);
 
@@ -37,9 +36,7 @@ void activate_shell(){
 
     if(bytes_read == MAX_COMMAND_LENGTH){
         shell_buffer[bytes_read - 1 ] = 0;
-    } else{
-        shell_buffer[bytes_read] = 0;
-    }
+    } 
 
     process_commands(shell_buffer);
     
@@ -56,10 +53,35 @@ void process_commands(char * command){
     
     if(strcmp(command, "help") == 0){
         help();
+    } else if(strcmp(command, "zoomin") == 0 ){
+        zoom_in();
+    } else if(strcmp(command, "zoomout") == 0 ){
+        zoom_out();
+    } else if(strcmp(command, "registers") == 0 ){
+        get_regs();
+    } else if(strcmp(command, "clear") == 0 ){
+        clear();
+    } else if(strcmp(command, "time") == 0 ){
+        get_time();
+    } else if(strcmp(command, "divzero") == 0 ){
+        invalid_command();
+    } else if(strcmp(command, "opcode") == 0 ){
+        invalid_command(); 
+    } else if(strcmp(command, "pongis") == 0 ){
+        invalid_command();
+    } else if(is_empty(command)) {
+        return;
     } else {
         invalid_command();
     }
         
+}
+
+int is_empty(char * command){
+    while(*command == ' ' || *command == '\t'){
+        command++;
+    }
+    return *command == '\0';
 }
 
 // cuando ingresa un comando no valido
@@ -68,8 +90,6 @@ void invalid_command(){
     //help();
 }
 
-// cuando solo ingresa espacios, tabs o nada
-void response_to_no_command();
 
 /* Commands */
     
@@ -97,7 +117,7 @@ void zoom_out(){
 }
     
 void get_regs(){
-
+    sys_print_regs();
 }
 
 void clear(){
@@ -106,7 +126,10 @@ void clear(){
 
 // nos piden la hora del sistema
 void get_time(){
-
+    time_t time;
+    sys_get_time(&time);
+    printf("Local time: %d/%d/%d %d:%d:%d ", time.day, time.month, time.year, time.hours, time.minutes, time.seconds);
+    putchar('\n');
 }
 
 int strcmp(const char *str1, const char *str2) {

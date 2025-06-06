@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <videoDriver.h>
+#include <rtc.h>
 
 #include <interrupts.h>
 #include <syscalls.h>
@@ -61,8 +62,13 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
         case 2:
             return sys_print_regs();
 
-        // start beep
+        // get time
         case 3:
+            time_t * time = va_arg(arguments, time_t *);
+            return sys_get_time(time);
+
+        // start beep
+        case 20:
             uint32_t frecuency_start_beep = va_arg(arguments, uint32_t);
             return sys_start_beep(frecuency_start_beep);
 
@@ -211,5 +217,15 @@ int64_t sys_beep(uint32_t frecuency, int64_t ticks) {
 
 int64_t sys_print_regs(void) {
     regs_print(0);
+    return 1;
+}
+
+int64_t sys_get_time(time_t * time){
+    time->seconds = get_seconds();
+    time->minutes = get_minutes();
+    time->hours = get_hours();
+    time->day = get_day();
+    time->month = get_month();
+    time->year = get_year();
     return 1;
 }

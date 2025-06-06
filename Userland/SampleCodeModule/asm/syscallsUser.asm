@@ -10,6 +10,7 @@ GLOBAL sys_draw_rec
 GLOBAL sys_fill_screen
 GLOBAL sys_draw_pixel
 GLOBAL sys_print_regs
+GLOBAL sys_get_time
 
 SECTION .text
 
@@ -31,6 +32,9 @@ sys_read:
 ; Por ahora, que los imprima directamente
 sys_print_regs:
     sysCallMaster 2
+
+sys_get_time:
+    sysCallMaster 3
 
 ; ################ SOUND SYS_CALLS ################
 sys_start_beep:

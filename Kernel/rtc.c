@@ -1,6 +1,8 @@
 #include <naiveConsole.h>
 #include <rtc.h>
 
+// TODO HOMOGENEIZAR LOS TIPOS DE DATOS QUE USA
+
 void printTime() {
     ncPrint("[Time]: ");
     switch (getTimeFragment(6)) {
@@ -43,4 +45,34 @@ void printTime() {
     ncPrint(":");
     ncPrintHex(getTimeFragment(0));// segundos
     ncNewline();
+}
+
+int64_t get_seconds(){
+    return rtcTypeToDecimal(getTimeFragment(SECONDS));
+}
+
+int64_t get_minutes(){
+    return rtcTypeToDecimal(getTimeFragment(MINUTES));
+}
+
+int64_t get_hours(){
+    return rtcTypeToDecimal(getTimeFragment(HOURS));
+}
+
+int64_t get_day(){
+    return rtcTypeToDecimal(getTimeFragment(DAY));
+}
+
+int64_t get_month(){
+    return rtcTypeToDecimal(getTimeFragment(MONTH));
+}
+
+int64_t get_year(){
+    return rtcTypeToDecimal(getTimeFragment(YEAR));
+}
+
+
+// https://stackoverflow.com/questions/28133020/how-to-convert-bcd-to-decimal
+unsigned int rtcTypeToDecimal(unsigned char time){
+    return (unsigned int) ((time >> 4) * 10 + (time & 0x0F));
 }

@@ -49,14 +49,14 @@ int main() {
 
     sys_write(fd, &"\n", 1);
 
-    if (bytes_read % 2) {
-        throw_invalid_opcode();
-    } else {
-        throw_zero_division();
-    }
+    // if (bytes_read % 2) {
+    //     throw_invalid_opcode();
+    // } else {
+    //     throw_zero_division();
+    // }
 
 
-    // shell();
+    shell();
 
     if (var1 == 0 && var2 == 0) return 0xDEADC0DE;
 
