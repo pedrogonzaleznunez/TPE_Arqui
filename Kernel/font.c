@@ -1,5 +1,4 @@
 #include <font.h>
-#include <videoDriver.h>
 
 #define MIN_CHAR ' '
 #define MAX_CHAR '~'

@@ -69,8 +69,7 @@ static uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
     return digits;
 }
 
-
-int64_t set_registers(register_set_t *regs) {
+int64_t setRegisters(register_set_t *regs) {
     if (!saved_registers_flag) { return 0; }
 
     regs->rax = saved_registers.rax;

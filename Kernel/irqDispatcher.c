@@ -1,8 +1,5 @@
 #include <keyboard.h>
-#include <stdint.h>
 #include <time.h>
-
-#include <videoDriver.h>
 
 static void int_20();
 static void int_21();

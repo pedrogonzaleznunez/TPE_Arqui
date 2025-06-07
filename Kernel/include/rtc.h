@@ -3,14 +3,13 @@
 #ifndef RTC_H
 #define RTC_H
 
-
-// Retrieved from https://stanislavs.org/helppc/cmos_ram.html 
+// Retrieved from https://stanislavs.org/helppc/cmos_ram.html
 #define SECONDS 0x00
 #define MINUTES 0x02
-#define HOURS 0x04
-#define YEAR 0x09
-#define MONTH 0x08
-#define DAY 0x07
+#define HOURS   0x04
+#define YEAR    0x09
+#define MONTH   0x08
+#define DAY     0x07
 
 typedef struct time {
     uint64_t seconds;
@@ -21,23 +20,18 @@ typedef struct time {
     uint64_t year;
 } time_t;
 
-// hace la interrupción. Según el descriptor
-// devuelve un campo del tiempo
+// hace la interrupción. Devuelve un campo del tiempo según el descriptor.
 int getTimeFragment(char descriptor);
 
-int64_t get_seconds();
-int64_t get_minutes();
-int64_t get_hours();
-int64_t get_day();
-int64_t get_month();
-int64_t get_year();
-
-// imprime el tiempo
-void printTime(); 
+int64_t getSeconds();
+int64_t getMinutes();
+int64_t getHours();
+int64_t getDay();
+int64_t getMonth();
+int64_t getYear();
 
 unsigned int rtcTypeToDecimal(unsigned char time);
 
-void set_time(time_t * time);
-
+void setTime(time_t *time);
 
 #endif

@@ -1,7 +1,5 @@
 #include <defs.h>
-#include <idtLoader.h>
 #include <interrupts.h>
-#include <stdint.h>
 #include <syscalls.h>
 
 #pragma pack(push) /* Push de la alineación actual */
@@ -23,7 +21,6 @@ DESCR_INT *idt = (DESCR_INT *) 0;// IDT de 255 entradas
 
 // tabla idt
 void load_idt() {
-
     // interrupciones propias
     setup_IDT_entry(0x00, (uint64_t) &_exception00Handler);
     setup_IDT_entry(0x06, (uint64_t) &_exception06Handler);

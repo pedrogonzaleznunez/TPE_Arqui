@@ -1,4 +1,3 @@
-
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 
@@ -8,13 +7,10 @@
 #define SHIFT_PRESSED_RIGHT  0x36
 #define CAPS_LOCK_PRESSED    0x3A
 #define F1_REGISTER_BACKUP   0x3B
-#define ARROW_UP 0x48
-#define ARROW_DOWN 0x50
-#define ARROW_LEFT 0x4B
-#define ARROW_RIGHT 0x4D
-#define ARROW_DOWN_CODE 17
-#define ARROW_UP_CODE 18
-#define ARROW_LEFT_CODE 19
+
+#define ARROW_DOWN_CODE  17
+#define ARROW_UP_CODE    18
+#define ARROW_LEFT_CODE  19
 #define ARROW_RIGHT_CODE 20
 
 #include <stdint.h>

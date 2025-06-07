@@ -10,8 +10,8 @@
 static uint64_t currentX = LEFT_MARGIN;
 static uint64_t currentY = TOP_MARGIN;
 
-#define DELTA_X ((VBE_mode_info->bpp) / 8)
-#define DELTA_Y ((VBE_mode_info)->pitch)
+#define BPP   ((VBE_mode_info->bpp) / 8)
+#define PITCH ((VBE_mode_info)->pitch)
 
 // Funciones de uso interno en videoDriver.c
 void moveLine(int source, int target);
@@ -19,7 +19,7 @@ void scrollUp();
 void checkScreenLimits();
 void checkEndOfHeight();
 void checkEndOfLine();
-uint8_t isOutOfBounds(uint64_t x, uint64_t y);
+int isOutOfBounds(uint64_t x, uint64_t y);
 void moveCurrentX();
 int checkSpecialCharacter(char c);
 
@@ -74,7 +74,7 @@ void putPixel(uint32_t hexColor, uint64_t x, uint64_t y) {
     if (isOutOfBounds(x, y)) return;
 
     uint8_t *framebuffer = (uint8_t *) (uintptr_t) VBE_mode_info->framebuffer;
-    uint64_t offset = (x * DELTA_X) + (y * DELTA_Y);
+    uint64_t offset = (x * BPP) + (y * PITCH);
 
     framebuffer[offset] = (hexColor) & 0xFF;
     framebuffer[offset + 1] = (hexColor >> 8) & 0xFF;
@@ -181,17 +181,13 @@ void scrollUp() {
     currentY = TOP_MARGIN + (lineCount - 1) * charHeight;
 
     uint64_t width = VBE_mode_info->width - LEFT_MARGIN - RIGHT_MARGIN;
-    uint64_t bytesPerLine = width * (VBE_mode_info->bpp / 8);
+    uint64_t bytesPerLine = width * BPP;
     uint8_t *framebuffer = (uint8_t *) (uintptr_t) VBE_mode_info->framebuffer;
 
     // limpia la última línea antes de seguir.
     for (int j = 0; j < charHeight; j++) {
-        uint8_t *lineStart =
-            framebuffer + LEFT_MARGIN * DELTA_X + (currentY + j) * DELTA_Y;
+        uint8_t *lineStart = framebuffer + LEFT_MARGIN * BPP + (currentY + j) * PITCH;
         memset(lineStart, DEFAULT_BGR_COLOR, bytesPerLine);
-        // for (int i = LEFT_MARGIN; i < VBE_mode_info->width - RIGHT_MARGIN; i++) {
-        //     putPixel(DEFAULT_BGR_COLOR, i, currentY + j);
-        // }
     }
 
     return;
@@ -205,54 +201,32 @@ void moveLine(int source, int target) {
         // Es un movimiento no válido
         return;
     }
-    // pitch es deltaY, vbe->bpp/8 es deltaX
     uint8_t *framebuffer = (uint8_t *) (uintptr_t) VBE_mode_info->framebuffer;
 
     uint64_t width = VBE_mode_info->width - LEFT_MARGIN - RIGHT_MARGIN;
-    uint64_t bytesPerLine = width * (VBE_mode_info->bpp / 8);
+    uint64_t bytesPerLine = width * BPP;
     uint64_t sourceY = source * charHeight + TOP_MARGIN;
     uint64_t targetY = target * charHeight + TOP_MARGIN;
 
     for (uint32_t j = 0; j < charHeight; j++) {
-        uint8_t *sourcePtr =
-            framebuffer + LEFT_MARGIN * DELTA_X + (sourceY + j) * DELTA_Y;
-        uint8_t *targetPtr =
-            framebuffer + LEFT_MARGIN * DELTA_X + (targetY + j) * DELTA_Y;
+        uint8_t *sourcePtr = framebuffer + LEFT_MARGIN * BPP + (sourceY + j) * PITCH;
+        uint8_t *targetPtr = framebuffer + LEFT_MARGIN * BPP + (targetY + j) * PITCH;
 
         memcpy(targetPtr, sourcePtr, bytesPerLine);
-
-        // for (int i = LEFT_MARGIN; i < VBE_mode_info->width - RIGHT_MARGIN; i++) {
-        //     uint64_t offset = (i * DELTA_X) + ((sourceY + j) * DELTA_Y);
-
-        //     uint32_t blue = framebuffer[offset];
-        //     uint32_t green = framebuffer[offset + 1];
-        //     uint32_t red = framebuffer[offset + 2];
-
-        //     uint32_t hexColor = (red << 16) | (green << 8) | blue;
-
-        //     putPixel(hexColor, i, targetY + j);
-        // }
     }
     return;
 }
 
-uint8_t isOutOfBounds(uint64_t x, uint64_t y) {
+int isOutOfBounds(uint64_t x, uint64_t y) {
     return !(x < VBE_mode_info->width && y < VBE_mode_info->height);
 }
 
 void clearScreen() {
     uint8_t *framebuffer = (uint8_t *) (uintptr_t) VBE_mode_info->framebuffer;
-    uint32_t total_bytes =
-        VBE_mode_info->width * VBE_mode_info->height * (VBE_mode_info->bpp / 8);
+    uint32_t total_bytes = VBE_mode_info->width * PITCH * BPP;
 
     // Usar memset es más eficiente que pixel por pixel
     memset(framebuffer, 0x00, total_bytes);
-
-    // for (int i = 0; i < VBE_mode_info->width; i++) {
-    //     for (int j = 0; j < VBE_mode_info->height; j++) {
-    //         putPixel(0x00, i, j);
-    //     }
-    // }
 
     currentX = LEFT_MARGIN;
     currentY = TOP_MARGIN;
@@ -359,10 +333,6 @@ void fillScreen(uint32_t hexColor) {
     } else {
         clearScreen();
     }
-
-    // for (uint64_t x = 0; x < VBE_mode_info->width; x++) {
-    //     for (uint64_t y = 0; y < VBE_mode_info->height; y++) { putPixel(hexColor, x, y); }
-    // }
 
     currentX = LEFT_MARGIN;
     currentY = TOP_MARGIN;

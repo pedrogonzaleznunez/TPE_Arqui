@@ -3,26 +3,24 @@
 #include <registers.h>
 #include <rtc.h>
 #include <sounds.h>
-#include <stdarg.h>
-#include <stdint.h>
 #include <time.h>
 #include <videoDriver.h>
 
 #include <interrupts.h>
 #include <syscalls.h>
 
+#include <stdarg.h>
 #include <stddef.h>// para el NULL
+#include <stdint.h>
 
-
-// las funciones devuelven un int, deberia devolver un int?
-// syscalls del kernel
+// args variables:
 // https://www.programacionenc.net/index.php?option=com_content&view=article&id=61:funciones-en-c-con-lista-de-argumentos-variable&catid=37:programacion-cc&Itemid=55
 
 int64_t syscallDispatcher(uint64_t syscallId, ...) {
     va_list arguments;             // lista de argumentos
     va_start(arguments, syscallId);// ultimo argumento que no es variable
 
-    // syscallId es el numero de syscall
+    // syscallId: numero de syscall
     switch (syscallId) {
 
         //write
@@ -42,12 +40,12 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
         // get regs
         case 2:
             register_set_t *regs = va_arg(arguments, register_set_t *);
-            return set_registers(regs);
+            return setRegisters(regs);
 
         // get time
         case 3:
             time_t *time = va_arg(arguments, time_t *);
-            set_time(time);
+            setTime(time);
             return 1;
 
         // delete char
@@ -60,26 +58,26 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
             uint32_t frecuency_start_beep = va_arg(arguments, uint32_t);
             playSound(frecuency_start_beep);
             return 1;
-            //return sys_start_beep(frecuency_start_beep);
 
         // stop beep
         case 21:
             noSound();
-            return 1; 
-            //return sys_stop_beep();
+            return 1;
 
         // beep
         case 22:
             uint32_t frecuency_beep = va_arg(arguments, uint32_t);
             int64_t ticks_beep = va_arg(arguments, int64_t);
-            return sys_beep(frecuency_beep, ticks_beep);
+            playSound(frecuency_beep);
+            timerWait(ticks_beep);
+            noSound();
+            return 1;
 
         // sleep
         case 23:
             int64_t ticks_sleep = va_arg(arguments, int64_t);
             timerWait(ticks_sleep);
             return 1;
-            //return sys_sleep(ticks_sleep);
 
         // clear screen
         case 30:
@@ -93,8 +91,7 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
             uint64_t radius_circle = va_arg(arguments, uint64_t);
             uint32_t hexColor_circle = va_arg(arguments, uint32_t);
             drawCircle(pos_x_circle, pos_y_circle, radius_circle, hexColor_circle);
-            return 0;
-            //return sys_draw_circle(pos_x_circle, pos_y_circle, radius_circle, hexColor_circle);
+            return 1;
 
         // draw rectangle
         case 32:
@@ -104,15 +101,13 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
             uint64_t to_y_rec = va_arg(arguments, uint64_t);
             uint32_t hexColor_rec = va_arg(arguments, uint32_t);
             drawRec(from_x_rec, from_y_rec, to_x_rec, to_y_rec, hexColor_rec);
-            return 0;
-            //return sys_draw_rec(from_x_rec, from_y_rec, to_x_rec, to_y_rec, hexColor_rec);
+            return 1;
 
         // fill screen
         case 33:
-            uint32_t hexColor_screen = va_arg(arguments, uint32_t);
-            fillScreen(hexColor_screen);
+            uint32_t hexColor_fill_screen = va_arg(arguments, uint32_t);
+            fillScreen(hexColor_fill_screen);
             return 0;
-            //return sys_fill_screen(hexColor_screen);
 
         // draw pixel
         case 34:
@@ -120,15 +115,13 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
             uint64_t pos_y_pixel = va_arg(arguments, uint64_t);
             uint32_t hexColor_pixel = va_arg(arguments, uint32_t);
             putPixel(hexColor_pixel, pos_x_pixel, pos_y_pixel);
-            return 0;
-            //return sys_draw_pixel(pos_x_pixel, pos_y_pixel, hexColor_pixel);
+            return 1;
     }
 
     va_end(arguments);
 
     return -1;
 }
-
 
 int64_t write(int64_t fd, const char *buf, int64_t count) {
     // handler de la syscall de write video
@@ -150,7 +143,7 @@ int64_t read(int64_t fd, char *buf, int64_t count) {
 
     while (bytesRead < count) {
         int8_t c = bufferRead();
-        if(c != -1){
+        if (c != -1) {
             if (c == 0) { break; }
             buf[bytesRead++] = c;
         }
@@ -158,68 +151,3 @@ int64_t read(int64_t fd, char *buf, int64_t count) {
 
     return bytesRead;
 }
-
-int64_t sys_beep(uint32_t frecuency, int64_t ticks) {
-    playSound(frecuency);
-    timerWait(ticks);
-    noSound();
-    return 1;
-}
-
-// int64_t sys_draw_circle(uint64_t pos_x, uint64_t pos_y, uint64_t radius,
-//                         uint32_t hexColor) {
-//     // handler de la syscall de dibujar un círculo
-//     drawCircle(pos_x, pos_y, radius, hexColor);
-//     return 0;
-// }
-
-// int64_t sys_draw_rec(uint64_t from_x, uint64_t from_y, uint64_t to_x, uint64_t to_y,
-//                      uint32_t hexColor) {
-//     // handler de la syscall de dibujar un cuadrado
-//     drawRec(from_x, from_y, to_x, to_y, hexColor);
-//     return 0;
-// }
-
-// int64_t sys_draw_pixel(uint64_t pos_x, uint64_t pos_y, uint32_t hexColor) {
-//     // handler de la syscall de dibujar un pixel
-//     putPixel(hexColor, pos_x, pos_y);
-//     return 0;
-// }
-
-// int64_t sys_fill_screen(uint32_t hexColor) {
-//     // handler de la syscall de llenar la pantalla
-//     fillScreen(hexColor);
-//     return 0;
-// }
-
-// int64_t sys_start_beep(uint32_t frecuency) {
-//     playSound(frecuency);
-//     return 1;
-// }
-
-// int64_t sys_stop_beep(void) {
-//     noSound();
-//     return 1;
-// }
-
-// int64_t sys_sleep(int64_t ticks) {
-//     timerWait(ticks);
-//     return 1;
-// }
-
-// int64_t sys_clear_screen(void) {
-//     clearScreen();
-//     return 1;
-// }
-
-
-// evito este paso y llamo a la funcion en el switch
-
-// int64_t sys_get_time(time_t *time) {
-//     set_time(time);
-//     return 1;
-// }
-
-// int64_t get_regs(register_set_t *registers) {
-//     return set_registers(registers);
-// }
