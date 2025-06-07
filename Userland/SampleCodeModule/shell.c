@@ -93,13 +93,13 @@ void activate_shell() {
 }
 
 
-// ojo que cuando borro ya no me lo toma como valido
-
 void process_commands(char *command) {
+    // todo: volar estos comentarios 
     // agregar función trim 
     // devuelve un puntero a char con la primera palabra y la borra del que mandaste
     // nada, nada, deja, deja.
     // se puede hacer con sscanf
+
     char instruction[MAX_COMMAND_LENGTH]; // vemos long
     int arg1;
 

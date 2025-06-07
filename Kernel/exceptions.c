@@ -33,7 +33,7 @@ void exceptionHelper(char *msg) {
     putString("\nPress enter to return to main\n", 0xFF0000);
     // Volver a habilitar interrupciones
     _sti();
-    while (sys_read(1, &c, 1));// espero un \n
+    while (read(1, &c, 1));// espero un \n
     clearScreen();
     return;
 }
