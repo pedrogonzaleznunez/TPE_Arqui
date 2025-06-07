@@ -3,7 +3,6 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-
 // todo manejar colores ??
 
 static char buffer[64] = {0};
@@ -19,13 +18,11 @@ void puts(const char *str) {
 }
 
 void putchar(const char c) {
-    // sys_write(FD_STDOUT, &c, 1);
     sys_write(FD_STDOUT, &c, 1);// syscall para escribir un caracter
 }
 
 int getchar() {
     char c;
-    // sys_read(FD_STDIN, &c, 1);
     sys_read(FD_STDIN, &c, 1);// syscall para leer un caracter
     return c;
 }
@@ -73,7 +70,6 @@ void vfprintf(int fd, const char *format, va_list args) {
                     // case 'f': printFloat(fd, va_arg(args, double)); break ;
                     case 'c': {
                         char c = (char) va_arg(args, int);
-                        // sys_write(fd, &c, 1);
                         sys_write(fd, &c, 1);// syscall para escribir un caracter
                         break;
                     }

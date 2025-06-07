@@ -1,7 +1,9 @@
 #include <myStrings.h>
 #include <shell.h>
-#include <stddef.h>
+#include <stdio.h>
 #include <syscalls.h>
+
+#include <stddef.h>
 
 #define MAX_LINES_SAVED 40
 
@@ -10,13 +12,14 @@ int isEmpty(char *command);
 void putLineInBuffer(char *line, int isCommand);
 void printReg(char *regName, int64_t value);
 char *getCommandFromHistory(int historyIndex);
+void checkArguments(int argsExpected, int argsRead, char *command, char *instruction,
+                    char *arg1);
 
 extern void throwZeroDivisionException(void);
 extern void throwInvalidOpcodeException(void);
 
 typedef struct line {
     char characters[MAX_COMMAND_LENGTH];
-    // int length; // este atributo no parece necesario
     int isCommand;
 } line_t;
 
@@ -26,15 +29,6 @@ static int lastLine = 0;
 static int currentHistoryIndex = -1;// navegación de historial
 static int totalLines = 0;
 static int commandCount = 0;
-
-/*
-    cuando nos llegue zoom in
-    clearScreen();
-    for(int i = 0; i < lines; i++){
-        puts(Promtp);
-        puts(lineBuffer[i].characters);
-    }
-*/
 
 void shell(void) {
     puts(WELCOME_MESSAGE);
@@ -162,21 +156,22 @@ void processCommands(char *command) {
     char instruction[MAX_COMMAND_LENGTH];// ver tema longitud
     char arg1[MAX_COMMAND_LENGTH];
 
-    
+
     printf("[DEBUG-BEFORE TRIM] command='%s'\n", command);
     trim(command);
     printf("[DEBUG-AFTER TRIM] command='%s'\n", command);
 
     // sscanf no funciona como esperado
-    
+
     int argsRead = sscanf(command, "%s %s", instruction, arg1);
-    printf("[DEBUG] command='%s' | instruction='%s' | arg1='%s' |argsRead=%d\n", command, instruction, arg1, argsRead);
+    printf("[DEBUG] command='%s' | instruction='%s' | arg1='%s' |argsRead=%d\n", command,
+           instruction, arg1, argsRead);
 
     for (int j = 0; command[j]; j++) {
         printf("command[%d] = '%c' (%d)\n", j, command[j], command[j]);
     }
 
-    
+
     // argumentos variables
 
     if (strcmp(instruction, "help") == 0) {
@@ -221,19 +216,17 @@ void invalidCommand() {
 /* Commands */
 
 void help() {
-    char *helpMessages[] = {
-        "Available commands:",
-        "clear: clear terminal.",
-        "divzero: prompts zero division exception.",
-        "help: lists all available commands.",
-        "opcode: prompts invalid operation code exception.",
-        "pongis: starts pongis game.",
-        "registers: lists saved registers.",
-        "time: displays current time.",
-        "zoomin: zooms in text on the screen.",
-        "zoomout: zooms out text on the screen.",
-        "echo %s: echoes text input."
-    };
+    char *helpMessages[] = {"Available commands:",
+                            "clear: clear terminal.",
+                            "divzero: prompts zero division exception.",
+                            "help: lists all available commands.",
+                            "opcode: prompts invalid operation code exception.",
+                            "pongis: starts pongis game.",
+                            "registers: lists saved registers.",
+                            "time: displays current time.",
+                            "zoomin: zooms in text on the screen.",
+                            "zoomout: zooms out text on the screen.",
+                            "echo %s: echoes text input."};
 
     int elems = sizeof(helpMessages) / sizeof(char *);
 
@@ -242,6 +235,15 @@ void help() {
         putLineInBuffer(helpMessages[i], 0);
     }
 }
+
+/*
+    cuando nos llegue zoom in
+    clearScreen();
+    for(int i = 0; i < lines; i++){
+        puts(Promtp);
+        puts(lineBuffer[i].characters);
+    }
+*/
 
 void zoomIn() {
 }
@@ -255,7 +257,7 @@ void getRegs() {
         printRegs(regs);
     } else {
         char *registerErrorMsg =
-            "Registers must be saved before printing. To save press 'q'";
+            "Registers must be saved before printing. To save press 'F1'.";
         puts(registerErrorMsg);
         putLineInBuffer(registerErrorMsg, 0);
     }
@@ -322,15 +324,12 @@ void putLineInBuffer(char *line, int isCommand) {
     return;
 }
 
-
-void checkArguments(int argsExpected, int argsRead, char * command, char * instruction, char * arg1){
+void checkArguments(int argsExpected, int argsRead, char *command, char *instruction,
+                    char *arg1) {
     if (argsRead != argsExpected) {
         puts("Unexpected arguments...\n");
         printf("Expected %d but found %d:\n", argsExpected, argsRead);
-        printf("%s %s\n", instruction, argsRead == 2? arg1 : "");
+        printf("%s %s\n", instruction, argsRead == 2 ? arg1 : "");
         printf("Correct use: $ %s %s \n", command, argsExpected == 2 ? "arg1" : "");
-            // "unexpected arguments..."
-            // "expected %d, found %d", args_expected, args_read - 1.
-            // "correct use: $ %s", msg
-        }
+    }
 }

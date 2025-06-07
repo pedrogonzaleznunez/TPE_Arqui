@@ -1,9 +1,7 @@
 #ifndef SYSCALLS_H
 #define SYSCALLS_H
 
-#include <stdarg.h>
 #include <stdint.h>
-#include <stdio.h>
 
 #define ARROW_DOWN_CODE  17
 #define ARROW_UP_CODE    18

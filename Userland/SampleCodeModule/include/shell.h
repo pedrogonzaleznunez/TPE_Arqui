@@ -1,9 +1,6 @@
 #ifndef SHELL_H
 #define SHELL_H
 
-#include <stdio.h>
-#include <syscalls.h>
-
 #define WELCOME_MESSAGE         "Welcome to OreOS"
 #define PROMPT_SYMBOL           "$"
 #define INVALID_COMMAND_MESSAGE "Invalid command."

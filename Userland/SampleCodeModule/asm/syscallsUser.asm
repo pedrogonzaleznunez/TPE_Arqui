@@ -1,17 +1,17 @@
-GLOBAL sys_read
 GLOBAL sys_write
-GLOBAL sys_start_beep
-GLOBAL sys_beep
-GLOBAL sys_stop_beep
+GLOBAL sys_read
+GLOBAL sys_get_regs
+GLOBAL sys_get_time
+GLOBAL sys_delete_char
 GLOBAL sys_sleep
+GLOBAL sys_start_beep
+GLOBAL sys_stop_beep
+GLOBAL sys_beep
 GLOBAL sys_clear_screen
 GLOBAL sys_draw_circle
 GLOBAL sys_draw_rec
 GLOBAL sys_fill_screen
 GLOBAL sys_draw_pixel
-GLOBAL sys_get_regs
-GLOBAL sys_get_time
-GLOBAL sys_delete_char
 
 SECTION .text
 
