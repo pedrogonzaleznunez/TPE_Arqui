@@ -129,9 +129,9 @@ void process_commands(char *command) {
     } else if (strcmp(instruction, "time") == 0) {
         get_time();
     } else if (strcmp(instruction, "divzero") == 0) {
-        invalid_command();
+        throw_zero_division();
     } else if (strcmp(instruction, "opcode") == 0) {
-        invalid_command();
+        throw_invalid_opcode();
     } else if (strcmp(instruction, "pongis") == 0) {
         invalid_command();
     } else if (is_empty(instruction)) {
