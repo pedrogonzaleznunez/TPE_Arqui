@@ -13,16 +13,14 @@ static void (*functions[])() = {
 };
 
 void irqDispatcher(uint64_t irq) {
-  functions[irq]();
-  return;
-
+    functions[irq]();
+    return;
 }
 
 static void int_20() {
     timer_handler();
 }
 
-static void int_21() { 
-  keyboardHandler(); 
- }
-
+static void int_21() {
+    keyboardHandler();
+}
