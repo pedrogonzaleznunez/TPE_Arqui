@@ -1,12 +1,37 @@
 #include <shell.h>
 #include <syscalls.h>
+#include <myStrings.h>
 
 #define printReg(x, y) printf("%s: %x\n", x, y)
+
+#define MAX_LINES_SAVED 40
+
+typedef struct line{
+    char characters[MAX_COMMAND_LENGTH];
+    int length;
+    int isCommand;
+} line_t;
+
+static line_t lineBuffer[MAX_LINES_SAVED];
+static firstLine = 0;
+static lastLine = 0;
+
+/*
+    cuando nos llegue zoom in
+    clearScreen();
+    for(int i = 0; i < lines; i++){
+        puts(Promtp);
+        puts(lineBuffer[i].characters);
+    }
+*/
 
 void shell() {
     puts(WELCOME_MESSAGE);
     help();
     int64_t fd = 0;
+
+    firstLine = 0;
+    lastLine = 0;
 
     while (1) {
         // const char *msg = "activar shell ";
@@ -15,36 +40,8 @@ void shell() {
     }
 }
 
-void activate_shell2() {
-    putchar(PROMPT_SYMBOL);
-    char shell_buffer[MAX_COMMAND_LENGTH] = {0};
-
-    int64_t bytes_read = sys_read(0, shell_buffer, MAX_COMMAND_LENGTH);
-
-    //int i = 0;
-    // char c;
-    // while((c = getchar()) != '\n' && i < MAX_COMMAND_LENGTH - 1){
-    //     // manejar back space
-    //     if( c >= 32 && c <= 126){
-    //         shell_buffer[i++] = c;
-    //         putchar(c);
-    //     }
-    // }
-
-    //shell_buffer[i] = '\0';
-    //puts("Termino de leer\n");
-
-    if (bytes_read == MAX_COMMAND_LENGTH) { shell_buffer[bytes_read - 1] = 0; }
-
-    sys_write(1, shell_buffer, bytes_read);
-
-    process_commands(shell_buffer);
-
-    // manejar borrado desde aca
-}
-
 void activate_shell() {
-    putchar(PROMPT_SYMBOL);
+    printf("%s ", PROMPT_SYMBOL);
 
     char shell_buffer[MAX_COMMAND_LENGTH] = {0};
 
@@ -60,23 +57,37 @@ void activate_shell() {
         if (c == '\n') {// dejar de leer y procesar
             shell_buffer[i] = '\0';
             read = 0;
+            putchar(c);
         } else if (c == '\b') {// backspace
             if (i > 0) {
                 i--;
                 shell_buffer[i] = '\0';
+                // syscall que llame a deleteChar en videoDriver
+                sys_delete_char();
             }
         } else {
             //if(i < MAX_COMMAND_LENGTH - 1){
             shell_buffer[i++] = c;
-            //   putchar(c); // mostrar en pantalla
+            putchar(c); // mostrar en pantalla
             // }
         }
         // ignorar otros caracteres
     }
 
     shell_buffer[i] = '\0';
-    if (i == MAX_COMMAND_LENGTH) { shell_buffer[i - 1] = 0; }
+    if (i == MAX_COMMAND_LENGTH) { 
+        shell_buffer[i - 1] = 0; 
+        putchar('\n');
+    }
 
+    // acá terminó de leer una línea ->
+    strcpy(lineBuffer[lastLine].characters, PROMPT_SYMBOL);
+    lineBuffer[lastLine].length = strlen(PROMPT_SYMBOL);
+    strcat(lineBuffer[lastLine].characters, shell_buffer);
+    lineBuffer[lastLine].length += i;
+
+    lastLine = (lastLine + 1) % MAX_LINES_SAVED;
+    firstLine += (lastLine == firstLine);
 
     process_commands(shell_buffer);
 }
@@ -85,26 +96,45 @@ void activate_shell() {
 // ojo que cuando borro ya no me lo toma como valido
 
 void process_commands(char *command) {
+    // agregar función trim 
+    // devuelve un puntero a char con la primera palabra y la borra del que mandaste
+    // nada, nada, deja, deja.
+    // se puede hacer con sscanf
+    char instruction[MAX_COMMAND_LENGTH]; // vemos long
+    int arg1;
 
-    if (strcmp(command, "help") == 0) {
+    trim(command);   
+
+    int args_read = sscanf(command, "%s %d", &instruction, &arg1);
+
+    // argumentos variables 
+    
+    if (strcmp(instruction, "help") == 0) {
+        if(args_read != 1){
+            // "unexpected arguments..."
+            // "expected %d, found %d", args_expected, args_read - 1.
+            // "correct use: $ %s", msg
+        }
         help();
-    } else if (strcmp(command, "zoomin") == 0) {
+    } else if (strcmp(instruction, "zoomin") == 0) {
         zoom_in();
-    } else if (strcmp(command, "zoomout") == 0) {
+    } else if (strcmp(instruction, "zoomout") == 0) {
         zoom_out();
-    } else if (strcmp(command, "registers") == 0) {
+    } else if (strcmp(instruction, "registers") == 0) {
         get_regs();
-    } else if (strcmp(command, "clear") == 0) {
+    } else if (strcmp(instruction, "clear") == 0) {
+        // check_arguments(args_expected, args_read, msg);
+        // Lo agregamos para c/u
         clear();
-    } else if (strcmp(command, "time") == 0) {
+    } else if (strcmp(instruction, "time") == 0) {
         get_time();
-    } else if (strcmp(command, "divzero") == 0) {
+    } else if (strcmp(instruction, "divzero") == 0) {
         invalid_command();
-    } else if (strcmp(command, "opcode") == 0) {
+    } else if (strcmp(instruction, "opcode") == 0) {
         invalid_command();
-    } else if (strcmp(command, "pongis") == 0) {
+    } else if (strcmp(instruction, "pongis") == 0) {
         invalid_command();
-    } else if (is_empty(command)) {
+    } else if (is_empty(instruction)) {
         return;
     } else {
         invalid_command();
@@ -186,15 +216,8 @@ void clear() {
 void get_time() {
     time_t time;
     sys_get_time(&time);
-    printf("Local time: %d/%d/%d %d:%d:%d ", time.day, time.month, time.year, time.hours,
+    printf("Local time: %d/%d/%d %d:%d:%d\n", time.day, time.month, time.year, time.hours,
            time.minutes, time.seconds);
-    putchar('\n');
+    return;
 }
 
-int strcmp(const char *str1, const char *str2) {
-    while (*str1 && (*str1 == *str2)) {
-        str1++;
-        str2++;
-    }
-    return *(unsigned char *) str1 - *(unsigned char *) str2;
-}

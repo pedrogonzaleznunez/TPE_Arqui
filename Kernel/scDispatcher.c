@@ -68,6 +68,11 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
             time_t *time = va_arg(arguments, time_t *);
             return sys_get_time(time);
 
+        // delete char
+        case 4:
+            deleteChar();
+            return 1;
+
         // start beep
         case 20:
             uint32_t frecuency_start_beep = va_arg(arguments, uint32_t);

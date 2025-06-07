@@ -6,7 +6,7 @@
 
 
 #define WELCOME_MESSAGE "Welcome to OreOS"
-#define PROMPT_SYMBOL '$'
+#define PROMPT_SYMBOL "$"
 #define INVALID_COMMAND_MESSAGE "Invalid command."
 #define MAX_COMMAND_LENGTH 50
 
