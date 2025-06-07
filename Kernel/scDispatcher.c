@@ -72,7 +72,7 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
         case 22:
             uint32_t frecuency_beep = va_arg(arguments, uint32_t);
             int64_t ticks_beep = va_arg(arguments, int64_t);
-            return sys_beep(frecuency_beep, ticks_beep);
+            return beep(frecuency_beep, ticks_beep);
 
         // sleep
         case 23:
@@ -159,7 +159,7 @@ int64_t read(int64_t fd, char *buf, int64_t count) {
     return bytesRead;
 }
 
-int64_t sys_beep(uint32_t frecuency, int64_t ticks) {
+int64_t beep(uint32_t frecuency, int64_t ticks) {
     playSound(frecuency);
     timerWait(ticks);
     noSound();
