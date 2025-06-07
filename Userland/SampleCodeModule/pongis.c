@@ -1,4 +1,3 @@
-
 #include <pongis.h>
 #include <stdio.h>
 #include <syscalls.h>
@@ -6,17 +5,7 @@
 
 // ################################# CONSTANTES #################################
 
-#define INITIAL_POS_1_X (SQUARE_DIM * 28)
-#define INITIAL_POS_1_Y (SQUARE_DIM * 21)
-#define INITIAL_POS_2_X (SQUARE_DIM * 3)
-#define INITIAL_POS_2_Y (SQUARE_DIM * 4)
-
 // initial directions
-#define INITIAL_DIR_1_X -1
-#define INITIAL_DIR_1_Y 0
-#define INITIAL_DIR_2_X 1
-#define INITIAL_DIR_2_Y 0
-
 #define CHARACTER_WIDTH 248
 #define CHARACTER_HEIGHT 248
 #define FIXED_POINT 1024 // para representar 1.0 como 1024
@@ -26,41 +15,50 @@
 #define TWO_PI_FIXED1 (FIXED_POINT * 628 / 100)  // ≈ 2π
 #define ANGLE_STEP_FIXED (TWO_PI_FIXED1 / TOTAL_DIRECTIONS)  // Paso de 10° en radianes
 
-
 // ################################# DATA STRUCTURES #################################
 
 // Esta estructura representa la bola que hay que embocar
 typedef struct {
     int x, y; // posicion 
     int dx, dy; // dirreccion y sentido actual
-} BallToScore;
+} Ball;
+typedef Ball * BallPtr;
 
-typedef struct pongis {
+typedef struct {
     int x, y; // posicion 
     int dx, dy; // dirreccion y sentido actual
 } Enemy;
+typedef Enemy * EnemyPtr;
 
 typedef struct {
+    int name[20]; // nombre del jugador
+    int score; // puntaje del jugador
+
     int x, y; // posicion 
     int dx, dy; // dirreccion y sentido actual
-} Player;
+} Player; 
+typedef Player * PlayerPtr;
 
 typedef struct {
     int x, y; // Position of the hole
-} Hole;
+} Hole; 
+typedef Hole * HolePtr;
 
 // ################################# VARIABLES #################################
 
 // estas variables las voy a tener q inicializar cuando comience el juego
 // y actualizar en cada nivel
 
-static BallToScore ball; 
+static Ball ball; 
 static Enemy enemy;
-static Player player;
+static Player player1;
+static Player player2; // si hay dos jugadores
 static Hole hole;
 
+static int key; // variable para almacenar la tecla presionada
+static int lastKey; // variable para almacenar la ultima tecla presionada
 static int level = 1;
-static int end_game = 0; // flag para terminar la ejecucion del juego
+static int end_of_game = 0; // flag para terminar la ejecucion del juego
 
 // ################################# NOTES #################################
 /*
@@ -72,131 +70,284 @@ static int end_game = 0; // flag para terminar la ejecucion del juego
 
 // ################################# FUNCTIONS #################################
 
-int startGame(void){
-    
-    
-    newLevel(level);
-    welcome(); // Mensaje de bienvenida
+// ################################## GAME LOGIC #################################
 
+// Funcion llamada desde el main del userland 
+void startGame(void) {
+    
+    initializeAllObjects(); // Inicializa todos los objetos del juego
+
+    pongis();
+    
+    return;
 }
 
-void drawCharacter(uint64_t startX, uint64_t startY) {
-    for (uint64_t y = 0; y < CHARACTER_HEIGHT; y++) {
-        for (uint64_t x = 0; x < CHARACTER_WIDTH; x++) {
-            uint32_t color = characterPixels[y * CHARACTER_WIDTH + x];
-            if (color != 0xFFFFFFFF)  // ignoramos fondo transparente
-                sys_draw_pixel(startX + x, startY + y,color);
-        }
-    }
+void welcome(){
+
+    sys_fill_screen(BACKGROUND_COLOR);
+
+    printf("Bienvenido a Pongis Golf!\n");
+    printf("Presiona 'ENTER' para comenzar el juego.\n");
+    printf("Selecione un nivel de dificultad:\n");
+    printf("Seleccione la cantidad de jugadores:\n");
+    
+    //sys_sleep(2000);
+    return;
+
+    // --> Implentar esto con syscalls 
 }
 
-void newLevel(int level) {
+void initializeAllObjects(void) {
+    // Inicializa todos los objetos del juego
 
-    // Fondo
-    // sys_fill_screen(BACKGROUND_COLOR); // Limpia la pantalla
-    sys_clear_screen();
-    // Obstaculos
-    sys_draw_circle(100,100,200, OBSTABLES_COLOR); // Dibuja un circulo rojo en la pantalla
-    sys_draw_circle(800,200,100, OBSTABLES_COLOR); // Dibuja un circulo rojo en la pantalla
+    end_of_game = 0;
+    level = 1;
+    key = 0; 
+    lastKey = 0;
 
-    // Hole
+    ball.x = BALL_INITIAL_X;
+    ball.y = BALL_INITIAL_Y;
+    ball.dx = 0;
+    ball.dy = 0;
+
+    enemy.x = 0; // Posicion inicial del enemigo
+    enemy.y = 0; // Posicion inicial del enemigo
+    enemy.dx = 0; // Direccion inicial del enemigo
+    enemy.dy = 0; // Sentido inicial del enemigo
+
+    player1.x = INITIAL_POS_1_X; // Posicion inicial del jugador 1
+    player1.y = INITIAL_POS_1_Y; // Posicion inicial del jugador 1
+    player1.dx = INITIAL_DIR_1_X; // Direccion inicial del jugador 1
+    player1.dy = INITIAL_DIR_1_Y; // Sentido inicial del jugador 1
+
+    player2.x = INITIAL_POS_2_X; // Posicion inicial del jugador 2
+    player2.y = INITIAL_POS_2_Y; // Posicion inicial del jugador 2
+    player2.dx = INITIAL_DIR_2_X; // Direccion inicial del jugador 2
+    player2.dy = INITIAL_DIR_2_Y; // Sentido inicial del jugador 2
+
     hole.x = 700; // Posicion del hoyo
     hole.y = 500; // Posicion del hoyo
+
+    return;
+}
+
+void printScore(PlayerPtr player) {
+    if(player == NULL) {
+        // printf("Jugador no encontrado.\n");
+        return;
+    }
+
+    // imprimir el puntaje del jugador al tope de la pantalla
+    printf("Puntaje del jugador %s: %d\n", player->name, player->score);
+    return;
+}
+
+void drawEnemy(void) {
+    // Dibuja el enemigo en la pantalla
+    sys_draw_circle(enemy.x, enemy.y, ENEMY_RADIUS, ENEMY_COLOR);
+}
+
+void drawBall() {
+    // Dibuja la bola en la pantalla
+    sys_draw_circle(ball.x, ball.y, BALL_RADIUS, BALL_COLOR);
+}
+
+void drawHole(){
     sys_draw_circle(hole.x, hole.y, 22, SHADOW_COLOR); // Dibuja la sombra del hoyo
     sys_draw_circle(hole.x, hole.y, 20, HOLE_COLOR); // Dibuja el hoyo
+}
 
+void kickBallIfNear(PlayerPtr player) {
+    if (collided(player->x, player->y, ball.x, ball.y, 30)) {
+        ball.dx = player->dx * 5;
+        ball.dy = player->dy * 5;
+    }
+}
 
+int distanceSquared(int x1, int y1, int x2, int y2) {
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+    return dx * dx + dy * dy;
+}
 
-    drawCharacter(500, 500); // Dibuja el personaje 1
+void checkCollisions(PlayerPtr player) {
+    if (player == NULL) return;
 
+    // 1. Bordes del campo
+    if (player->x - PLAYER_RADIUS < 0 || player->x + PLAYER_RADIUS > FIELD_WIDTH) {
+        player->x -= player->dx * 10; // volver a la posición anterior
+    }
+    if (player->y - PLAYER_RADIUS < 0 || player->y + PLAYER_RADIUS > FIELD_HEIGHT) {
+        player->y -= player->dy * 10;
+    }
 
-    int dir_index = 0;
+    // 2. Colisión con hoyo
+    int dist_sq = distanceSquared(ball.x, ball.y, hole.x, hole.y);
+    int r_sum = BALL_RADIUS + HOLE_RADIUS;
 
-    // while (1) {
-    //     int angle = dir_index * ANGLE_STEP_FIXED;
+    if (dist_sq <= r_sum * r_sum) {
+        end_of_game = 1;
+        printf("¡Jugador embocó la pelota en el hoyo!\n");
+    }
 
-    //     clearCharacterArea(500, 500);
-    //     drawCharacterRotated(500, 500, angle);
-        
-    //     dir_index = (dir_index + 1) % TOTAL_DIRECTIONS;
+    // 3. Colisión con la pelota (modificado)
+    dist_sq = distanceSquared(player->x, player->y, ball.x, ball.y);
+    r_sum = PLAYER_RADIUS + BALL_RADIUS;
+    if (dist_sq <= r_sum * r_sum) {
+        // En lugar de hacer rebotar al jugador, golpeamos la pelota
+        kickBallIfNear(player);
+    }
 
-    //     // sys_sleep();
+    // // 4. Colisión con enemigo
+    // dist_sq = distanceSquared(player->x, player->y, enemy.x, enemy.y);
+    // r_sum = PLAYER_RADIUS + ENEMY_RADIUS;
+    // if (dist_sq <= r_sum * r_sum) {
+    //     // Acción posible: perder vida, rebote, terminar juego...
+    //     printf("¡Cuidado! Colisión con el enemigo.\n");
     // }
-
 }
 
 
+void pongis(void) {
+    welcome();
 
-void welcome(void) {
+    do {
+        sys_clear_screen();
+        sys_fill_screen(BACKGROUND_COLOR); 
+        initializeAllObjects();
+        drawHole();
+        //drawEnemy();
+        drawBall(); // Dibujamos la pelota en su posición inicial
+
+        while(!end_of_game) {
+            key = getchar();
+            handleInput(&player1, key, lastKey);
+            movePlayer(&player1);
+            checkCollisions(&player1);
+            moveBall();  // Mover la pelota después de procesar colisiones
+            lastKey = getchar(); // Actualizar la última tecla presionada
+
+        }
+
+    } while(!end_of_game);
+}
+
+/**
+ * @brief Verifica si dos círculos colisionan.
+ * @param x1 Coordenada x del primer círculo.
+ * @param y1 Coordenada y del primer círculo.
+ * @param x2 Coordenada x del segundo círculo.
+ * @param y2 Coordenada y del segundo círculo.
+ * @param radiusSum Suma de los radios de los dos círculos.
+ * @return 1 si colisionan, 0 si no.
+ */
+int collided(int x1, int y1, int x2, int y2, int radiusSum) {
+    int dx = x1 - x2;
+    int dy = y1 - y2;
+    return dx * dx + dy * dy <= radiusSum * radiusSum;
+}
+
+/***
+ * @brief Maneja la entrada del jugador y actualiza su dirección.
+ * @param player Puntero al jugador que se va a mover.
+ * @param key Tecla actual presionada.
+ * @param lastKey Última tecla presionada.
+***/
+void handleInput(PlayerPtr player, int key, int lastKey) {
+    if (player == NULL) return;
+
+    // Reset default
+    player->dx = 0;
+    player->dy = 0;
+
+    // Combinaciones para diagonales
+    if ((key == 'w' && lastKey == 'd') || (key == 'd' && lastKey == 'w')) {
+        player->dy = -1;
+        player->dx = 1;
+    } else if ((key == 'w' && lastKey == 'a') || (key == 'a' && lastKey == 'w')) {
+        player->dy = -1;
+        player->dx = -1;
+    } else if ((key == 's' && lastKey == 'd') || (key == 'd' && lastKey == 's')) {
+        player->dy = 1;
+        player->dx = 1;
+    } else if ((key == 's' && lastKey == 'a') || (key == 'a' && lastKey == 's')) {
+        player->dy = 1;
+        player->dx = -1;
+    } else {
+        // Movimiento simple
+        switch (key) {
+            case 'w':
+                player->dy = -1;
+                break;
+            case 's':
+                player->dy = 1;
+                break;
+            case 'a':
+                player->dx = -1;
+                break;
+            case 'd':
+                player->dx = 1;
+                break;
+        }
+    }
+}
+
+void movePlayer(PlayerPtr player) {
+
+    if (player == NULL) return;
+
+    int old_x = player->x;
+    int old_y = player->y;
+
+    player->x += player->dx * SPEED;
+    player->y += player->dy * SPEED;
+
+    sys_draw_circle(old_x, old_y, PLAYER_RADIUS, BACKGROUND_COLOR);
+    sys_draw_circle(player->x, player->y, PLAYER_RADIUS, PLAYER_COLOR);
+
+}
+
+/**
+ * @brief Mueve la pelota y maneja las colisiones con los bordes y el hoyo.
+ */
+void moveBall(void) {
+    // Borrar la pelota de su posición anterior
+    sys_draw_circle(ball.x, ball.y, BALL_RADIUS, BACKGROUND_COLOR);
     
-    // printf("Welcome to Pongis Golf!\n");
-    // printf("In this game, you will control a player who must hit a ball into a hole.\n");
-    // printf("You can move the player using the arrow keys \n");
 
-}
-
-extern uint32_t characterPixels[]; 
-
-int sin_taylor(int angle_rad) {
-    int x = angle_rad;
-    int x3 = (x * x / FIXED_POINT) * x / FIXED_POINT;
-    int x5 = (x3 * x * x) / (FIXED_POINT * FIXED_POINT);
-
-    return x - x3 / 6 + x5 / 120;
-}
-
-int cos_taylor(int angle_rad) {
-    int x = angle_rad;
-    int x2 = (x * x) / FIXED_POINT;
-    int x4 = (x2 * x2) / FIXED_POINT;
-
-    return FIXED_POINT - x2 / 2 + x4 / 24;
-}
-
-int normalize_radians(int angle_rad) {
-    // Asegura que el ángulo esté en el rango [-π, π] en punto fijo
-    const int PI_FIXED = FIXED_POINT * 314 / 100;   // ≈ π
-    const int TWO_PI_FIXED = FIXED_POINT * 628 / 100; // ≈ 2π
-
-    while (angle_rad > PI_FIXED)
-        angle_rad -= TWO_PI_FIXED;
-    while (angle_rad < -PI_FIXED)
-        angle_rad += TWO_PI_FIXED;
-
-    return angle_rad;
-}
-
-void drawCharacterRotated(uint64_t centerX, uint64_t centerY, int angle_rad) {
-    angle_rad = normalize_radians(angle_rad);  // 💥 ¡Esto evita que explote!
-
-    int cos_theta = cos_taylor(angle_rad);
-    int sin_theta = sin_taylor(angle_rad);
-
-    int cx = CHARACTER_WIDTH / 2;
-    int cy = CHARACTER_HEIGHT / 2;
-
-    for (int y_out = 0; y_out < CHARACTER_HEIGHT; y_out++) {
-        for (int x_out = 0; x_out < CHARACTER_WIDTH; x_out++) {
-            int dx = x_out - cx;
-            int dy = y_out - cy;
-
-            int x_in = (cos_theta * dx + sin_theta * dy) / FIXED_POINT + cx;
-            int y_in = (-sin_theta * dx + cos_theta * dy) / FIXED_POINT + cy;
-
-            if (x_in >= 0 && x_in < CHARACTER_WIDTH && y_in >= 0 && y_in < CHARACTER_HEIGHT) {
-                uint32_t color = characterPixels[y_in * CHARACTER_WIDTH + x_in];
-                if (color != 0xFFFFFFFF)
-                    sys_draw_pixel(centerX - cx + x_out, centerY - cy + y_out, color);
-            }
-        }
+    ball.x += ball.dx * SPEED; 
+    ball.y += ball.dy * SPEED;
+    
+    // colisiones con los bordes de la pantalla
+    if (ball.x - BALL_RADIUS < 0 || ball.x + BALL_RADIUS > FIELD_WIDTH) {
+        ball.dx = -ball.dx; 
+        ball.x += ball.dx;  
     }
-}
-void clearCharacterArea(uint64_t centerX, uint64_t centerY) {
-    int w = CHARACTER_WIDTH;
-    int h = CHARACTER_HEIGHT;
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
-            sys_draw_pixel(centerX - w/2 + x, centerY - h/2 + y, 0x329bab); // fondo
-        }
+    if (ball.y - BALL_RADIUS < 0 || ball.y + BALL_RADIUS > FIELD_HEIGHT) {
+        ball.dy = -ball.dy; 
+        ball.y += ball.dy;  
     }
+    
+    // la friccion reduce gradualmente la velocidad
+    if (ball.dx != 0 || ball.dy != 0) {
+        if (ball.dx > 0) 
+            ball.dx--;
+        else if (ball.dx < 0) 
+            ball.dx++;
+        
+        if (ball.dy > 0) 
+            ball.dy--;
+        else if (ball.dy < 0)
+            ball.dy++;
+    }
+    
+    // Verificar si la pelota entra en el hoyo
+    if (collided(ball.x, ball.y, hole.x, hole.y, BALL_RADIUS + HOLE_RADIUS - RADIUS_FIX)) {
+        end_of_game = 1;
+        printf("¡Has embocado la pelota! ¡Nivel completado!\n");
+    }
+    
+    // Dibujar la pelota en su nueva posición
+    sys_draw_circle(ball.x, ball.y, BALL_RADIUS, BALL_COLOR);
 }
+
