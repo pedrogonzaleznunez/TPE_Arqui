@@ -1,8 +1,8 @@
 #ifndef _STDIO_H_
 #define _STDIO_H_
 
-#include <stdarg.h>
 #include <myStrings.h>
+#include <stdarg.h>
 #include <stdint.h>
 
 
@@ -16,6 +16,7 @@
 void vprintf(const char *str, va_list args);
 void printf(const char *format, ...);
 void fprintf(int fd, const char *str, ...);
+void sprintf(char *str, const char *format, ...);
 
 int vscanf(const char *format, va_list args);
 int vsscanf(const char *buffer, const char *format, va_list args);
