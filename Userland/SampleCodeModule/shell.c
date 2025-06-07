@@ -160,20 +160,27 @@ char *getCommandFromHistory(int historyIndex) {
 
 void processCommands(char *command) {
     char instruction[MAX_COMMAND_LENGTH];// ver tema longitud
-    int arg1;
+    char arg1[MAX_COMMAND_LENGTH];
 
+    
+    printf("[DEBUG-BEFORE TRIM] command='%s'\n", command);
     trim(command);
+    printf("[DEBUG-AFTER TRIM] command='%s'\n", command);
 
-    int args_read = sscanf(command, "%s %d", &instruction, &arg1);
+    // sscanf no funciona como esperado
+    
+    int argsRead = sscanf(command, "%s %s", instruction, arg1);
+    printf("[DEBUG] command='%s' | instruction='%s' | arg1='%s' |argsRead=%d\n", command, instruction, arg1, argsRead);
 
+    for (int j = 0; command[j]; j++) {
+        printf("command[%d] = '%c' (%d)\n", j, command[j], command[j]);
+    }
+
+    
     // argumentos variables
 
     if (strcmp(instruction, "help") == 0) {
-        if (args_read != 1) {
-            // "unexpected arguments..."
-            // "expected %d, found %d", args_expected, args_read - 1.
-            // "correct use: $ %s", msg
-        }
+        checkArguments(1, argsRead, "help", instruction, arg1);
         help();
     } else if (strcmp(instruction, "zoomin") == 0) {
         zoomIn();
@@ -225,6 +232,7 @@ void help() {
         "time: displays current time.",
         "zoomin: zooms in text on the screen.",
         "zoomout: zooms out text on the screen.",
+        "echo %s: echoes text input."
     };
 
     int elems = sizeof(helpMessages) / sizeof(char *);
@@ -312,4 +320,17 @@ void putLineInBuffer(char *line, int isCommand) {
         totalLines++;
     }
     return;
+}
+
+
+void checkArguments(int argsExpected, int argsRead, char * command, char * instruction, char * arg1){
+    if (argsRead != argsExpected) {
+        puts("Unexpected arguments...\n");
+        printf("Expected %d but found %d:\n", argsExpected, argsRead);
+        printf("%s %s\n", instruction, argsRead == 2? arg1 : "");
+        printf("Correct use: $ %s %s \n", command, argsExpected == 2 ? "arg1" : "");
+            // "unexpected arguments..."
+            // "expected %d, found %d", args_expected, args_read - 1.
+            // "correct use: $ %s", msg
+        }
 }

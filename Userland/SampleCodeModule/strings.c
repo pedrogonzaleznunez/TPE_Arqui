@@ -99,10 +99,12 @@ char *strrchr(const char *s, char c) {
 void trim(char *str) {
     char *aux = str;
 
+    // elimina espacios y tab del principio
     while (*aux == ' ' || *aux == '\t') { aux++; }
 
     int i = 0;
 
+    // si hay espacios o tab deja un solo espacio en su lugar
     while (*aux) {
         if (!((*aux == ' ' || *aux == '\t') &&
               (*(aux + 1) == ' ' || *(aux + 1) == '\t'))) {
