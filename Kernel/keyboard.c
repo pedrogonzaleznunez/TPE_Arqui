@@ -28,7 +28,7 @@ static char printable[] = {
     [0x10] = 'q',  [0x11] = 'w', [0x12] = 'e', [0x13] = 'r', [0x14] = 't',  [0x15] = 'y',
     [0x16] = 'u',  [0x17] = 'i', [0x18] = 'o', [0x19] = 'p', [0x1A] = '[',  [0x1B] = ']',
     [0x1C] = '\n',// enter
-    [0x1D] = 0,  // left control no es imprimible
+    [0x1D] = 0,   // left control no es imprimible
     [0x1E] = 'a',  [0x1F] = 's', [0x20] = 'd', [0x21] = 'f', [0x22] = 'g',  [0x23] = 'h',
     [0x24] = 'j',  [0x25] = 'k', [0x26] = 'l', [0x27] = ';', [0x28] = '\'', [0x29] = '`',
     [0x2A] = -1,// left shift no es imprimible
@@ -67,8 +67,16 @@ static char printable_shift[] = {
 };
 
 char getChar(uint8_t scanCode) {
-
-    if (scanCode > 0 && scanCode < 0x53) {
+    // Van primero porque entran en el intervalo del mapa, pero no son imprimibles.
+    if (scanCode == ARROW_UP) {
+        return ARROW_UP_CODE;
+    } else if (scanCode == ARROW_DOWN) {
+        return ARROW_DOWN_CODE;
+    } else if (scanCode == ARROW_LEFT) {
+        return ARROW_LEFT_CODE;
+    } else if (scanCode == ARROW_RIGHT) {
+        return ARROW_RIGHT_CODE;
+    } else if (scanCode > 0 && scanCode < 0x53) {
         char aux = printable[scanCode];
 
         if ((caps_lock_on) && (aux >= 'a' && aux <= 'z')) {
@@ -81,14 +89,6 @@ char getChar(uint8_t scanCode) {
 
         if (shift_pressed && scanCode <= 0x0D) { return printable_shift[scanCode]; }
         return aux;
-    } else if(scanCode == ARROW_UP){
-        return ARROW_UP_CODE;
-    } else if (scanCode == ARROW_DOWN){
-        return ARROW_DOWN_CODE;
-    } else if(scanCode == ARROW_LEFT){
-        return ARROW_LEFT_CODE;
-    } else if (scanCode == ARROW_RIGHT){
-        return ARROW_RIGHT_CODE;
     } else {
         return 0;
     }
@@ -135,7 +135,7 @@ void keyboardHandler() {
             buffer[writeIdx++] = c;
             writeIdx %= BUFFER_DEFAULT_SIZE;
         }
-       // printKey(key);
+        // printKey(key);
     }
 }
 

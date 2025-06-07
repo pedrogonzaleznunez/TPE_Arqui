@@ -1,13 +1,13 @@
-GLOBAL throw_zero_division
-GLOBAL throw_invalid_opcode
+GLOBAL throwZeroDivisionException
+GLOBAL throwInvalidOpcodeException
 
 section .text
 
-throw_zero_division:
+throwZeroDivisionException:
     mov rax, 0
     div rax
     ret
 
-throw_invalid_opcode:
+throwInvalidOpcodeException:
     ud2 ; instrucción que se usa para generar la excepción
     ret

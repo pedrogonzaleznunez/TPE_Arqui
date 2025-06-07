@@ -10,7 +10,7 @@ static char buffer[64] = {0};
 
 static void printBase(int fd, int num, int base);
 void vfprintf(int fd, const char *format, va_list args);
-//static 
+//static
 uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
 
 void puts(const char *str) {
@@ -81,7 +81,7 @@ void vfprintf(int fd, const char *format, va_list args) {
                         fprintf(fd, va_arg(args, char *));
                         break;
                     case '%':
-                        sys_write(fd, "%", 1);// syscall para escribir un caracter
+                        sys_write(fd, &"%", 1);// syscall para escribir un caracter
                         break;
                 }
                 i++;
@@ -112,8 +112,7 @@ int vscanf(const char *format, va_list args) {
                         c = getchar();
 
                         if (c != '-' && (c < '0' || c > '9')) {
-                            while ((c = getchar()) !=
-                                   '\n');// empty input buffer
+                            while ((c = getchar()) != '\n');// empty input buffer
                             break;
                         };
 
@@ -226,7 +225,7 @@ static void printBase(int fd, int num, int base) {
     fprintf(fd, buffer);
 }
 
-//static 
+//static
 uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
     char *p = buffer;
     char digits[] = "0123456789ABCDEF";
@@ -261,3 +260,68 @@ uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
     return length;
 }
 
+void sprintf(char *str, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    int i = 0;
+    int a = 0;
+
+    while (format[i] != 0) {
+
+        // Verificamos si tenemos un caracter de formato
+        switch (format[i]) {
+
+            case '%':
+                i++;
+                switch (format[i]) {
+                    case 'x':
+                        uintToBase(va_arg(args, int), buffer, 16);
+                        strcpy(str + a, buffer);
+                        a += strlen(buffer);
+                        break;
+                    case 'd':
+                        uintToBase(va_arg(args, int), buffer, 10);
+                        strcpy(str + a, buffer);
+                        a += strlen(buffer);
+                        break;
+                    case 'o':
+                        uintToBase(va_arg(args, int), buffer, 8);
+                        strcpy(str + a, buffer);
+                        a += strlen(buffer);
+                        break;
+                    case 'b':
+                        uintToBase(va_arg(args, int), buffer, 2);
+                        strcpy(str + a, buffer);
+                        a += strlen(buffer);
+                        break;
+                    // case 'f': printFloat(fd, va_arg(args, double)); break ;
+                    case 'c': {
+                        char c = (char) va_arg(args, int);
+                        str[a++] = c;
+                        break;
+                    }
+                    case 's':
+                        char *toAdd = va_arg(args, char *);
+                        strcpy(str + a, toAdd);
+                        a += strlen(toAdd);
+                        break;
+                    case '%':
+                        str[a++] = '%';
+                        break;
+                }
+                i++;
+                break;
+
+            // Si no es un caracter de formato, lo imprimimos directamente
+            default:
+                str[a++] = format[i];
+                i++;
+                break;
+        }
+    }
+
+    str[a] = '\0';
+
+    va_end(args);
+}
