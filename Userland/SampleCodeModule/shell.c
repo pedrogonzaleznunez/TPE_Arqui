@@ -190,6 +190,14 @@ void processCommands(char *command) {
         if(correct = checkArguments(1, argsRead, "opcode")){
             throwInvalidOpcodeException();
         }
+    } else if(strcmp(instruction, "echo") == 0){
+        if(argsRead == 1){ // no tiene argumentos 
+            puts("\n");
+        } else {
+            command+=5;
+            printf("%s\n", command);
+        }
+
     } else if (strcmp(instruction, "pongis") == 0) {
         if(correct = checkArguments(1, argsRead, "pongis")){
             // start game
@@ -223,10 +231,10 @@ void help() {
                             "opcode: prompts invalid operation code exception.",
                             "pongis: starts pongis game.",
                             "registers: lists saved registers.",
-                            "time: displays current time.\n\tValid arguements:\n\t\tnone\n\t\th for hour\n\t\td for date\n\t\ty for year",
+                            "time [argument ... ]: displays current time.\n\tValid arguements:\n\t\tnone\n\t\th for hour\n\t\td for date\n\t\ty for year",
                             "zoomin: zooms in text on the screen.",
                             "zoomout: zooms out text on the screen.",
-                            "echo %s: echoes text input."};
+                            "echo [string ... ]: echoes text input."};
 
     int elems = sizeof(helpMessages) / sizeof(char *);
 
@@ -353,7 +361,7 @@ void processTime(char * arg1, int argsRead){
             }
             switch(*arg1){
                 case('h'):
-                    sprintf(buffer, "Local hour: %d:%d:%d", time.hours, time.minutes, time.seconds);
+                    sprintf(buffer, "Local hour: %d:%d:%d [HH:MM:SS]", time.hours, time.minutes, time.seconds);
                     break;
                 case('d'):
                     sprintf(buffer, "Local date: %s%d/%s%d/%d [DD/MM/YY]", (time.day <= 9)? "0" : "", time.day, (time.month<= 9)? "0" : "", time.month, time.year);
