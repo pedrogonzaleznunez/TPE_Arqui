@@ -1,5 +1,6 @@
 #include <pongis.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <syscalls.h>
 #include "character_data.h"
 
@@ -31,9 +32,7 @@ typedef struct {
 typedef Enemy * EnemyPtr;
 
 typedef struct {
-    int name[20]; // nombre del jugador
     int score; // puntaje del jugador
-
     int x, y; // posicion 
     int dx, dy; // dirreccion y sentido actual
 } Player; 
@@ -57,6 +56,7 @@ static Hole hole;
 
 static int key; // variable para almacenar la tecla presionada
 static int lastKey; // variable para almacenar la ultima tecla presionada
+static int playerCount; 
 static int level = 1;
 static int end_of_game = 0; // flag para terminar la ejecucion del juego
 
@@ -88,13 +88,33 @@ void welcome(){
 
     printf("Bienvenido a Pongis Golf!\n");
     printf("Presiona 'ENTER' para comenzar el juego.\n");
-    printf("Selecione un nivel de dificultad:\n");
     printf("Seleccione la cantidad de jugadores:\n");
-    
+    printf("Presione 1 para un jugador.\n");
+    printf("Presione 2 para dos jugadores.\n");
+
+    do{
+        key = getchar(); // Espera a que el usuario presione una tecla
+
+        if (key == '1') {
+            printf("Has seleccionado un jugador.\n");
+            playerCount = 1;   
+            break;
+
+        } else if (key == '2') {
+            printf("Has seleccionado dos jugadores.\n");
+            playerCount = 2;
+            break;
+
+        } 
+        else {
+            printf("Opción no válida. Presiona 1 o 2.\n");
+        }
+    }   while (1); 
+
     //sys_sleep(2000);
     return;
 
-    // --> Implentar esto con syscalls 
+
 }
 
 void initializeAllObjects(void) {
@@ -138,7 +158,12 @@ void printScore(PlayerPtr player) {
     }
 
     // imprimir el puntaje del jugador al tope de la pantalla
-    printf("Puntaje del jugador %s: %d\n", player->name, player->score);
+    if(playerCount == 1) {
+        printf("Puntaje del jugador: %d\n", player->score);
+    } else if(playerCount == 2) {
+        printf("Puntaje del jugador 1: %d\n", player1.score);
+        printf("Puntaje del jugador 2: %d\n", player2.score);
+    }
     return;
 }
 
