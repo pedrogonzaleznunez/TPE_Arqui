@@ -1,13 +1,7 @@
-#include <font.h>
-#include <idtLoader.h>
+#include <interrupts.h>
 #include <lib.h>
 #include <moduleLoader.h>
-#include <naiveConsole.h>
-#include <sounds.h>
-#include <stdint.h>
-#include <videoDriver.h>
-#include <interrupts.h>
-#include <registers.h>
+// incluye a idtLoader.h y stdint.h
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -36,8 +30,7 @@ void *getStackBase() {
 
 void *initializeKernelBinary() {
 
-    void *moduleAddresses[] = {sampleCodeModuleAddress,
-                               sampleDataModuleAddress};
+    void *moduleAddresses[] = {sampleCodeModuleAddress, sampleDataModuleAddress};
 
     loadModules(&endOfKernelBinary, moduleAddresses);
 
@@ -46,51 +39,8 @@ void *initializeKernelBinary() {
     return getStackBase();
 }
 
-void printSystemTime() {
-    // uint64_t time = getSystemTime();
-    // ncPrint("System time: ");
-    // ncPrintDec(time);
-    // ncNewline();
-}
-
 int main() {
-
     load_idt();
-    // Inicio kernel
-    // putString("Bienvenido a x64BareBones!", 0xFF00FF);
-    // newLine();
-
-    // printSystemTime();
-
-    // ncPrint("[Kernel Main]");
-    // ncNewline();
-    // ncPrint("  Sample code module at 0x");
-    // ncPrintHex((uint64_t)sampleCodeModuleAddress);
-    // ncNewline();
-    // ncPrint("  Calling the sample code module returned: ");
-    // putString("Entra al Userland:", 0xFF00FF);
-    // newLine();
-
-    // ###### entrada al Userland ######
     ((EntryPoint) sampleCodeModuleAddress)();
-
-    // newLine();
-    // newLine();
-    // putString("Termina el módulo de Userland", 0xFF00FF);
-    //  ncNewline();
-
-    // ncPrint("  Sample data module at 0x");
-    // ncPrintHex((uint64_t)sampleDataModuleAddress);
-    // ncNewline();
-    // ncPrint("  Sample data module contents: ");
-    // ncPrint((char *)sampleDataModuleAddress);
-    // ncNewline();
-
-    // Prueba del driver de sonidos
-    // SE ESCUCHA UN POCO ALTO
-    // beep();
-
-    //while (1);
-
     return 0;
 }

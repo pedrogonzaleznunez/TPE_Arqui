@@ -1,4 +1,5 @@
 #include <font.h>
+#include <lib.h>
 #include <videoDriver.h>
 
 #define LEFT_MARGIN   4
@@ -9,8 +10,8 @@
 static uint64_t currentX = LEFT_MARGIN;
 static uint64_t currentY = TOP_MARGIN;
 
-#define DELTA_X ((VBE_mode_info->bpp) / 8)
-#define DELTA_Y ((VBE_mode_info)->pitch)
+#define BPP   ((VBE_mode_info->bpp) / 8)
+#define PITCH ((VBE_mode_info)->pitch)
 
 // Funciones de uso interno en videoDriver.c
 void moveLine(int source, int target);
@@ -18,28 +19,26 @@ void scrollUp();
 void checkScreenLimits();
 void checkEndOfHeight();
 void checkEndOfLine();
-uint8_t isOutOfBounds(uint64_t x, uint64_t y);
+int isOutOfBounds(uint64_t x, uint64_t y);
 void moveCurrentX();
 int checkSpecialCharacter(char c);
 
 struct vbe_mode_info_structure {
-    uint16_t
-        attributes;// deprecated, only bit 7 should be of interest to you, and it
-                   // indicates the mode supports a linear frame buffer.
+    uint16_t attributes; // deprecated, only bit 7 should be of interest to you, and it
+                         // indicates the mode supports a linear frame buffer.
     uint8_t window_a;    // deprecated
     uint8_t window_b;    // deprecated
     uint16_t granularity;// deprecated; used while calculating bank numbers
     uint16_t window_size;
     uint16_t segment_a;
     uint16_t segment_b;
-    uint32_t
-        win_func_ptr;// deprecated; used to switch banks from protected mode
-                     // without returning to real mode
-    uint16_t pitch;  // number of bytes per horizontal line
-    uint16_t width;  // width in pixels
-    uint16_t height; // height in pixels
-    uint8_t w_char;  // unused...
-    uint8_t y_char;  // ...
+    uint32_t win_func_ptr;// deprecated; used to switch banks from protected mode
+                          // without returning to real mode
+    uint16_t pitch;       // number of bytes per horizontal line
+    uint16_t width;       // width in pixels
+    uint16_t height;      // height in pixels
+    uint8_t w_char;       // unused...
+    uint8_t y_char;       // ...
     uint8_t planes;
     uint8_t bpp;  // bits per pixel in this mode
     uint8_t banks;// deprecated; total number of banks in this mode
@@ -75,7 +74,7 @@ void putPixel(uint32_t hexColor, uint64_t x, uint64_t y) {
     if (isOutOfBounds(x, y)) return;
 
     uint8_t *framebuffer = (uint8_t *) (uintptr_t) VBE_mode_info->framebuffer;
-    uint64_t offset = (x * DELTA_X) + (y * DELTA_Y);
+    uint64_t offset = (x * BPP) + (y * PITCH);
 
     framebuffer[offset] = (hexColor) & 0xFF;
     framebuffer[offset + 1] = (hexColor >> 8) & 0xFF;
@@ -106,7 +105,7 @@ void putCharInPos(char c, uint32_t hexColor, uint64_t x, uint64_t y) {
 void putStringInPos(char *str, uint32_t hexColor, uint64_t x, uint64_t y) {
     if (str == NULL) { return; }
 
-    // La parte que no entre en la pantalla no se imprime
+    // La parte que no está en el rango de la pantalla no escribe en memoria
     while (*str) {
         if (!checkSpecialCharacter(*str)) {
             putCharInPos(*str, hexColor, x, y);
@@ -143,9 +142,7 @@ void putChar(char c, uint32_t hexColor) {
 
 void checkEndOfLine() {
     // Acá agregado getFontWidth()
-    if (currentX + RIGHT_MARGIN + getFontWidth() > VBE_mode_info->width) {
-        newLine();
-    }
+    if (currentX + RIGHT_MARGIN + getFontWidth() > VBE_mode_info->width) { newLine(); }
     return;
 }
 
@@ -183,12 +180,14 @@ void scrollUp() {
     currentX = LEFT_MARGIN;
     currentY = TOP_MARGIN + (lineCount - 1) * charHeight;
 
+    uint64_t width = VBE_mode_info->width - LEFT_MARGIN - RIGHT_MARGIN;
+    uint64_t bytesPerLine = width * BPP;
+    uint8_t *framebuffer = (uint8_t *) (uintptr_t) VBE_mode_info->framebuffer;
+
     // limpia la última línea antes de seguir.
     for (int j = 0; j < charHeight; j++) {
-        for (int i = LEFT_MARGIN; i < VBE_mode_info->width - RIGHT_MARGIN;
-             i++) {
-            putPixel(DEFAULT_BGR_COLOR, i, currentY + j);
-        }
+        uint8_t *lineStart = framebuffer + LEFT_MARGIN * BPP + (currentY + j) * PITCH;
+        memset(lineStart, DEFAULT_BGR_COLOR, bytesPerLine);
     }
 
     return;
@@ -197,44 +196,38 @@ void scrollUp() {
 void moveLine(int source, int target) {
     uint8_t charHeight = getFontHeight();
 
-    if (source < 0 || source > VBE_mode_info->height / charHeight ||
-        target < 0 || target > VBE_mode_info->height / charHeight) {
+    if (source < 0 || source > VBE_mode_info->height / charHeight || target < 0 ||
+        target > VBE_mode_info->height / charHeight) {
         // Es un movimiento no válido
         return;
     }
+    uint8_t *framebuffer = (uint8_t *) (uintptr_t) VBE_mode_info->framebuffer;
 
+    uint64_t width = VBE_mode_info->width - LEFT_MARGIN - RIGHT_MARGIN;
+    uint64_t bytesPerLine = width * BPP;
     uint64_t sourceY = source * charHeight + TOP_MARGIN;
     uint64_t targetY = target * charHeight + TOP_MARGIN;
 
-    for (size_t j = 0; j < charHeight; j++) {
-        for (int i = LEFT_MARGIN; i < VBE_mode_info->width - RIGHT_MARGIN;
-             i++) {
-            uint8_t *framebuffer =
-                (uint8_t *) (uintptr_t) VBE_mode_info->framebuffer;
-            uint64_t offset = (i * DELTA_X) + ((sourceY + j) * DELTA_Y);
+    for (uint32_t j = 0; j < charHeight; j++) {
+        uint8_t *sourcePtr = framebuffer + LEFT_MARGIN * BPP + (sourceY + j) * PITCH;
+        uint8_t *targetPtr = framebuffer + LEFT_MARGIN * BPP + (targetY + j) * PITCH;
 
-            uint32_t blue = framebuffer[offset];
-            uint32_t green = framebuffer[offset + 1];
-            uint32_t red = framebuffer[offset + 2];
-
-            uint32_t hexColor = (red << 16) | (green << 8) | blue;
-
-            putPixel(hexColor, i, targetY + j);
-        }
+        memcpy(targetPtr, sourcePtr, bytesPerLine);
     }
     return;
 }
 
-uint8_t isOutOfBounds(uint64_t x, uint64_t y) {
+int isOutOfBounds(uint64_t x, uint64_t y) {
     return !(x < VBE_mode_info->width && y < VBE_mode_info->height);
 }
 
 void clearScreen() {
-    for (int i = 0; i < VBE_mode_info->width; i++) {
-        for (int j = 0; j < VBE_mode_info->height; j++) {
-            putPixel(0x00, i, j);
-        }
-    }
+    uint8_t *framebuffer = (uint8_t *) (uintptr_t) VBE_mode_info->framebuffer;
+    uint32_t total_bytes = VBE_mode_info->width * PITCH * BPP;
+
+    // Usar memset es más eficiente que pixel por pixel
+    memset(framebuffer, 0x00, total_bytes);
+
     currentX = LEFT_MARGIN;
     currentY = TOP_MARGIN;
 }
@@ -288,15 +281,17 @@ void drawCircle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexCol
 
     // Calculamos el rectángulo de exploración acotado a la pantalla
     uint64_t min_x = pos_x > radius ? pos_x - radius : 0;
-    uint64_t max_x = (pos_x + radius < VBE_mode_info->width) ? pos_x + radius : VBE_mode_info->width - 1;
+    uint64_t max_x = (pos_x + radius < VBE_mode_info->width) ? pos_x + radius
+                                                             : VBE_mode_info->width - 1;
     uint64_t min_y = pos_y > radius ? pos_y - radius : 0;
-    uint64_t max_y = (pos_y + radius < VBE_mode_info->height) ? pos_y + radius : VBE_mode_info->height - 1;
+    uint64_t max_y = (pos_y + radius < VBE_mode_info->height) ? pos_y + radius
+                                                              : VBE_mode_info->height - 1;
 
     for (uint64_t x = min_x; x <= max_x; x++) {
         for (uint64_t y = min_y; y <= max_y; y++) {
-            int64_t dx = (int64_t)x - (int64_t)pos_x;
-            int64_t dy = (int64_t)y - (int64_t)pos_y;
-            if (dx * dx + dy * dy <= (int64_t)radius * radius) {
+            int64_t dx = (int64_t) x - (int64_t) pos_x;
+            int64_t dy = (int64_t) y - (int64_t) pos_y;
+            if (dx * dx + dy * dy <= (int64_t) radius * radius) {
                 putPixel(hexColor, x, y);
             }
         }
@@ -304,29 +299,41 @@ void drawCircle(uint64_t pos_x, uint64_t pos_y, uint64_t radius, uint32_t hexCol
     return;
 }
 
-void drawRec(uint64_t from_x, uint64_t from_y, uint64_t to_x, uint64_t to_y, uint32_t hexColor) {
+void drawRec(uint64_t from_x, uint64_t from_y, uint64_t to_x, uint64_t to_y,
+             uint32_t hexColor) {
     if (from_x > to_x || from_y > to_y) return;
 
     // Clamp de los límites para no salirnos de la pantalla
     uint64_t start_x = from_x < VBE_mode_info->width ? from_x : VBE_mode_info->width;
-    uint64_t end_x   = to_x   < VBE_mode_info->width ? to_x   : VBE_mode_info->width - 1;
+    uint64_t end_x = to_x < VBE_mode_info->width ? to_x : VBE_mode_info->width - 1;
     uint64_t start_y = from_y < VBE_mode_info->height ? from_y : VBE_mode_info->height;
-    uint64_t end_y   = to_y   < VBE_mode_info->height ? to_y   : VBE_mode_info->height - 1;
+    uint64_t end_y = to_y < VBE_mode_info->height ? to_y : VBE_mode_info->height - 1;
 
     for (uint64_t x = start_x; x <= end_x; x++) {
-        for (uint64_t y = start_y; y <= end_y; y++) {
-            putPixel(hexColor, x, y);
-        }
+        for (uint64_t y = start_y; y <= end_y; y++) { putPixel(hexColor, x, y); }
     }
     return;
 }
 
 void fillScreen(uint32_t hexColor) {
-    for (uint64_t x = 0; x < VBE_mode_info->width; x++) {
-        for (uint64_t y = 0; y < VBE_mode_info->height; y++) {
-            putPixel(hexColor, x, y);
+    uint8_t *framebuffer = (uint8_t *) (uintptr_t) VBE_mode_info->framebuffer;
+    uint32_t total_pixels = VBE_mode_info->width * VBE_mode_info->height;
+
+    if (hexColor) {
+        uint8_t r = (hexColor >> 16) & 0xFF;
+        uint8_t g = (hexColor >> 8) & 0xFF;
+        uint8_t b = hexColor & 0xFF;
+
+        for (uint32_t i = 0; i < total_pixels; i++) {
+            uint32_t offset = i * 3;
+            framebuffer[offset] = b;
+            framebuffer[offset + 1] = g;
+            framebuffer[offset + 2] = r;
         }
+    } else {
+        clearScreen();
     }
+
     currentX = LEFT_MARGIN;
     currentY = TOP_MARGIN;
 }

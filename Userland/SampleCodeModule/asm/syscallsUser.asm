@@ -1,17 +1,18 @@
-GLOBAL sys_read
 GLOBAL sys_write
-GLOBAL sys_start_beep
-GLOBAL sys_beep
-GLOBAL sys_stop_beep
+GLOBAL sys_read
+GLOBAL sys_get_regs
+GLOBAL sys_get_time
+GLOBAL sys_delete_char
 GLOBAL sys_sleep
+GLOBAL sys_start_beep
+GLOBAL sys_stop_beep
+GLOBAL sys_beep
 GLOBAL sys_clear_screen
 GLOBAL sys_draw_circle
 GLOBAL sys_draw_rec
 GLOBAL sys_fill_screen
 GLOBAL sys_draw_pixel
-GLOBAL sys_get_regs
-GLOBAL sys_get_time
-GLOBAL sys_delete_char
+
 SECTION .text
 
 %macro sysCallMaster 1
@@ -28,6 +29,7 @@ sys_write:
 
 sys_read:
     sysCallMaster 1
+
 sys_get_regs:
     sysCallMaster 2
 
@@ -36,6 +38,9 @@ sys_get_time:
 
 sys_delete_char: 
     sysCallMaster 4
+
+sys_sleep:
+    sysCallMaster 23
 
 ; ################ SOUND SYS_CALLS ################
 sys_start_beep:

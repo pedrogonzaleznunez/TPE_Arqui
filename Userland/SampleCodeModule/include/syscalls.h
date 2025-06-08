@@ -1,13 +1,11 @@
-#include <stdarg.h>
-#include <stdint.h>
-#include <stdio.h>
-
 #ifndef SYSCALLS_H
 #define SYSCALLS_H
 
-#define ARROW_DOWN_CODE 17
-#define ARROW_UP_CODE 18
-#define ARROW_LEFT_CODE 19
+#include <stdint.h>
+
+#define ARROW_DOWN_CODE  17
+#define ARROW_UP_CODE    18
+#define ARROW_LEFT_CODE  19
 #define ARROW_RIGHT_CODE 20
 
 typedef struct time {
@@ -54,16 +52,15 @@ int64_t sys_get_time(time_t *time);
 
 int64_t sys_delete_char(void);
 
+int64_t sys_sleep(int64_t ticks);
+
 // ##################### sound syscalls ######################
 
-//pending
 int64_t sys_start_beep(uint32_t frecuence);
 
 int64_t sys_beep(uint32_t frecuence, int64_t ticks);
-//pending
-int64_t sys_stop_beep(void);
 
-int64_t sys_sleep(int64_t ticks);
+int64_t sys_stop_beep(void);
 
 // ##################### video syscalls ######################
 
@@ -77,6 +74,7 @@ int64_t sys_draw_rec(uint64_t from_x, uint64_t from_y, uint64_t to_x, uint64_t t
 
 int64_t sys_draw_pixel(uint64_t pos_x, uint64_t pos_y, uint32_t hexColor);
 
-int64_t sys_draw_rec(uint64_t from_x, uint64_t from_y, uint64_t to_x, uint64_t to_y , uint32_t hexColor);
+int64_t sys_draw_rec(uint64_t from_x, uint64_t from_y, uint64_t to_x, uint64_t to_y,
+                     uint32_t hexColor);
 
 #endif

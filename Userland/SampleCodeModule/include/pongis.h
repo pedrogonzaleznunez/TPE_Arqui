@@ -3,7 +3,7 @@
 
 // ###### COLORS ######
 #define BACKGROUND_COLOR 0x329bab
-#define OBSTABLES_COLOR 0x3bf4c4
+#define OBSTACLES_COLOR 0x3bf4c4
 
 // #define CHARACTER_COLOR 0x3bf4c4
 #define PLAYER_COLOR 0x12c3fe

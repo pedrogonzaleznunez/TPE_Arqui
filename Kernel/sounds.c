@@ -1,7 +1,9 @@
 #include <sounds.h>
 #include <time.h>
 
-//Play sound using built-in speaker
+// https://wiki.osdev.org/PC_Speaker
+
+// Play sound using built-in speaker
 void playSound(uint32_t nFrequence) {
     uint32_t Div;
     uint8_t tmp;
@@ -17,17 +19,13 @@ void playSound(uint32_t nFrequence) {
     if (tmp != (tmp | 3)) { outb(0x61, tmp | 3); }
 }
 
-//make it shut up
 void noSound() {
     uint8_t tmp = inb(0x61) & 0xFC;
-
     outb(0x61, tmp);
 }
 
-//Make a beep
 void beep(void) {
     playSound(440);
     timerWait(40);
     noSound();
-    //set_PIT_2(old_frequency);
 }

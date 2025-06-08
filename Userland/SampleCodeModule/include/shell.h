@@ -1,33 +1,31 @@
-#include <syscalls.h>
-#include <stdio.h>
-
 #ifndef SHELL_H
 #define SHELL_H
 
-
-#define WELCOME_MESSAGE "Welcome to OreOS"
-#define PROMPT_SYMBOL "$"
+#define WELCOME_MESSAGE         "Welcome to OreOS"
+#define PROMPT_SYMBOL           "$"
 #define INVALID_COMMAND_MESSAGE "Invalid command."
-#define MAX_COMMAND_LENGTH 50
+#define MAX_COMMAND_LENGTH      50
 
-void process_commands(char * command);
+void shell(void);
+
+void processCommands(char *command);
 
 // cuando ingresa un comando no valido
-void invalid_command();
+void invalidCommand();
 
 // commands
 void help();
 
-void zoom_in();
+void zoomIn();
 
-void zoom_out();
+void zoomOut();
 
-void get_time();
+void getTime();
 
-void get_regs();
+void getRegs();
 
+void clear();
 
-
-
+void printRegs();
 
 #endif

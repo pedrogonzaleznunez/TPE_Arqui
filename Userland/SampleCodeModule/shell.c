@@ -1,58 +1,62 @@
-#include <shell.h>
-#include <syscalls.h>
 #include <myStrings.h>
+#include <shell.h>
+#include <stdio.h>
+#include <syscalls.h>
 
-#define printReg(x, y) printf("%s: %x\n", x, y)
+#include <stddef.h>
 
 #define MAX_LINES_SAVED 40
 
-typedef struct line{
+void activateShell(void);
+int isEmpty(char *command);
+void putLineInBuffer(char *line, int isCommand);
+void printReg(char *regName, int64_t value);
+char *getCommandFromHistory(int historyIndex);
+void checkArguments(int argsExpected, int argsRead, char *command, char *instruction,
+                    char *arg1);
+
+extern void throwZeroDivisionException(void);
+extern void throwInvalidOpcodeException(void);
+
+typedef struct line {
     char characters[MAX_COMMAND_LENGTH];
-    int length;
     int isCommand;
 } line_t;
 
 static line_t lineBuffer[MAX_LINES_SAVED];
-static firstLine = 0;
-static lastLine = 0;
+static int firstLine = 0;
+static int lastLine = 0;
+static int currentHistoryIndex = -1;// navegación de historial
+static int totalLines = 0;
+static int commandCount = 0;
 
-/*
-    cuando nos llegue zoom in
-    clearScreen();
-    for(int i = 0; i < lines; i++){
-        puts(Promtp);
-        puts(lineBuffer[i].characters);
-    }
-*/
-
-void shell() {
+void shell(void) {
     puts(WELCOME_MESSAGE);
+    putLineInBuffer(WELCOME_MESSAGE, 0);
     help();
-    int64_t fd = 0;
 
     firstLine = 0;
     lastLine = 0;
+    totalLines = 1;
+    currentHistoryIndex = -1;
 
-    while (1) {
-        // const char *msg = "activar shell ";
-        // sys_write(fd, msg, (int64_t) 15);
-        activate_shell();
+    while (1) {// agregar forma de salir?? con un boolean (int) done/exit/quit
+        activateShell();
     }
 }
 
-void activate_shell() {
+void activateShell(void) {
     printf("%s ", PROMPT_SYMBOL);
 
     char shell_buffer[MAX_COMMAND_LENGTH] = {0};
-
     int i = 0;
     char c;
     int read = 1;
 
-    while (read && i < MAX_COMMAND_LENGTH) {
-        int64_t ret = sys_read(0, &c, 1);// leer un carácter
+    currentHistoryIndex = -1;
 
-        //if(ret <= 0) continue;
+    while (read && i < MAX_COMMAND_LENGTH) {
+        sys_read(0, &c, 1);// leer un carácter
 
         if (c == '\n') {// dejar de leer y procesar
             shell_buffer[i] = '\0';
@@ -65,129 +69,202 @@ void activate_shell() {
                 // syscall que llame a deleteChar en videoDriver
                 sys_delete_char();
             }
+        } else if (c == ARROW_DOWN_CODE || c == ARROW_UP_CODE) {
+            // si no hay comandos, no analiza
+            if (commandCount != 0) {
+                if (c == ARROW_UP_CODE) {
+                    if (currentHistoryIndex == -1) {
+                        currentHistoryIndex = 0;// empieza en el comando más nuevo
+                    } else if (currentHistoryIndex < commandCount - 1) {
+                        currentHistoryIndex++;// avanza en los comandos
+                    }
+                } else {// ARROW_DOWN_CODE
+                    if (currentHistoryIndex > 0) {
+                        currentHistoryIndex--;
+                    } else if (currentHistoryIndex == 0) {
+                        currentHistoryIndex = -1;// vuelve a línea vacía
+                    }
+                }
+
+                while (i > 0) {// vacía la línea en la que está para luego sobreescribirla
+                    shell_buffer[i--] = '\0';
+                    sys_delete_char();
+                }
+
+                // si no estamos en línea vacía, mostrar el comando del historial
+                if (currentHistoryIndex >= 0) {
+                    char *command = getCommandFromHistory(currentHistoryIndex);
+                    if (command != NULL) {
+                        strcpy(shell_buffer, command);
+                        i = strlen(shell_buffer);
+                        printf("%s", shell_buffer);
+                    }
+                } else {
+                    // Línea vacía
+                    shell_buffer[0] = '\0';
+                    i = 0;
+                }
+            }
+
         } else {
             //if(i < MAX_COMMAND_LENGTH - 1){
             shell_buffer[i++] = c;
-            putchar(c); // mostrar en pantalla
+            putchar(c);// mostrar en pantalla
             // }
         }
         // ignorar otros caracteres
     }
 
     shell_buffer[i] = '\0';
-    if (i == MAX_COMMAND_LENGTH) { 
-        shell_buffer[i - 1] = 0; 
+    if (i == MAX_COMMAND_LENGTH) {
+        shell_buffer[i - 1] = 0;
         putchar('\n');
     }
 
-    // acá terminó de leer una línea ->
-    strcpy(lineBuffer[lastLine].characters, PROMPT_SYMBOL);
-    lineBuffer[lastLine].length = strlen(PROMPT_SYMBOL);
-    strcat(lineBuffer[lastLine].characters, shell_buffer);
-    lineBuffer[lastLine].length += i;
+    if (!isEmpty(shell_buffer)) {
+        char fullLine[MAX_COMMAND_LENGTH + strlen(PROMPT_SYMBOL)];
+        strcpy(fullLine, PROMPT_SYMBOL);
+        strcat(fullLine, shell_buffer);
+        putLineInBuffer(fullLine, 1);
+    }
 
-    lastLine = (lastLine + 1) % MAX_LINES_SAVED;
-    firstLine += (lastLine == firstLine);
-
-    process_commands(shell_buffer);
+    processCommands(shell_buffer);
 }
 
+char *getCommandFromHistory(int historyIndex) {
+    int commandsFound = 0;
+    int index = (lastLine + MAX_LINES_SAVED - 1) % MAX_LINES_SAVED;
+    int searched = 0;
 
-// ojo que cuando borro ya no me lo toma como valido
-
-void process_commands(char *command) {
-    // agregar función trim 
-    // devuelve un puntero a char con la primera palabra y la borra del que mandaste
-    // nada, nada, deja, deja.
-    // se puede hacer con sscanf
-    char instruction[MAX_COMMAND_LENGTH]; // vemos long
-    int arg1;
-
-    trim(command);   
-
-    int args_read = sscanf(command, "%s %d", &instruction, &arg1);
-
-    // argumentos variables 
-    
-    if (strcmp(instruction, "help") == 0) {
-        if(args_read != 1){
-            // "unexpected arguments..."
-            // "expected %d, found %d", args_expected, args_read - 1.
-            // "correct use: $ %s", msg
+    // busco el comando en la posición historyIndex (0 = más reciente)
+    while (searched < totalLines) {
+        if (lineBuffer[index].isCommand == 1) {
+            if (commandsFound == historyIndex) {
+                // devuelvo la parte del comando sin el prompt
+                return lineBuffer[index].characters + strlen(PROMPT_SYMBOL);
+            }
+            commandsFound++;
         }
+        index = (index + MAX_LINES_SAVED - 1) % MAX_LINES_SAVED;
+        searched++;
+    }
+
+    return NULL;
+}
+
+void processCommands(char *command) {
+    char instruction[MAX_COMMAND_LENGTH];// ver tema longitud
+    char arg1[MAX_COMMAND_LENGTH];
+
+
+    printf("[DEBUG-BEFORE TRIM] command='%s'\n", command);
+    trim(command);
+    printf("[DEBUG-AFTER TRIM] command='%s'\n", command);
+
+    // sscanf no funciona como esperado
+
+    int argsRead = sscanf(command, "%s %s", instruction, arg1);
+    printf("[DEBUG] command='%s' | instruction='%s' | arg1='%s' |argsRead=%d\n", command,
+           instruction, arg1, argsRead);
+
+    for (int j = 0; command[j]; j++) {
+        printf("command[%d] = '%c' (%d)\n", j, command[j], command[j]);
+    }
+
+
+    // argumentos variables
+
+    if (strcmp(instruction, "help") == 0) {
+        checkArguments(1, argsRead, "help", instruction, arg1);
         help();
     } else if (strcmp(instruction, "zoomin") == 0) {
-        zoom_in();
+        zoomIn();
     } else if (strcmp(instruction, "zoomout") == 0) {
-        zoom_out();
+        zoomOut();
     } else if (strcmp(instruction, "registers") == 0) {
-        get_regs();
+        getRegs();
     } else if (strcmp(instruction, "clear") == 0) {
         // check_arguments(args_expected, args_read, msg);
         // Lo agregamos para c/u
         clear();
     } else if (strcmp(instruction, "time") == 0) {
-        get_time();
+        getTime();
     } else if (strcmp(instruction, "divzero") == 0) {
-        invalid_command();
+        throwZeroDivisionException();
     } else if (strcmp(instruction, "opcode") == 0) {
-        invalid_command();
+        throwInvalidOpcodeException();
     } else if (strcmp(instruction, "pongis") == 0) {
-        invalid_command();
-    } else if (is_empty(instruction)) {
+        invalidCommand();
+    } else if (isEmpty(instruction)) {
         return;
     } else {
-        invalid_command();
+        invalidCommand();
     }
 }
 
-int is_empty(char *command) {
+int isEmpty(char *command) {
     while (*command == ' ' || *command == '\t') { command++; }
     return *command == '\0';
 }
 
 // cuando ingresa un comando no valido
-void invalid_command() {
+void invalidCommand() {
     puts(INVALID_COMMAND_MESSAGE);
-    //help();
+    putLineInBuffer(INVALID_COMMAND_MESSAGE, 0);
 }
-
 
 /* Commands */
 
-
 void help() {
-    puts("\nAvailable commands:\n");
-    puts("\nclear: clear terminal.");
-    puts("\ndivzero: prompts zero division exception.");
-    puts("\nhelp: lists all available commands.");
-    puts("\nopcode: prompts invalid operation code exception.");
-    puts("\npongis: starts pongis game.");
-    puts("\nregisters: lists saved registers.");
-    puts("\ntime: displays current time.");
-    puts("\nzoomin: zooms in text on the screen.");
-    puts("\nzoomout: zooms out text on the screen.");
-}
+    char *helpMessages[] = {"Available commands:",
+                            "clear: clear terminal.",
+                            "divzero: prompts zero division exception.",
+                            "help: lists all available commands.",
+                            "opcode: prompts invalid operation code exception.",
+                            "pongis: starts pongis game.",
+                            "registers: lists saved registers.",
+                            "time: displays current time.",
+                            "zoomin: zooms in text on the screen.",
+                            "zoomout: zooms out text on the screen.",
+                            "echo %s: echoes text input."};
 
-void zoom_in() {
-}
+    int elems = sizeof(helpMessages) / sizeof(char *);
 
-void zoom_out() {
-}
-
-void get_regs() {
-    register_set_t regs;
-    // puts("\nsys call que imprime:\n");   // Doy de baja la syscall que los imprime directamente
-    // sys_print_regs();
-    // puts("\nsys call que los carga\n");
-    if (sys_get_regs(&regs)) {
-        print_regs(regs);
-    } else {
-        puts("Registers must be saved before printing. To save press 'q'");
+    for (int i = 0; i < elems; i++) {
+        puts(helpMessages[i]);
+        putLineInBuffer(helpMessages[i], 0);
     }
 }
 
-void print_regs(register_set_t regs) {
+/*
+    cuando nos llegue zoom in
+    clearScreen();
+    for(int i = 0; i < lines; i++){
+        puts(Promtp);
+        puts(lineBuffer[i].characters);
+    }
+*/
+
+void zoomIn() {
+}
+
+void zoomOut() {
+}
+
+void getRegs() {
+    register_set_t regs;
+    if (sys_get_regs(&regs)) {
+        printRegs(regs);
+    } else {
+        char *registerErrorMsg =
+            "Registers must be saved before printing. To save press 'F1'.";
+        puts(registerErrorMsg);
+        putLineInBuffer(registerErrorMsg, 0);
+    }
+    return;
+}
+
+void printRegs(register_set_t regs) {
     printReg("RAX", regs.rax);
     printReg("RBX", regs.rbx);
     printReg("RCX", regs.rcx);
@@ -209,15 +286,50 @@ void print_regs(register_set_t regs) {
     return;
 }
 
-void clear() {
+void printReg(char *regName, int64_t value) {
+    char buffer[25];
+    sprintf(buffer, "%s: %x", regName, value);
+    puts(buffer);
+    putLineInBuffer(buffer, 0);
 }
 
-// nos piden la hora del sistema
-void get_time() {
-    time_t time;
-    sys_get_time(&time);
-    printf("Local time: %d/%d/%d %d:%d:%d\n", time.day, time.month, time.year, time.hours,
-           time.minutes, time.seconds);
+void clear() {
+    sys_clear_screen();
     return;
 }
 
+// nos piden la hora del sistema
+void getTime() {
+    time_t time;
+    sys_get_time(&time);
+    char buffer[50];
+    sprintf(buffer, "Local time: %d/%d/%d %d:%d:%d", time.day, time.month, time.year,
+            time.hours, time.minutes, time.seconds);
+    puts(buffer);
+    putLineInBuffer(buffer, 0);
+    return;
+}
+
+void putLineInBuffer(char *line, int isCommand) {
+    strcpy(lineBuffer[lastLine].characters, line);
+    lineBuffer[lastLine].isCommand = isCommand;
+    lastLine = (lastLine + 1) % MAX_LINES_SAVED;
+    commandCount += isCommand;
+    if (totalLines >= MAX_LINES_SAVED) {
+        if (lineBuffer[firstLine].isCommand) { commandCount--; }
+        firstLine = (firstLine + 1) % MAX_LINES_SAVED;
+    } else {
+        totalLines++;
+    }
+    return;
+}
+
+void checkArguments(int argsExpected, int argsRead, char *command, char *instruction,
+                    char *arg1) {
+    if (argsRead != argsExpected) {
+        puts("Unexpected arguments...\n");
+        printf("Expected %d but found %d:\n", argsExpected, argsRead);
+        printf("%s %s\n", instruction, argsRead == 2 ? arg1 : "");
+        printf("Correct use: $ %s %s \n", command, argsExpected == 2 ? "arg1" : "");
+    }
+}

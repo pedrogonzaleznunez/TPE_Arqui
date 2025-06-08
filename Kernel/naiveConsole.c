@@ -1,11 +1,5 @@
 #include <naiveConsole.h>
 
-/*
-   Le agregué: que cuando llega al final empieza a mover todo para arriba y
-   sigue escribiendo en la línea más baja Que cuando borra pone toda la pantalla
-   en negro impresión de caracteres con un formato dado.
-*/
-
 // Funciones agregadas internas
 void ncMoveLine(int target, int source);
 void ncScrollUp();
@@ -30,9 +24,7 @@ void ncPrintChar(char character) {
 }
 
 void ncNewline() {
-    do {
-        ncPrintChar(' ');
-    } while ((uint64_t) (currentVideo - video) % (width * 2) != 0);
+    do { ncPrintChar(' '); } while ((uint64_t) (currentVideo - video) % (width * 2) != 0);
     ncCheckEndOfScreen();
 }
 
@@ -58,8 +50,7 @@ void ncClear() {
 
     for (i = 0; i < height * width; i++) {
         video[i * 2] = ' ';
-        video[i * 2 + 1] =
-            0x00;// Que en principio todos los borrados queden en negro.
+        video[i * 2 + 1] = 0x00;
     }
 
     currentVideo = video;
