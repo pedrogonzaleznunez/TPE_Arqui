@@ -14,7 +14,7 @@ void processCommands(char *command);
 // cuando ingresa un comando no valido
 void invalidCommand();
 
-int checkArguments(int argsExpected, int argsRead, char *command);
+int correctArguments(int argsExpected, int argsRead, char *command);
 
 // commands
 void help();
