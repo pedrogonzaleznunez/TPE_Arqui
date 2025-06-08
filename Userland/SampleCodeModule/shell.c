@@ -12,8 +12,8 @@ int isEmpty(char *command);
 void putLineInBuffer(char *line, int isCommand);
 void printReg(char *regName, int64_t value);
 char *getCommandFromHistory(int historyIndex);
-void checkArguments(int argsExpected, int argsRead, char *command, char *instruction,
-                    char *arg1);
+int checkArguments(int argsExpected, int argsRead, char *command);
+void checkArgumentsTime(char * arg1, int argsRead);
 
 extern void throwZeroDivisionException(void);
 extern void throwInvalidOpcodeException(void);
@@ -155,45 +155,45 @@ char *getCommandFromHistory(int historyIndex) {
 void processCommands(char *command) {
     char instruction[MAX_COMMAND_LENGTH];// ver tema longitud
     char arg1[MAX_COMMAND_LENGTH];
+    char arg2[MAX_COMMAND_LENGTH];
 
-
-    printf("[DEBUG-BEFORE TRIM] command='%s'\n", command);
     trim(command);
-    printf("[DEBUG-AFTER TRIM] command='%s'\n", command);
 
-    // sscanf no funciona como esperado
-
-    int argsRead = sscanf(command, "%s %s", instruction, arg1);
-    printf("[DEBUG] command='%s' | instruction='%s' | arg1='%s' |argsRead=%d\n", command,
-           instruction, arg1, argsRead);
-
-    for (int j = 0; command[j]; j++) {
-        printf("command[%d] = '%c' (%d)\n", j, command[j], command[j]);
-    }
-
-
-    // argumentos variables
+    int argsRead = sscanf(command, "%s %s %s", instruction, arg1, arg2);
+    int correct;
 
     if (strcmp(instruction, "help") == 0) {
-        checkArguments(1, argsRead, "help", instruction, arg1);
-        help();
+        correct = checkArguments(1, argsRead, "help");
+        if(correct){
+            help();
+        }
     } else if (strcmp(instruction, "zoomin") == 0) {
         zoomIn();
     } else if (strcmp(instruction, "zoomout") == 0) {
         zoomOut();
     } else if (strcmp(instruction, "registers") == 0) {
-        getRegs();
+        if(correct = checkArguments(1, argsRead, "registers")){
+            getRegs();
+        }
     } else if (strcmp(instruction, "clear") == 0) {
-        // check_arguments(args_expected, args_read, msg);
-        // Lo agregamos para c/u
-        clear();
+        if(correct = checkArguments(1, argsRead, "clear")){
+            clear();
+        }
     } else if (strcmp(instruction, "time") == 0) {
-        getTime();
+        processTime(arg1, argsRead);
+        //getTime();
     } else if (strcmp(instruction, "divzero") == 0) {
-        throwZeroDivisionException();
+        if(correct = checkArguments(1, argsRead, "divzero")){
+            throwZeroDivisionException();
+        }
     } else if (strcmp(instruction, "opcode") == 0) {
-        throwInvalidOpcodeException();
+        if(correct = checkArguments(1, argsRead, "opcode")){
+            throwInvalidOpcodeException();
+        }
     } else if (strcmp(instruction, "pongis") == 0) {
+        if(correct = checkArguments(1, argsRead, "pongis")){
+            // start game
+        }
         invalidCommand();
     } else if (isEmpty(instruction)) {
         return;
@@ -223,7 +223,7 @@ void help() {
                             "opcode: prompts invalid operation code exception.",
                             "pongis: starts pongis game.",
                             "registers: lists saved registers.",
-                            "time: displays current time.",
+                            "time: displays current time.\n\tValid arguements:\n\t\tnone\n\t\th for hour\n\t\td for date\n\t\ty for year",
                             "zoomin: zooms in text on the screen.",
                             "zoomout: zooms out text on the screen.",
                             "echo %s: echoes text input."};
@@ -303,8 +303,9 @@ void getTime() {
     time_t time;
     sys_get_time(&time);
     char buffer[50];
-    sprintf(buffer, "Local time: %d/%d/%d %d:%d:%d", time.day, time.month, time.year,
+    sprintf(buffer, "Local time: %s%d/%s%d/%d %d:%d:%d [DD/MM/YY HH/MM/SS]", (time.day <= 9)? "0" : "", time.day, (time.month<= 9)? "0" : "", time.month, time.year,
             time.hours, time.minutes, time.seconds);
+
     puts(buffer);
     putLineInBuffer(buffer, 0);
     return;
@@ -324,12 +325,47 @@ void putLineInBuffer(char *line, int isCommand) {
     return;
 }
 
-void checkArguments(int argsExpected, int argsRead, char *command, char *instruction,
-                    char *arg1) {
+int checkArguments(int argsExpected, int argsRead, char *command) {
     if (argsRead != argsExpected) {
         puts("Unexpected arguments...\n");
-        printf("Expected %d but found %d:\n", argsExpected, argsRead);
-        printf("%s %s\n", instruction, argsRead == 2 ? arg1 : "");
-        printf("Correct use: $ %s %s \n", command, argsExpected == 2 ? "arg1" : "");
+        printf("Expected %d but found %d:\n", argsExpected - 1, argsRead - 1);
+        printf("Correct use: $ %s %s \n", command, argsExpected == 2 ? "arg1" : ""); // tenemos comandos que necesitan un argumento como maximo
+        return 0;
+    }
+    return 1; // todo bien
+}
+
+void processTime(char * arg1, int argsRead){
+    if(argsRead == 1){
+        getTime(); // el tiempo generico
+    } else {
+        int correct = checkArguments(2, argsRead, "time");
+        if(!correct){
+            return;
+        }
+        time_t time;
+        sys_get_time(&time);
+        char buffer[50];
+            if(*(arg1+1)!= '\0'){ // esta bien porque arg1 es un vector de chars que yo se tiene mas de una posicion
+                
+                puts(TIME_ARGS_MSG);
+                return;
+            }
+            switch(*arg1){
+                case('h'):
+                    sprintf(buffer, "Local hour: %d:%d:%d", time.hours, time.minutes, time.seconds);
+                    break;
+                case('d'):
+                    sprintf(buffer, "Local date: %s%d/%s%d/%d [DD/MM/YY]", (time.day <= 9)? "0" : "", time.day, (time.month<= 9)? "0" : "", time.month, time.year);
+                    break;
+                case('y'):
+                    sprintf(buffer, "Local current year: 20%d", time.year); // actualizar en 75 años!!
+                    break;
+                default:
+                    puts(TIME_ARGS_MSG);
+                    return;
+            }
+        puts(buffer);
+        putLineInBuffer(buffer, 0);
     }
 }
