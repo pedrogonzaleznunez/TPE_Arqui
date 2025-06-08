@@ -353,7 +353,7 @@ void processTime(char * arg1, int argsRead){
             }
             switch(*arg1){
                 case('h'):
-                    sprintf(buffer, "Local hour: %d:%d:%d", time.hours, time.minutes, time.seconds);
+                    sprintf(buffer, "Local hour: %d:%d:%d [HH:MM:SS]", time.hours, time.minutes, time.seconds);
                     break;
                 case('d'):
                     sprintf(buffer, "Local date: %s%d/%s%d/%d [DD/MM/YY]", (time.day <= 9)? "0" : "", time.day, (time.month<= 9)? "0" : "", time.month, time.year);
