@@ -1,8 +1,10 @@
 #include <keyboard.h>
 
 #define BUFFER_DEFAULT_SIZE 1024
+#define MAX_SCAN_CODE       0x53
 
 static uint8_t buffer[BUFFER_DEFAULT_SIZE] = {0};
+static uint8_t keysState[MAX_SCAN_CODE + 1] = {0};
 static uint32_t writeIdx = 0;
 static uint32_t readIdx = 0;
 
@@ -106,7 +108,7 @@ static char printable_shift[] = {
 };
 
 char getChar(uint8_t scanCode) {
-    if (scanCode > 0 && scanCode < 0x53) {
+    if (scanCode > 0 && scanCode < MAX_SCAN_CODE) {
         char aux = printable[scanCode];
 
         if ((caps_lock_on) && (aux >= 'a' && aux <= 'z')) {
@@ -149,11 +151,14 @@ void keyboardHandler() {
 
     // si no es un release, que lo guarde en el buffer
     if (!(aux >> 7)) {
+        keysState[key] = 1;
         char c = getChar(key);
         if (!isBufferFull()) {
             buffer[writeIdx++] = c;
             writeIdx %= BUFFER_DEFAULT_SIZE;
         }
+    } else {
+        keysState[key & 0x7F] = 0;
     }
 }
 
@@ -173,4 +178,9 @@ int isBufferEmpty() {
 
 int isBufferFull() {
     return (writeIdx + 1) % BUFFER_DEFAULT_SIZE == readIdx;
+}
+
+int8_t getKeyState(uint8_t scancode) {
+    if (scancode > 0 && scancode <= MAX_SCAN_CODE) { return keysState[scancode]; }
+    return -1;
 }
