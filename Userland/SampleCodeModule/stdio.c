@@ -9,6 +9,7 @@ static char buffer[64] = {0};
 
 static void printBase(int fd, int num, int base);
 void vfprintf(int fd, const char *format, va_list args);
+void skip_whitespace(const char *buffer, int *idx);
 //static
 uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
 
@@ -93,109 +94,124 @@ void vfprintf(int fd, const char *format, va_list args) {
 }
 
 int vscanf(const char *format, va_list args) {
-    int i = 0;
-    int args_read = 0;
+    char buffer[4096];
     char c;
-    while (format[i] != 0) {
-        switch (format[i]) {
-            case '%':
-                i++;
-                switch (format[i]) {
-                    case 'd':
-                        int64_t num = 0;
-                        uint8_t negative = 0;
+    uint32_t bytes_read = 0;
 
-                        c = getchar();
-
-                        if (c != '-' && (c < '0' || c > '9')) {
-                            while ((c = getchar()) != '\n');// empty input buffer
-                            break;
-                        };
-
-                        do {
-                            if (c == '-') negative = 1;
-                            else
-                                num = num * 10 + c - '0';
-                        } while (((c = getchar()) >= '0' && c <= '9') ||
-                                 (num == 0 && c == '-'));
-
-                        *va_arg(args, int *) = num * (negative ? -1 : 1);
-                        args_read++;
-                        break;
-                    case 'c':
-                        *va_arg(args, char *) = getchar();
-                        args_read++;
-                        break;
-                    case 's':
-                        char *str = va_arg(args, char *);
-                        while ((c = getchar()) != ' ' && c != '\n') {
-                            *str = c;
-                            str++;
-                        }
-                        *str = 0;
-                        args_read++;
-                        break;
-                }
-        }
-        i++;
+    while ((c = getchar()) != '\n' && c && bytes_read < sizeof(buffer)) {
+        buffer[bytes_read++] = c;
     }
-    return args_read;
+
+    buffer[bytes_read] = 0;
+
+    return vsscanf(buffer, format, args);
+}
+
+void skip_whitespace(const char *buffer, int *idx) {
+    while (buffer[*idx] == ' ' || buffer[*idx] == '\t' || buffer[*idx] == '\n' ||
+           buffer[*idx] == '\r') {
+        (*idx)++;
+    }
 }
 
 int vsscanf(const char *buffer, const char *format, va_list args) {
     int form_i = 0;
     int buf_i = 0;
     int args_read = 0;
-    while (format[form_i] != 0) {
-        switch (format[form_i]) {
-            case '%':
-                form_i++;
-                switch (format[form_i]) {
-                    case 'd': {
-                        int num = 0;
-                        uint8_t read_num = 0, negative = 0;
 
-                        if (buffer[buf_i] != '-' &&
-                            (buffer[buf_i] < '0' || buffer[buf_i] > '9'))
-                            break;
+    while (format[form_i] != '\0') {
+        // si hay un modificador:
+        if (format[form_i] == '%') {
+            form_i++;// omitimos el símbolo
+            switch (format[form_i]) {
+                case 'd': {
+                    skip_whitespace(buffer, &buf_i);// saltar espacios antes del número
 
-                        if (buffer[buf_i] == '-') {
-                            negative = 1;
-                            buf_i++;
-                        };
+                    if (buffer[buf_i] == '\0') break;// fin de buffer
 
-                        while (buffer[buf_i] >= '0' && buffer[buf_i] <= '9') {
-                            num = num * 10 + buffer[buf_i] - '0';
-                            buf_i++;
-                            read_num = 1;
-                        }
+                    int num = 0;
+                    uint8_t negative = 0, read_num = 0;
 
+                    // signo
+                    if (buffer[buf_i] == '-') {
+                        negative = 1;
+                        buf_i++;
+                    } else if (buffer[buf_i] == '+') {
+                        buf_i++;
+                    }
+
+                    // tomar los dígitos
+                    while (buffer[buf_i] >= '0' && buffer[buf_i] <= '9' &&
+                           buffer[buf_i] != '\0') {
+                        num = num * 10 + buffer[buf_i] - '0';
+                        buf_i++;
+                        read_num++;
+                    }
+
+                    if (read_num > 0) {
                         *va_arg(args, int *) = num * (negative ? -1 : 1);
-                        args_read += read_num;
-                        break;
-                    }
-                    case 'c': {
-                        *va_arg(args, char *) = buffer[buf_i++];
                         args_read++;
-                        break;
+                    } else {
+                        return args_read;// no se leyó el número. Termina
                     }
-                    case 's': {
-                        char *str = va_arg(args, char *);
-                        while (buffer[buf_i] != ' ' && buffer[buf_i] != '\n' &&
-                               buffer[buf_i] != 0) {
-                            *(str++) = buffer[buf_i];
-                            buf_i++;
-                        }
-                        *str = 0;
-                        args_read++;
-                        break;
-                    }
-                    default:
-                        break;
+                    break;
                 }
+                case 'c': {
+                    // %c no salta whitespace
+                    if (buffer[buf_i] == '\0') break;
+                    *va_arg(args, char *) = buffer[buf_i++];
+                    args_read++;
+                    break;
+                }
+                case 's': {
+                    // saltar espacios antes del string
+                    skip_whitespace(buffer, &buf_i);
+
+                    if (buffer[buf_i] == '\0') break;
+
+                    char *str = va_arg(args, char *);
+                    int chars_read = 0;
+
+                    // leer hasta whitespace o fin de buffer
+                    while (buffer[buf_i] != ' ' && buffer[buf_i] != '\t' &&
+                           buffer[buf_i] != '\n' && buffer[buf_i] != '\r' &&
+                           buffer[buf_i] != '\0') {
+                        *str = buffer[buf_i++];
+                        str++;
+                        chars_read++;
+                    }
+
+                    *str = '\0';
+
+                    if (chars_read > 0) {
+                        args_read++;
+                    } else {
+                        return args_read;// Termina
+                    }
+                    break;
+                }
+
+                default:
+                    // especificador no reconocido. Termina
+                    return args_read;
+            }
+
+            form_i++;// avanzar después del especificador
+
+        } else {
+            // debe coincidir exactamente
+            if (format[form_i] == ' ') {
+                skip_whitespace(buffer, &buf_i);// un espacio equivale a cualquier espacio
+            } else {
+                if (buffer[buf_i] != format[form_i]) {
+                    return args_read;// no coincide. Termina.
+                }
+                buf_i++;
+            }
+            form_i++;
         }
-        form_i++;
     }
+
     return args_read;
 }
 
