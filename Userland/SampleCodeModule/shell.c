@@ -160,34 +160,36 @@ void processCommands(char *command) {
     trim(command);
 
     int argsRead = sscanf(command, "%s %s %s", instruction, arg1, arg2);
-    int correct;
 
     if (strcmp(instruction, "help") == 0) {
-        correct = checkArguments(1, argsRead, "help");
-        if(correct){
+        if(correctArguments(1, argsRead, "help")){
             help();
         }
     } else if (strcmp(instruction, "zoomin") == 0) {
-        zoomIn();
+        if(correctArguments(1, argsRead, "zoomin")){
+            zoomIn();
+        }
     } else if (strcmp(instruction, "zoomout") == 0) {
-        zoomOut();
+        if(correctArguments(1, argsRead, "zoomout")){
+            zoomOut();
+        }
     } else if (strcmp(instruction, "registers") == 0) {
-        if(correct = checkArguments(1, argsRead, "registers")){
+        if(correctArguments(1, argsRead, "registers")){
             getRegs();
         }
     } else if (strcmp(instruction, "clear") == 0) {
-        if(correct = checkArguments(1, argsRead, "clear")){
+        if(correctArguments(1, argsRead, "clear")){
             clear();
         }
     } else if (strcmp(instruction, "time") == 0) {
         processTime(arg1, argsRead);
         //getTime();
     } else if (strcmp(instruction, "divzero") == 0) {
-        if(correct = checkArguments(1, argsRead, "divzero")){
+        if(correctArguments(1, argsRead, "divzero")){
             throwZeroDivisionException();
         }
     } else if (strcmp(instruction, "opcode") == 0) {
-        if(correct = checkArguments(1, argsRead, "opcode")){
+        if(correctArguments(1, argsRead, "opcode")){
             throwInvalidOpcodeException();
         }
     } else if(strcmp(instruction, "echo") == 0){
@@ -199,7 +201,7 @@ void processCommands(char *command) {
         }
 
     } else if (strcmp(instruction, "pongis") == 0) {
-        if(correct = checkArguments(1, argsRead, "pongis")){
+        if(correctArguments(1, argsRead, "pongis")){
             // start game
         }
         invalidCommand();
@@ -333,11 +335,12 @@ void putLineInBuffer(char *line, int isCommand) {
     return;
 }
 
-int checkArguments(int argsExpected, int argsRead, char *command) {
+int correctArguments(int argsExpected, int argsRead, char *command) {
     if (argsRead != argsExpected) {
-        puts("Unexpected arguments...\n");
-        printf("Expected %d but found %d:\n", argsExpected - 1, argsRead - 1);
-        printf("Correct use: $ %s %s \n", command, argsExpected == 2 ? "arg1" : ""); // tenemos comandos que necesitan un argumento como maximo
+        char buffer[50];
+        sprintf(buffer, "Unexpected arguments...\nExpected %d but found %d:\nCorrect use: $ %s %s \n", argsExpected - 1, argsRead - 1, command, argsExpected == 2 ? "arg1" : "");
+        puts(buffer);
+        putLineInBuffer(buffer, 0);
         return 0;
     }
     return 1; // todo bien
@@ -347,15 +350,14 @@ void processTime(char * arg1, int argsRead){
     if(argsRead == 1){
         getTime(); // el tiempo generico
     } else {
-        int correct = checkArguments(2, argsRead, "time");
-        if(!correct){
+        if(correctArguments(2, argsRead, "time")){
             return;
         }
         time_t time;
         sys_get_time(&time);
         char buffer[50];
             if(*(arg1+1)!= '\0'){ // esta bien porque arg1 es un vector de chars que yo se tiene mas de una posicion
-                
+                putLineInBuffer(TIME_ARGS_MSG, 0);
                 puts(TIME_ARGS_MSG);
                 return;
             }
@@ -370,6 +372,7 @@ void processTime(char * arg1, int argsRead){
                     sprintf(buffer, "Local current year: 20%d", time.year); // actualizar en 75 años!!
                     break;
                 default:
+                    putLineInBuffer(TIME_ARGS_MSG, 0);
                     puts(TIME_ARGS_MSG);
                     return;
             }
