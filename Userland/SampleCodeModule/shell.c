@@ -1,4 +1,5 @@
 #include <myStrings.h>
+#include <pongis.h>
 #include <shell.h>
 #include <stdio.h>
 #include <syscalls.h>
@@ -201,10 +202,9 @@ void processCommands(char *command) {
         }
 
     } else if (strcmp(instruction, "pongis") == 0) {
-        if(correctArguments(1, argsRead, "pongis")){
-            // start game
-        }
-        invalidCommand();
+
+        startGame();
+
     } else if (isEmpty(instruction)) {
         return;
     } else {

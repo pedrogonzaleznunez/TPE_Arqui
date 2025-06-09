@@ -81,6 +81,7 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
         // sleep
         case 23:
             int64_t ticks_sleep = va_arg(arguments, int64_t);
+            _sti();
             timerWait(ticks_sleep);
             return 1;
 
