@@ -349,16 +349,16 @@ int correctArguments(int argsExpected, int argsRead, char *command) {
 void processTime(char * arg1, int argsRead){
     if(argsRead == 1){
         getTime(); // el tiempo generico
-    } else {
-        if(correctArguments(2, argsRead, "time")){
-            return;
-        }
+        return;
+    } 
+    
+    if(correctArguments(2, argsRead, "time")){        
         time_t time;
         sys_get_time(&time);
         char buffer[50];
-            if(*(arg1+1)!= '\0'){ // esta bien porque arg1 es un vector de chars que yo se tiene mas de una posicion
-                putLineInBuffer(TIME_ARGS_MSG, 0);
+            if(*(arg1+1) != '\0'){ // esta bien porque arg1 es un vector de chars que yo se tiene mas de una posicion
                 puts(TIME_ARGS_MSG);
+                putLineInBuffer(TIME_ARGS_MSG, 0);
                 return;
             }
             switch(*arg1){
