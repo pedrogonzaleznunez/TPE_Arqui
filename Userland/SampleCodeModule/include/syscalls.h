@@ -68,6 +68,8 @@ int64_t sys_stop_beep(void);
 
 int64_t sys_clear_screen(void);
 
+int64_t sys_fill_screen(uint32_t hexColor);
+
 int64_t sys_draw_circle(uint64_t pos_x, uint64_t pos_y, uint64_t radius,
                         uint32_t hexColor);
 

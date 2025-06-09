@@ -8,9 +8,9 @@
 // #define CHARACTER_COLOR 0x3bf4c4
 #define PLAYER_COLOR_1 0x0033FF
 #define PLAYER_COLOR_2 0x024A86
-#define ENEMY_COLOR 0xfdfdfd
-#define BALL_COLOR 0xffd714
-#define HOLE_COLOR 0x0f2120
+#define ENEMY_COLOR    0xfdfdfd
+#define BALL_COLOR     0xffd714
+#define HOLE_COLOR     0x0f2120
 
 
 #define RADIUS_FIX 15// Ajuste para la colisión con el hoyo
@@ -40,7 +40,7 @@
 
 // ###### BALL INITIAL  ######
 
-#define BALL_RADIUS 15 // Radio de la bola
+#define BALL_RADIUS 15// Radio de la bola
 
 // Initial position of the ball per level
 // LEVEL 1
@@ -55,8 +55,8 @@
 #define BALL_INITIAL_X_L3 100
 #define BALL_INITIAL_Y_L3 300
 // ###### HOLE INITIAL  ######
-#define HOLE_RADIUS 20 // Radio del hoyo
-#define HOLE_SHADOW_RADIUS 22 // Radio de la sombra del hoyo
+#define HOLE_RADIUS        20// Radio del hoyo
+#define HOLE_SHADOW_RADIUS 22// Radio de la sombra del hoyo
 
 // Initial position of the hole per level
 #define HOLE_INITIAL_X_L1 700
@@ -93,6 +93,16 @@
 #define HOLE_RADIUS   20
 
 #define SPEED 5
+
+// ###### SCANCODES ######
+#define W_SCANCODE           0x11
+#define A_SCANCODE           0x1E
+#define S_SCANCODE           0x1F
+#define D_SCANCODE           0x20
+#define ARROW_UP_SCANCODE    0x48
+#define ARROW_DOWN_SCANCODE  0x50
+#define ARROW_LEFT_SCANCODE  0x4B
+#define ARROW_RIGHT_SCANCODE 0x4D
 
 // ###### FUNCTIONS ######
 void startGame(void);
