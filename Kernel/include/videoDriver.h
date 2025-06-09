@@ -30,4 +30,6 @@ void drawRec(uint64_t from_x, uint64_t from_y, uint64_t to_x, uint64_t to_y,
 
 void fillScreen(uint32_t hexColor);
 
+void setMultiplier(int more);
+
 #endif

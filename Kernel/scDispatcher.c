@@ -53,9 +53,20 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
             deleteChar();
             return 1;
 
+        // get key state
         case 5:
             int scancode_getState = va_arg(arguments, int);
             return getKeyState(scancode_getState);
+
+        // zoom in
+        case 6:
+            setMultiplier(1);
+            return 1;
+
+        // zoom out
+        case 7:
+            setMultiplier(0);
+            return 1;
 
         // start beep
         case 20:

@@ -54,6 +54,10 @@ int64_t sys_delete_char(void);
 
 int64_t sys_get_key_state(int scancode);
 
+int64_t sys_zoom_in(void);
+
+int64_t sys_zoom_out(void);
+
 int64_t sys_sleep(int64_t ticks);
 
 // ##################### sound syscalls ######################

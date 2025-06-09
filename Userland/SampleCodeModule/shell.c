@@ -6,7 +6,7 @@
 
 #include <stddef.h>
 
-#define MAX_LINES_SAVED 40
+#define MAX_LINES_SAVED 60
 
 void activateShell(void);
 int isEmpty(char *command);
@@ -16,6 +16,7 @@ char *getCommandFromHistory(int historyIndex);
 int checkArguments(int argsExpected, int argsRead, char *command);
 void checkArgumentsTime(char *arg1, int argsRead);
 void processTime(char *arg1, int argsRead);
+void printLines(void);
 
 extern void throwZeroDivisionException(void);
 extern void throwInvalidOpcodeException(void);
@@ -33,14 +34,14 @@ static int totalLines = 0;
 static int commandCount = 0;
 
 void shell(void) {
-    puts(WELCOME_MESSAGE);
-    putLineInBuffer(WELCOME_MESSAGE, 0);
-    help();
-
     firstLine = 0;
     lastLine = 0;
     totalLines = 1;
     currentHistoryIndex = -1;
+
+    puts(WELCOME_MESSAGE);
+    putLineInBuffer(WELCOME_MESSAGE, 0);
+    help();
 
     while (1) {// agregar forma de salir?? con un boolean (int) done/exit/quit
         activateShell();
@@ -124,8 +125,10 @@ void activateShell(void) {
     }
 
     if (!isEmpty(shell_buffer)) {
-        char fullLine[MAX_COMMAND_LENGTH + strlen(PROMPT_SYMBOL)];
+        char
+            fullLine[MAX_COMMAND_LENGTH + strlen(PROMPT_SYMBOL) + 1];// + 1 por el espacio
         strcpy(fullLine, PROMPT_SYMBOL);
+        strcat(fullLine, " ");
         strcat(fullLine, shell_buffer);
         putLineInBuffer(fullLine, 1);
     }
@@ -143,7 +146,8 @@ char *getCommandFromHistory(int historyIndex) {
         if (lineBuffer[index].isCommand == 1) {
             if (commandsFound == historyIndex) {
                 // devuelvo la parte del comando sin el prompt
-                return lineBuffer[index].characters + strlen(PROMPT_SYMBOL);
+                return lineBuffer[index].characters + strlen(PROMPT_SYMBOL) +
+                       1;// + 1 por el espacio
             }
             commandsFound++;
         }
@@ -175,7 +179,6 @@ void processCommands(char *command) {
         if (correctArguments(1, argsRead, "clear")) { clear(); }
     } else if (strcmp(instruction, "time") == 0) {
         processTime(arg1, argsRead);
-        //getTime();
     } else if (strcmp(instruction, "divzero") == 0) {
         if (correctArguments(1, argsRead, "divzero")) { throwZeroDivisionException(); }
     } else if (strcmp(instruction, "opcode") == 0) {
@@ -183,17 +186,20 @@ void processCommands(char *command) {
     } else if (strcmp(instruction, "echo") == 0) {
         if (argsRead == 1) {// no tiene argumentos
             puts("\n");
+            putLineInBuffer("\n", 0);
         } else {
             command += 5;
+            char buffer[MAX_COMMAND_LENGTH];
+            strcpy(buffer, command);
             printf("%s\n", command);
+            putLineInBuffer(buffer, 0);
         }
 
     } else if (strcmp(instruction, "pongis") == 0) {
-
         startGame();
+        // + putLineInBuffer si hace falta
         clear();
-        // printLines(); TODO imprime todas las líneas guardadas en lineBuffer (se utiliza en zoomIn y zoomOut)
-
+        printLines();
     } else if (isEmpty(instruction)) {
         return;
     } else {
@@ -237,19 +243,16 @@ void help() {
     }
 }
 
-/*
-    cuando nos llegue zoom in
-    clearScreen();
-    for(int i = 0; i < lines; i++){
-        puts(Promtp);
-        puts(lineBuffer[i].characters);
-    }
-*/
-
 void zoomIn() {
+    sys_zoom_in();
+    clear();
+    printLines();
 }
 
 void zoomOut() {
+    sys_zoom_out();
+    clear();
+    printLines();
 }
 
 void getRegs() {
@@ -294,6 +297,8 @@ void printReg(char *regName, int64_t value) {
     putLineInBuffer(buffer, 0);
 }
 
+// problema: qué pasa si hago zoomin/zoomout después de un clear
+// me vuelve a escribir todos los comandos
 void clear() {
     sys_clear_screen();
     return;
@@ -323,6 +328,15 @@ void putLineInBuffer(char *line, int isCommand) {
         firstLine = (firstLine + 1) % MAX_LINES_SAVED;
     } else {
         totalLines++;
+    }
+    return;
+}
+
+void printLines(void) {
+    int aux = firstLine;
+    while (aux != lastLine) {
+        printf("%s\n", lineBuffer[aux].characters);
+        aux = (aux + 1) % MAX_LINES_SAVED;
     }
     return;
 }

@@ -23,6 +23,10 @@ int isOutOfBounds(uint64_t x, uint64_t y);
 void moveCurrentX();
 int checkSpecialCharacter(char c);
 
+static double multipliers[] = {0.9, 1, 1.25};
+static uint8_t currentMult = 1;
+double multiplier = 1;
+
 struct vbe_mode_info_structure {
     uint16_t attributes; // deprecated, only bit 7 should be of interest to you, and it
                          // indicates the mode supports a linear frame buffer.
@@ -93,7 +97,8 @@ void putCharInPos(char c, uint32_t hexColor, uint64_t x, uint64_t y) {
 
     for (uint8_t auxY = 0; auxY < charHeight; auxY++) {
         for (uint8_t auxX = 0; auxX < charWidth; auxX++) {
-            if ((charBitmap[auxY] >> (charWidth - 1 - auxX)) & 0x01) {
+            if ((charBitmap[(int) (auxY / multiplier)] >> (charWidth - 1 - auxX)) &
+                0x01) {
                 putPixel(hexColor, x + auxX, y + auxY);
             }
         }
@@ -336,4 +341,14 @@ void fillScreen(uint32_t hexColor) {
 
     currentX = LEFT_MARGIN;
     currentY = TOP_MARGIN;
+}
+
+void setMultiplier(int more) {
+    if (more) {
+        if (currentMult != sizeof(multipliers) / sizeof(double) - 1) {
+            multiplier = multipliers[++currentMult];
+        }
+    } else {
+        if (currentMult != 0) { multiplier = multipliers[--currentMult]; }
+    }
 }

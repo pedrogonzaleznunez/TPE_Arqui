@@ -9,6 +9,8 @@
 static uint8_t font_width = DEFAULT_WIDTH;
 static uint8_t font_height = DEFAULT_HEIGHT;
 
+extern double multiplier;
+
 static uint8_t fontBitmap[] = {
     /*Unicode: U+0020 ( ) , Width: 5 */
     0x00,//.....
@@ -1818,11 +1820,11 @@ static uint8_t fontBitmap[] = {
 };
 
 uint8_t getFontWidth() {
-    return font_width;
+    return font_width * multiplier;
 }
 
 uint8_t getFontHeight() {
-    return font_height;
+    return font_height * multiplier;
 }
 
 uint8_t *getFontChar(char c) {

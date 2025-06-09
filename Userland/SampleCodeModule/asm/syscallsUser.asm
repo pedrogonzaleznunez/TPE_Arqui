@@ -4,6 +4,8 @@ GLOBAL sys_get_regs
 GLOBAL sys_get_time
 GLOBAL sys_delete_char
 GLOBAL sys_get_key_state
+GLOBAL sys_zoom_in
+GLOBAL sys_zoom_out
 GLOBAL sys_sleep
 GLOBAL sys_start_beep
 GLOBAL sys_stop_beep
@@ -42,6 +44,12 @@ sys_delete_char:
 
 sys_get_key_state:
     sysCallMaster 5
+
+sys_zoom_in:
+    sysCallMaster 6
+
+sys_zoom_out:
+    sysCallMaster 7
 
 sys_sleep:
     sysCallMaster 23
