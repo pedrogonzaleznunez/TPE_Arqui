@@ -53,6 +53,10 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
             deleteChar();
             return 1;
 
+        case 5:
+            int scancode_getState = va_arg(arguments, int);
+            return getKeyState(scancode_getState);
+
         // start beep
         case 20:
             uint32_t frecuency_start_beep = va_arg(arguments, uint32_t);

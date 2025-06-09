@@ -31,4 +31,6 @@ int isBufferEmpty();
 
 int isBufferFull();
 
+int8_t getKeyState(uint8_t scancode);
+
 #endif
