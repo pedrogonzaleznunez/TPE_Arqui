@@ -6,7 +6,7 @@
 
 #include <stddef.h>
 
-#define MAX_LINES_SAVED 60
+#define MAX_LINES_SAVED 100
 
 void activateShell(void);
 int isEmpty(char *command);
@@ -28,6 +28,7 @@ typedef struct line {
 
 static line_t lineBuffer[MAX_LINES_SAVED];
 static int firstLine = 0;
+static int toPrintFirstLine = 0;
 static int lastLine = 0;
 static int currentHistoryIndex = -1;// navegación de historial
 static int totalLines = 0;
@@ -35,6 +36,7 @@ static int commandCount = 0;
 
 void shell(void) {
     firstLine = 0;
+    toPrintFirstLine = firstLine;
     lastLine = 0;
     totalLines = 1;
     currentHistoryIndex = -1;
@@ -176,7 +178,10 @@ void processCommands(char *command) {
     } else if (strcmp(instruction, "registers") == 0) {
         if (correctArguments(1, argsRead, "registers")) { getRegs(); }
     } else if (strcmp(instruction, "clear") == 0) {
-        if (correctArguments(1, argsRead, "clear")) { clear(); }
+        if (correctArguments(1, argsRead, "clear")) {
+            clear();
+            toPrintFirstLine = lastLine;
+        }
     } else if (strcmp(instruction, "time") == 0) {
         processTime(arg1, argsRead);
     } else if (strcmp(instruction, "divzero") == 0) {
@@ -199,6 +204,7 @@ void processCommands(char *command) {
         startGame();
         // + putLineInBuffer si hace falta
         clear();
+        toPrintFirstLine = lastLine;
         printLines();
     } else if (isEmpty(instruction)) {
         return;
@@ -333,7 +339,7 @@ void putLineInBuffer(char *line, int isCommand) {
 }
 
 void printLines(void) {
-    int aux = firstLine;
+    int aux = toPrintFirstLine;
     while (aux != lastLine) {
         printf("%s\n", lineBuffer[aux].characters);
         aux = (aux + 1) % MAX_LINES_SAVED;
