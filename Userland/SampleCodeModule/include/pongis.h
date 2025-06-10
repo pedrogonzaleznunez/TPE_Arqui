@@ -66,9 +66,13 @@
 #define BALL_INITIAL_Y_L3 300
 
 
-// ###### HOLE INITIAL  ######
-#define HOLE_RADIUS        20// Radio del hoyo
-#define HOLE_SHADOW_RADIUS 22// Radio de la sombra del hoyo
+// ###### HOLE ######
+#define HOLE_RADIUS_L1        30// Radio del hoyo
+#define HOLE_SHADOW_RADIUS_L1    32// Radio de la sombra del hoyo
+#define HOLE_RADIUS_L2        20// Radio del hoyo
+#define HOLE_SHADOW_RADIUS_L2    22// Radio de la sombra del hoyo
+#define HOLE_RADIUS_L3        15// Radio del hoyo
+#define HOLE_SHADOW_RADIUS_L3    17// Radio de la sombra del hoyo
 
 // Initial position of the hole per level
 #define HOLE_INITIAL_X_L1 700

@@ -25,7 +25,10 @@ typedef Player *PlayerPtr;
 
 typedef struct {
     int x, y;// Position of the hole
+    int radius;
+    int shadow_radius;
 } Hole;
+
 typedef Hole *HolePtr;
 
 typedef struct {
@@ -47,6 +50,12 @@ Point initialPosBall[] = {{BALL_INITIAL_X_L1, BALL_INITIAL_Y_L1},
 Point initialPosHole[] = {{HOLE_INITIAL_X_L1, HOLE_INITIAL_Y_L1},
                           {HOLE_INITIAL_X_L2, HOLE_INITIAL_Y_L2},
                           {HOLE_INITIAL_X_L3, HOLE_INITIAL_Y_L3}};
+
+const int hole_size[][2] = {
+            {HOLE_RADIUS_L1, HOLE_SHADOW_RADIUS_L1},
+            {HOLE_RADIUS_L2, HOLE_SHADOW_RADIUS_L2},
+            {HOLE_RADIUS_L3, HOLE_SHADOW_RADIUS_L3}
+};
 
 // ################################# VARIABLES #################################
 static Ball ball;
@@ -235,8 +244,8 @@ void drawHole(int l) {
     if (l < 0 || l > MAX_LEVEL) { return; }
     hole.x = initialPosHole[l - 1].x;
     hole.y = initialPosHole[l - 1].y;
-    sys_draw_circle(hole.x, hole.y, HOLE_SHADOW_RADIUS, SHADOW_COLOR);
-    sys_draw_circle(hole.x, hole.y, HOLE_RADIUS, HOLE_COLOR);
+    sys_draw_circle(hole.x, hole.y, hole.shadow_radius, SHADOW_COLOR);
+    sys_draw_circle(hole.x, hole.y, hole.radius, HOLE_COLOR);
 }
 
 void kickBallIfNear(PlayerPtr player) {
@@ -273,10 +282,11 @@ void checkCollisions(void) {
     if (playerCount > 1) { checkCollisionsPlayer(&player2); }
 
     // 2. Colisión con hoyo
-    int r_sum = BALL_RADIUS + HOLE_RADIUS;
+    int r_sum = BALL_RADIUS + hole.radius;
     if (distanceSquared(ball.x, ball.y, hole.x, hole.y) <= r_sum * r_sum) {
         scored = 1;
         level++;// Incrementar el nivel
+
         if (level > MAX_LEVEL)
             end_of_game = 1;// Terminar el juego si se completan todos los niveles
         sys_sleep(5);
@@ -328,6 +338,8 @@ void newLevel(int l) {
         initializePlayer(l, &player2, initialPosPlayer2, PLAYER_COLOR_2);
     }
     printScore(&player1, &player2);
+    hole.radius = hole_size[l - 1][0];
+    hole.shadow_radius = hole_size[l - 1][1];
     drawHole(l);
     drawBall(l);
     scored = 0;// Reiniciar el estado de embocada
