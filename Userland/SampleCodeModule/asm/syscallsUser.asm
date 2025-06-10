@@ -17,6 +17,8 @@ GLOBAL sys_fill_screen
 GLOBAL sys_draw_pixel
 GLOBAL sys_chars_width
 GLOBAL sys_chars_height
+GLOBAL sys_get_screen_width
+GLOBAL sys_get_screen_height
 SECTION .text
 
 %macro sysCallMaster 1
@@ -86,3 +88,10 @@ sys_chars_width:
 
 sys_chars_height:
     sysCallMaster 36
+
+sys_get_screen_width:
+    sysCallMaster 37
+
+sys_get_screen_height:
+    sysCallMaster 38
+    

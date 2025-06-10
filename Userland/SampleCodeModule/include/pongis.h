@@ -64,6 +64,8 @@
 // LEVEL 3
 #define BALL_INITIAL_X_L3 100
 #define BALL_INITIAL_Y_L3 300
+
+
 // ###### HOLE INITIAL  ######
 #define HOLE_RADIUS        20// Radio del hoyo
 #define HOLE_SHADOW_RADIUS 22// Radio de la sombra del hoyo
@@ -78,33 +80,25 @@
 #define HOLE_INITIAL_X_L3 500
 #define HOLE_INITIAL_Y_L3 300
 
-
-#define INITIAL_DIR_1_X -1
-#define INITIAL_DIR_1_Y 0
-#define INITIAL_DIR_2_X 1
-#define INITIAL_DIR_2_Y 0
-#define INITIAL_DIR_3_X 0
-#define INITIAL_DIR_3_Y -1
-
 #define CHARACTER_WIDTH  248
 #define CHARACTER_HEIGHT 248
-#define FIXED_POINT      1024
+// #define FIXED_POINT      1024
 
-#define TOTAL_DIRECTIONS 36
-#define DEGREE_STEP      10
-#define TWO_PI_FIXED1    (FIXED_POINT * 628 / 100)
-#define ANGLE_STEP_FIXED (TWO_PI_FIXED1 / TOTAL_DIRECTIONS)
+// #define TOTAL_DIRECTIONS 36
+// #define DEGREE_STEP      10
+// #define TWO_PI_FIXED1    (FIXED_POINT * 628 / 100)
+// #define ANGLE_STEP_FIXED (TWO_PI_FIXED1 / TOTAL_DIRECTIONS)
 
-#define FIELD_WIDTH  1024
-#define FIELD_HEIGHT 768
+// #define FIELD_WIDTH  1024
+// #define FIELD_HEIGHT 768
 
 #define PLAYER_RADIUS 20
-#define ENEMY_RADIUS  20
-#define HOLE_RADIUS   20
+// #define ENEMY_RADIUS  20
+#define HOLE_RADIUS 20
 
 #define SPEED 5
 
-// ###### SCANCODES ######
+// ###### KEYBOARD SCANCODES ######
 #define W_SCANCODE           0x11
 #define A_SCANCODE           0x1E
 #define S_SCANCODE           0x1F
@@ -114,16 +108,12 @@
 #define ARROW_LEFT_SCANCODE  0x4B
 #define ARROW_RIGHT_SCANCODE 0x4D
 
+// ###### LEVELS ######
+#define MIN_LEVEL 1
+#define MAX_LEVEL 3
+
 // ###### FUNCTIONS ######
+
 void startGame(void);
-void welcome(void);
-void initializeAllObjects(void);
-
-void drawEnemy(int l);
-void drawBall(int l);
-void drawHole(int l);
-int collided(int x1, int y1, int x2, int y2, int radiusSum);
-void pongis(void);
-
 
 #endif

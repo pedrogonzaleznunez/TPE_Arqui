@@ -32,16 +32,12 @@ void fillScreen(uint32_t hexColor);
 
 void setMultiplier(int more);
 
-int getAmountCharsWidth();
+int64_t getWidthInChars(void);
 
-int getAmountCharsHeight();
+int64_t getHeightInChars(void);
 
-int getAmountCharsWidth();
+int64_t getScreenWidth(void);
 
-int getAmountCharsHeight();
-
-int getWidthInChars(void);
-
- int getHeightInChars(void);
+int64_t getScreenHeight(void);
 
 #endif

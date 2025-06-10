@@ -141,6 +141,14 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
         // letras a lo largo (lineas)
         case 36:
             return getHeightInChars();
+
+        // ancho de pantalla
+        case 37:
+            return getScreenWidth();
+
+        // alto de pantalla
+        case 38:
+            return getScreenHeight();
     }
 
     va_end(arguments);
