@@ -1,10 +1,10 @@
+#include <naiveConsole.h>
 #include <registers.h>
 #include <videoDriver.h>
 
 register_set_t register_status;
 extern uint8_t saved_registers_flag;
 
-static uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
 void printReg(char *name, int64_t value);
 
 void printAllRegs() {
@@ -36,36 +36,6 @@ void printReg(char *name, int64_t value) {
     putString(numBuffer, 0x00FF00);
     putChar('\n', 0x00FF00);
     return;
-}
-
-// Esto es aux
-static uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
-    char *p = buffer;
-    char *p1, *p2;
-    uint32_t digits = 0;
-
-    // Calculate characters for each digit
-    do {
-        uint32_t remainder = value % base;
-        *p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
-        digits++;
-    } while (value /= base);
-
-    // Terminate string in buffer.
-    *p = 0;
-
-    // Reverse string in buffer.
-    p1 = buffer;
-    p2 = p - 1;
-    while (p1 < p2) {
-        char tmp = *p1;
-        *p1 = *p2;
-        *p2 = tmp;
-        p1++;
-        p2--;
-    }
-
-    return digits;
 }
 
 int64_t setRegisters(register_set_t *regs) {
