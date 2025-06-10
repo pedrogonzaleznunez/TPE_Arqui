@@ -1816,6 +1816,23 @@ static uint8_t fontBitmap[] = {
     0x00,//.......
     0x00,//.......
 
+    // Unicode: U+00FC (ü), Width: 7
+    0x00, // .......
+    0x36, // ..XX.XX
+    0x36, // ..XX.XX
+    0x00, // .......
+    0x63, // .XX..XX
+    0x63, // .XX..XX
+    0x63, // .XX..XX
+    0x63, // .XX..XX
+    0x63, // .XX..XX
+    0x63, // .XX..XX
+    0x3E, // ..XXXXX
+    0x00, // .......
+    0x00, // .......
+    0x00, // .......
+    0x00, // .......
+    0x00, // .......
 
 };
 
@@ -1828,6 +1845,9 @@ uint8_t getFontHeight() {
 }
 
 uint8_t *getFontChar(char c) {
+     if ((unsigned char)c == 0xC3) {
+        return fontBitmap + CHAR_U_UMLAUT_OFFSET * font_height;
+    }
     if (c < MIN_CHAR || c > MAX_CHAR) { return NULL; }
     return fontBitmap + (c - MIN_CHAR) * font_height;
 }
