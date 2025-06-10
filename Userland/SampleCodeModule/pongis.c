@@ -20,6 +20,7 @@ typedef struct {
     int hold_counter;// contador para mantener la direccion
     int speed;       // velocidad actual del jugador
     int last_key;
+    int color;
 } Player;
 typedef Player *PlayerPtr;
 
@@ -87,7 +88,7 @@ int height, width;
 // ################################# FUNCTIONS #################################
 
 void handleInput(PlayerPtr player1, PlayerPtr player2, int key);
-void movePlayer(PlayerPtr player, int playerColor);
+void movePlayer(PlayerPtr player);
 void moveBall(void);
 void initializeAllObjects(void);
 void initializePlayer(int l, PlayerPtr player, Point initialPos[], int playerColor);
@@ -223,12 +224,13 @@ void initializePlayer(int l, PlayerPtr player, Point initialPos[], int playerCol
     player->y = initialPos[l - 1].y;
     player->dx = 0;
     player->dy = 0;
+    player->color = playerColor;
 
     // Inicializar velocidad y contador de teclas mantenidas
     player->speed = PLAYER_ACCELERATION;
     player->hold_counter = 0;
 
-    sys_draw_circle(player->x, player->y, PLAYER_RADIUS, playerColor);
+    sys_draw_circle(player->x, player->y, PLAYER_RADIUS, player->color);
 }
 
 void drawBall(int l) {
@@ -293,13 +295,15 @@ void checkCollisions(void) {
     }
 
     // Colision hoyo con player
-    int rad_sum = PLAYER_RADIUS + hole.radius + RADIUS_FIX;
+    int rad_sum = PLAYER_RADIUS + hole.shadow_radius + RADIUS_FIX;
     int dist_sq_player1 = distanceSquared(player1.x, player1.y, hole.x, hole.y);
     int dist_sq_player2 = playerCount > 1 ? distanceSquared(player2.x, player2.y, hole.x, hole.y) : 0;
     if (dist_sq_player1 <= rad_sum * rad_sum) {
         drawHole(level); 
+        movePlayer(&player1);
     } else if (playerCount > 1 && dist_sq_player2 <= rad_sum * rad_sum) {
         drawHole(level);
+        movePlayer(&player2);
     }
 
     // 3. Colisión con pelota
@@ -367,8 +371,8 @@ void pongis(void) {
             key = getchar();
             if (key == 'q') { return; }
             handleInput(&player1, &player2, key);
-            movePlayer(&player1, PLAYER_COLOR_1);
-            if (playerCount > 1) { movePlayer(&player2, PLAYER_COLOR_2); }
+            movePlayer(&player1);
+            if (playerCount > 1) { movePlayer(&player2); }
             moveBall();       // Mover la pelota después de procesar colisiones
             checkCollisions();// Verificar colisiones
             // lastKey = getchar(); // Actualizar la última tecla presionada
@@ -471,7 +475,7 @@ void handleInput(PlayerPtr player1, PlayerPtr player2, int key) {
     }
 }
 
-void movePlayer(PlayerPtr player, int playerColor) {
+void movePlayer(PlayerPtr player) {
     if (player == NULL) return;
 
     int old_x1 = player->x;
@@ -482,7 +486,7 @@ void movePlayer(PlayerPtr player, int playerColor) {
     player->y += player->dy * player->speed;
 
     sys_draw_circle(old_x1, old_y1, PLAYER_RADIUS, BACKGROUND_COLOR);
-    sys_draw_circle(player->x, player->y, PLAYER_RADIUS, playerColor);
+    sys_draw_circle(player->x, player->y, PLAYER_RADIUS, player->color);
 
     return;
 }
