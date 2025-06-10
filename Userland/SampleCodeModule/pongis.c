@@ -124,6 +124,7 @@ typedef struct {
 
 Note welcome_theme[] = {{NOTE_C4, 2}, {NOTE_F4, 2}, {NOTE_C5, 2}};
 Note hit_ball_theme[] = {{NOTE_C4, 1}, {NOTE_F4, 1}};
+Note new_level[] = {{NOTE_C4, 2}, {NOTE_E4, 2}, {NOTE_G4, 2}, {NOTE_C5, 2}};
 
 // ################################## GAME LOGIC #################################
 
@@ -178,9 +179,12 @@ void welcome() {
         key = getchar();// Espera a que el usuario presione una tecla
         if (key == '1') {
             putsWidthCenter("Has seleccionado un jugador.\n");
+            putsWidthCenter("Usa las teclas A  S  D para moverte\n");
             playerCount = 1;
         } else if (key == '2') {
             putsWidthCenter("Has seleccionado dos jugadores.\n");
+            putsWidthCenter("Usa las teclas WASD para mover al jugador 1\n");
+            putsWidthCenter("Usa las flechas para mover al jugador 2\n");
             playerCount = 2;
         } else if (key == 'q') {
             end_of_game = 1;
@@ -190,7 +194,7 @@ void welcome() {
             printOptions();
             putsWidthCenter("Opcion no valida. Presiona 1 o 2.\n");
         }
-        sys_sleep(5);// Para que se llegue a leer la opción
+        sys_sleep(40);// Para que se llegue a leer la opción
     }
 
     player1.score = 0;
@@ -203,13 +207,14 @@ void printOptions(void) {
     putsWidthCenter("Seleccione la cantidad de jugadores:\n");
     putsWidthCenter("Presione 1 para un jugador.\n");
     putsWidthCenter("Presione 2 para dos jugadores.\n");
+    putsWidthCenter("Presiona 'q' para salir del juego.\n");
 }
 
 void printScore(PlayerPtr player1, PlayerPtr player2) {
     if (player1 == NULL || (playerCount > 1 && player2 == NULL)) { return; }
 
     // imprimir el puntaje del jugador al tope de la pantalla
-    if (playerCount == 1) {
+    if(playerCount ==1){
         printf("Puntaje del jugador: %d\n", player1->score);
     } else if (playerCount == 2) {
         printf("Puntaje del jugador 1: %d\n", player1->score);
@@ -341,6 +346,9 @@ void printLevel(int l) {
 
 void newLevel(int l) {
     sys_fill_screen(BACKGROUND_COLOR);// Limpiar la pantalla
+    for (int i = 0; i < sizeof(new_level) / sizeof(Note); i++) {
+            sys_beep(new_level[i].freq, new_level[i].dur);
+        }
     printLevel(l);
     sys_sleep(30);
 
@@ -487,7 +495,6 @@ void movePlayer(PlayerPtr player) {
 
     sys_draw_circle(old_x1, old_y1, PLAYER_RADIUS, BACKGROUND_COLOR);
     sys_draw_circle(player->x, player->y, PLAYER_RADIUS, player->color);
-
     return;
 }
 
