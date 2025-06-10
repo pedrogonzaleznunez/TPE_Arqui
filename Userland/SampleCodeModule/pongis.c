@@ -128,6 +128,29 @@ void handleInput(PlayerPtr player1, PlayerPtr player2, int key);
 void movePlayer(PlayerPtr player1, PlayerPtr player2);
 void moveBall(void);
 
+// ################################## SOUNDS #################################
+
+typedef struct {
+    uint32_t freq;
+    uint32_t dur;
+} Note;
+
+// Algunas notas
+#define NOTE_G3 196
+#define NOTE_C4 261
+#define NOTE_D4 294
+#define NOTE_E4 329
+#define NOTE_F4 349
+#define NOTE_G4 392
+#define NOTE_A4 440
+#define NOTE_B4 494
+#define NOTE_C5 523
+#define NOTE_D5 587
+#define NOTE_E5 659
+
+Note welcome_theme[] = {{NOTE_C4, 2}, {NOTE_F4, 2}, {NOTE_C5, 2}};
+Note hit_ball_theme[] = {{NOTE_C4, 1}, {NOTE_F4, 1}};
+
 // ################################## GAME LOGIC #################################
 
 // Funcion llamada desde el main del userland
@@ -143,7 +166,10 @@ void startGame(void) {
 
 void welcome() {
 
-    // sys_beep(200, 20);
+    for (int i = 0; i < sizeof(welcome_theme) / sizeof(Note); i++) {
+        sys_beep(welcome_theme[i].freq, welcome_theme[i].dur);
+    }
+
     sys_fill_screen(BACKGROUND_COLOR);
 
     putsCenter("Bienvenido a Pongis Golf!\n");
@@ -290,6 +316,10 @@ void kickBallIfNear(PlayerPtr player) {
     if (collided(player->x, player->y, ball.x, ball.y, 30)) {
         // Si el jugador está cerca de la pelota, la patea
         int kickFactor = 3 + player->speed;
+
+        for (int i = 0; i < sizeof(hit_ball_theme) / sizeof(Note); i++) {
+            sys_beep(hit_ball_theme[i].freq, hit_ball_theme[i].dur);
+        }
 
         ball.dx = player->dx * kickFactor;
         ball.dy = player->dy * kickFactor;
