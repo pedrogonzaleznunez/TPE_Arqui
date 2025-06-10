@@ -1,7 +1,7 @@
 #ifndef SHELL_H
 #define SHELL_H
 
-#define WELCOME_MESSAGE         "Welcome to OreOS"
+#define WELCOME_MESSAGE         "Welcome to PongüixOS"
 #define PROMPT_SYMBOL           "$"
 #define INVALID_COMMAND_MESSAGE "Invalid command."
 #define MAX_COMMAND_LENGTH      50

@@ -229,6 +229,7 @@ void help() {
     char *helpMessages[] = {"Available commands:",
                             "clear: clear terminal.",
                             "divzero: prompts zero division exception.",
+                            "echo [string ... ]: echoes text input.",
                             "help: lists all available commands.",
                             "opcode: prompts invalid operation code exception.",
                             "pongis: starts pongis game.",
@@ -240,8 +241,8 @@ void help() {
                             "\t\td for date",
                             "\t\ty for year",
                             "zoomin: zooms in text on the screen.",
-                            "zoomout: zooms out text on the screen.",
-                            "echo [string ... ]: echoes text input."};
+                            "zoomout: zooms out text on the screen."
+                            };
 
     int elems = sizeof(helpMessages) / sizeof(char *);
 
