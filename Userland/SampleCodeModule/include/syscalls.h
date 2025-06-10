@@ -52,7 +52,7 @@ int64_t sys_get_time(time_t *time);
 
 int64_t sys_delete_char(void);
 
-int64_t sys_get_key_state(int scancode);
+int64_t sys_get_key_state(uint8_t *keysState);
 
 int64_t sys_zoom_in(void);
 

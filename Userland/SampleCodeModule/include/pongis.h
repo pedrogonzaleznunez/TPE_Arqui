@@ -2,26 +2,26 @@
 #define PONGIS_H_
 
 // ###### COLORS ######
-#define BACKGROUND_COLOR 0x006400 // 0x329bab
-#define OBSTACLES_COLOR  //0x3bf4c4
+#define BACKGROUND_COLOR 0x006400// 0x329bab
+#define OBSTACLES_COLOR          //0x3bf4c4
 
 // #define CHARACTER_COLOR 0x3bf4c4
-#define PLAYER_COLOR_1 0x8B0000 //0x0033FF
-#define PLAYER_COLOR_2 0x301934 //0x024A86
+#define PLAYER_COLOR_1 0x8B0000//0x0033FF
+#define PLAYER_COLOR_2 0x301934//0x024A86
 #define ENEMY_COLOR    0xfdfdfd
-#define BALL_COLOR     0xFFFFFF //0xffd714
-#define HOLE_COLOR     0x000000 //0x0f2120
+#define BALL_COLOR     0xFFFFFF//0xffd714
+#define HOLE_COLOR     0x000000//0x0f2120
 
 #define MAX_SPEED_X 3.0f
 #define MAX_SPEED_Y 4.0f
 
 #define PLAYER_ACCELERATION 1
 #define PLAYER_MAX_VELOCITY 5
-#define BALL_BASE_SPEED 3
+#define BALL_BASE_SPEED     3
 
-#define PLAYER_WIDTH  40   // o el valor real del sprite
-#define PLAYER_HEIGHT 40   // idem
-#define BALL_RADIUS   10   // o el tamaño correspondiente
+#define PLAYER_WIDTH  40// o el valor real del sprite
+#define PLAYER_HEIGHT 40// idem
+#define BALL_RADIUS   10// o el tamaño correspondiente
 
 #define RADIUS_FIX 15// Ajuste para la colisión con el hoyo
 
