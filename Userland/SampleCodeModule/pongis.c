@@ -1,6 +1,7 @@
 #include "character_data.h"
 #include <pongis.h>
 #include <stdio.h>
+#include <math.h>
 #include <stdlib.h>
 #include <syscalls.h>
 
@@ -35,6 +36,9 @@ typedef struct {
     int score; // puntaje del jugador
     int x, y;  // posicion
     int dx, dy;// dirreccion y sentido actual
+    int hold_counter;// contador para mantener la direccion
+    int speed;        // velocidad actual del jugador
+    int last_key;
 } Player;
 typedef Player *PlayerPtr;
 
@@ -105,7 +109,6 @@ static Player player2;// si hay dos jugadores
 static Hole hole;
 
 static int key;    // variable para almacenar la tecla presionada
-static int lastKey;// variable para almacenar la ultima tecla presionada
 static int playerCount;
 static int level = 1;
 static int embocada = 0;   // flag para saber si la pelota fue embocada
@@ -172,6 +175,7 @@ void welcome() {
 }
 
 
+
 void printScore(PlayerPtr player1, PlayerPtr player2) {
     if (player1 == NULL || (playerCount > 1 && player2 == NULL)) { return; }
 
@@ -211,6 +215,12 @@ void drawPlayers(int l) {
             break;
     }
 
+    // Inicializar velocidad y contador de teclas mantenidas
+    player1.speed = PLAYER_ACCELERATION;
+    player1.hold_counter = 0;
+    player2.speed = PLAYER_ACCELERATION;
+    player2.hold_counter = 0;
+    
     sys_draw_circle(player1.x, player1.y, PLAYER_RADIUS, PLAYER_COLOR_1);
 
     if (playerCount > 1) {
@@ -276,8 +286,12 @@ void drawHole(int l) {
 
 void kickBallIfNear(PlayerPtr player) {
     if (collided(player->x, player->y, ball.x, ball.y, 30)) {
-        ball.dx = player->dx * 5;
-        ball.dy = player->dy * 5;
+        // Si el jugador está cerca de la pelota, la patea
+        int kickFactor = 3 + player->speed;
+        
+        ball.dx = player->dx * kickFactor;
+        ball.dy = player->dy * kickFactor;
+        
     }
 }
 
@@ -481,6 +495,12 @@ int collided(int x1, int y1, int x2, int y2, int radiusSum) {
 void handleInput(PlayerPtr player1, PlayerPtr player2, int key) {
     if (player1 == NULL || player2 == NULL) return;
 
+    // Guardar las direcciones anteriores para comparar
+    int prev_dx1 = player1->dx;
+    int prev_dy1 = player1->dy;
+    int prev_dx2 = player2->dx;
+    int prev_dy2 = player2->dy;
+    
     // Reset default
     player1->dx = 0;
     player1->dy = 0;
@@ -492,35 +512,70 @@ void handleInput(PlayerPtr player1, PlayerPtr player2, int key) {
         return;
     }
 
+    // Verificar teclas presionadas y establecer direcciones
     if (sys_get_key_state(W_SCANCODE)) { player1->dy -= 1; }
     if (sys_get_key_state(S_SCANCODE)) { player1->dy += 1; }
     if (sys_get_key_state(A_SCANCODE)) { player1->dx -= 1; }
     if (sys_get_key_state(D_SCANCODE)) { player1->dx += 1; }
-    if (sys_get_key_state(ARROW_UP_SCANCODE)) { player2->dy -= 1; }
-    if (sys_get_key_state(ARROW_DOWN_SCANCODE)) { player2->dy += 1; }
-    if (sys_get_key_state(ARROW_LEFT_SCANCODE)) { player2->dx -= 1; }
-    if (sys_get_key_state(ARROW_RIGHT_SCANCODE)) { player2->dx += 1; }
+    
+    if (playerCount > 1) {
+        if (sys_get_key_state(ARROW_UP_SCANCODE)) { player2->dy -= 1; }
+        if (sys_get_key_state(ARROW_DOWN_SCANCODE)) { player2->dy += 1; }
+        if (sys_get_key_state(ARROW_LEFT_SCANCODE)) { player2->dx -= 1; }
+        if (sys_get_key_state(ARROW_RIGHT_SCANCODE)) { player2->dx += 1; }
+    }
+    
+    // Manejar aceleración para player1
+    if (player1->dx == prev_dx1 && player1->dy == prev_dy1 && (player1->dx != 0 || player1->dy != 0)) {
+        // Si la dirección no cambió y hay movimiento, incrementar contador
+        player1->hold_counter += 1;
+        // Ajustar velocidad según el tiempo que se ha mantenido la tecla presionada
+        player1->speed = PLAYER_ACCELERATION + (player1->hold_counter / 5);
+        // Limitar la velocidad máxima
+        if (player1->speed > PLAYER_MAX_VELOCITY) {
+            player1->speed = PLAYER_MAX_VELOCITY;
+        }
+    } else {
+        // Si cambió la dirección o no hay movimiento, reiniciar contador
+        player1->hold_counter = 0;
+        player1->speed = PLAYER_ACCELERATION;
+    }
+    
+    // Manejar aceleración para player2 si está en juego
+    if (playerCount > 1) {
+        if (player2->dx == prev_dx2 && player2->dy == prev_dy2 && (player2->dx != 0 || player2->dy != 0)) {
+            player2->hold_counter += 1;
+            player2->speed = PLAYER_ACCELERATION + (player2->hold_counter / 5);
+            if (player2->speed > PLAYER_MAX_VELOCITY) {
+                player2->speed = PLAYER_MAX_VELOCITY;
+            }
+        } else {
+            player2->hold_counter = 0;
+            player2->speed = PLAYER_ACCELERATION;
+        }
+    }
 }
-
 void movePlayer(PlayerPtr player1, PlayerPtr player2) {
 
-    if (player1 == NULL || player2 == NULL) return;
+    if (player1 == NULL || (playerCount > 1 && player2 == NULL)) return;
 
     int old_x1 = player1->x;
     int old_y1 = player1->y;
-    int old_x2 = player2->x;
-    int old_y2 = player2->y;
 
-    player1->x += player1->dx * SPEED;
-    player1->y += player1->dy * SPEED;
-    player2->x += player2->dx * SPEED;
-    player2->y += player2->dy * SPEED;
-
+    // Usar la velocidad específica del jugador en lugar de SPEED constante
+    player1->x += player1->dx * player1->speed;
+    player1->y += player1->dy * player1->speed;
 
     sys_draw_circle(old_x1, old_y1, PLAYER_RADIUS, BACKGROUND_COLOR);
     sys_draw_circle(player1->x, player1->y, PLAYER_RADIUS, PLAYER_COLOR_1);
 
     if (playerCount > 1) {
+        int old_x2 = player2->x;
+        int old_y2 = player2->y;
+        
+        player2->x += player2->dx * player2->speed;
+        player2->y += player2->dy * player2->speed;
+        
         sys_draw_circle(old_x2, old_y2, PLAYER_RADIUS, BACKGROUND_COLOR);
         sys_draw_circle(player2->x, player2->y, PLAYER_RADIUS, PLAYER_COLOR_2);
     }

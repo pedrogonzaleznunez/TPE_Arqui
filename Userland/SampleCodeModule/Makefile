@@ -12,7 +12,7 @@ $(MODULE): $(OBJECTS) $(OBJECTS_ASM)
 	$(GCC) $(GCCFLAGS) -T sampleCodeModule.ld -o ../$(MODULE) $(OBJECTS) $(OBJECTS_ASM)
 
 %.o: %.c
-	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
+	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@ -lm
 
 %.o: %.asm
 	$(ASM) $(ASMFLAGS) $< -o $@
