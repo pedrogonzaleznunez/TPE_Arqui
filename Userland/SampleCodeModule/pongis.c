@@ -343,6 +343,7 @@ void pongis(void) {
 
         while (!end_of_game && !scored) {
             key = getchar();
+            if (key == 'q') { return; }
             handleInput(&player1, &player2, key);
             movePlayer(&player1, PLAYER_COLOR_1);
             if (playerCount > 1) { movePlayer(&player2, PLAYER_COLOR_2); }
@@ -400,11 +401,6 @@ void handleInput(PlayerPtr player1, PlayerPtr player2, int key) {
     player1->dy = 0;
     player2->dx = 0;
     player2->dy = 0;
-
-    if (key == 'q') {
-        end_of_game = 1;
-        return;
-    }
 
     sys_get_key_state(keysState);
 
