@@ -196,7 +196,7 @@ void startGame(void) {
     welcome();
     pongis();
 
-    putsCenter("Juego finalizado\n");
+    putsWidthCenter("Juego finalizado\n");
     sys_sleep(2);
 
     return;
@@ -224,10 +224,10 @@ void welcome() {
     while (!end_of_game && !playerCount) {
         key = getchar();// Espera a que el usuario presione una tecla
         if (key == '1') {
-            putsCenter("Has seleccionado un jugador.\n");
+            putsWidthCenter("Has seleccionado un jugador.\n");
             playerCount = 1;
         } else if (key == '2') {
-            putsCenter("Has seleccionado dos jugadores.\n");
+            putsWidthCenter("Has seleccionado dos jugadores.\n");
             playerCount = 2;
         } else if (key == 'q') {
             end_of_game = 1;
@@ -235,7 +235,7 @@ void welcome() {
         } else {
             sys_fill_screen(BACKGROUND_COLOR);
             printOptions();
-            putsCenter("Opcion no valida. Presiona 1 o 2.\n");
+            putsWidthCenter("Opcion no valida. Presiona 1 o 2.\n");
         }
         sys_sleep(2);// Para que se llegue a leer la opción
     }
@@ -246,10 +246,10 @@ void welcome() {
 }
 
 void printOptions(void) {
-    putsCenter("Bienvenido a Pongis Golf!\n");
-    putsCenter("Seleccione la cantidad de jugadores:\n");
-    putsCenter("Presione 1 para un jugador.\n");
-    putsCenter("Presione 2 para dos jugadores.\n");
+    putsCenterWidthHeightFourthCenter("Bienvenido a Pongis Golf!\n");
+    putsWidthCenter("Seleccione la cantidad de jugadores:\n");
+    putsWidthCenter("Presione 1 para un jugador.\n");
+    putsWidthCenter("Presione 2 para dos jugadores.\n");
 }
 
 void printScore(PlayerPtr player1, PlayerPtr player2) {
@@ -489,6 +489,7 @@ void newLevel(int l) {
     sys_clear_screen();
     sys_fill_screen(BACKGROUND_COLOR);
     initializePlayers(l);// Dibuja los jugadores
+    printScore(&player1, &player2);
     drawHole(l);
     drawBall(l);
     embocada = 0;// Reiniciar el estado de embocada
