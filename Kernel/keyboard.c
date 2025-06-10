@@ -110,7 +110,7 @@ static char printable_shift[] = {
 };
 
 char getChar(uint8_t scanCode) {
-    if (scanCode > 0 && scanCode < MAX_SCAN_CODE) {
+    if (scanCode > 0 && scanCode <= MAX_SCAN_CODE) {
         char aux = printable[scanCode];
 
         if ((caps_lock_on) && (aux >= 'a' && aux <= 'z')) {
