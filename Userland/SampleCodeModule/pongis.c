@@ -292,6 +292,16 @@ void checkCollisions(void) {
         sys_sleep(5);
     }
 
+    // Colision hoyo con player
+    int rad_sum = PLAYER_RADIUS + hole.radius + RADIUS_FIX;
+    int dist_sq_player1 = distanceSquared(player1.x, player1.y, hole.x, hole.y);
+    int dist_sq_player2 = playerCount > 1 ? distanceSquared(player2.x, player2.y, hole.x, hole.y) : 0;
+    if (dist_sq_player1 <= rad_sum * rad_sum) {
+        drawHole(level); 
+    } else if (playerCount > 1 && dist_sq_player2 <= rad_sum * rad_sum) {
+        drawHole(level);
+    }
+
     // 3. Colisión con pelota
     checkCollisionsBall(&player1);
     if (playerCount > 1) { checkCollisionsBall(&player2); }
@@ -327,7 +337,7 @@ void printLevel(int l) {
 
 void newLevel(int l) {
     sys_fill_screen(BACKGROUND_COLOR);// Limpiar la pantalla
-    printLevel(level);
+    printLevel(l);
     sys_sleep(30);
 
     // ##### Arranca el new level #####
@@ -347,7 +357,7 @@ void newLevel(int l) {
 
 void pongis(void) {
 
-    // do {
+    
     while (!end_of_game) {
         newLevel(level);
         scored = 0;
@@ -376,7 +386,6 @@ void pongis(void) {
             }
         }
     }
-    //  } while (!end_of_game);
 }
 /**
  * @brief Verifica si dos círculos colisionan.
