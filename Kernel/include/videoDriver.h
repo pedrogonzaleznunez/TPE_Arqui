@@ -32,4 +32,5 @@ void fillScreen(uint32_t hexColor);
 
 void setMultiplier(int more);
 
+int getWidthInChars(void);
 #endif

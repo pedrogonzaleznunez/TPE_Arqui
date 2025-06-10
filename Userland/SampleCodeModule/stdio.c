@@ -18,21 +18,18 @@ void puts(const char *str) {
     putchar('\n');
 }
 
-void putsWidthCenter(const char *str){
-    // necesito el ancho de la screen 
-    // necesito el ancho del string 
+void putsCenter(const char *str) {
+    // necesito el ancho de la screen
+    // necesito el ancho del string
     int screen_width = sys_chars_width();
-    int str_length = 0;
-    const char *ptr = str;
-    while (*ptr++){str_length++;} 
+    int str_length = strlen(str);
     int padding = (screen_width - str_length) / 2;
     for (int i = 0; i < padding; i++) {
-        putchar(' '); // Agregar espacios al inicio
+        putchar(' ');// Agregar espacios al inicio
     }
-    for(int i = 0 ; i < str_length; i++){
-        putchar(str[i]); // Imprimir el string
+    for (int i = 0; i < str_length; i++) {
+        putchar(str[i]);// Imprimir el string
     }
-
 }
 
 void putchar(const char c) {
