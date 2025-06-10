@@ -11,7 +11,7 @@ static uint32_t readIdx = 0;
 static uint32_t shift_pressed = 0;
 static uint32_t caps_lock_on = 0;
 
-extern uint8_t save_registers_flag;
+extern uint8_t toSave_registers_flag;
 
 // valores sacados de Scan Code Set 1 en https://wiki.osdev.org/PS/2_Keyboard
 // Se podría agregar que el driver de video haga la parte de impresión de
@@ -147,7 +147,7 @@ void keyboardHandler() {
         return;
     }
 
-    if (key == F1_REGISTER_BACKUP) { save_registers_flag = 1; }
+    if (key == F1_REGISTER_BACKUP) { toSave_registers_flag = 1; }
 
     // si no es un release, que lo guarde en el buffer
     if (!(aux >> 7)) {

@@ -15,11 +15,10 @@ GLOBAL _irq05Handler
 ; flags que indican:
 ; i) si se debe guardar el estado
 ; ii) si el estado se guardó
-GLOBAL save_registers_flag
+GLOBAL toSave_registers_flag
 GLOBAL saved_registers_flag
-; structs de los registros
-EXTERN saved_registers
-EXTERN saved_registers_on_exception
+; struct de los registros
+EXTERN register_status
 
 GLOBAL _exception00Handler
 GLOBAL _exception06Handler
@@ -103,20 +102,20 @@ SECTION .text
 	call irqDispatcher
 
  		; check por si tengo que guardar los registros
-    mov al, byte [save_registers_flag]
+    mov al, byte [toSave_registers_flag]
     cmp al, 0
    
     je .skip_save 
 		; save:
     popState		; restauro
-	saveRegisters saved_registers
+	saveRegisters register_status
 	pushState
 	
 	mov byte[saved_registers_flag], 1		;indico que se guardaron
+	
+	mov byte [toSave_registers_flag], 0		; desactivo la flag
 
 .skip_save:
-    
-    mov byte [save_registers_flag], 0
 
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
@@ -129,11 +128,8 @@ SECTION .text
 
 ; Exceptions handler
 %macro exceptionHandler 1
-	saveRegisters saved_registers_on_exception
+	saveRegisters register_status
 
-	; también se puede tener una única estructura
-	; y que si hay una excepción, se pierden valores
-	; guardados previos
 	mov byte[saved_registers_flag], 0
 
 	mov rdi, %1 ; pasaje de parametro
@@ -224,6 +220,6 @@ SECTION .bss
 	aux resq 1
 
 SECTION .data
-    save_registers_flag db 0
+    toSave_registers_flag db 0
 	saved_registers_flag db 0
 	userland equ 0x400000

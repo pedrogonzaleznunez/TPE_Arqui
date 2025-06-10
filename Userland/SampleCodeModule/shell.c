@@ -204,7 +204,6 @@ void processCommands(char *command) {
         startGame();
         // + putLineInBuffer si hace falta
         clear();
-        toPrintFirstLine = lastLine;
         printLines();
     } else if (isEmpty(instruction)) {
         return;

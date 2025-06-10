@@ -1,32 +1,31 @@
 #include <registers.h>
 #include <videoDriver.h>
 
-register_set_t saved_registers, saved_registers_on_exception;
+register_set_t register_status;
 extern uint8_t saved_registers_flag;
 
 static uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
 void printReg(char *name, int64_t value);
 
-void printAllRegs(uint32_t error) {
-    register_set_t toPrint = error ? saved_registers_on_exception : saved_registers;
-    printReg("RAX: ", toPrint.rax);
-    printReg("RBX: ", toPrint.rbx);
-    printReg("RCX: ", toPrint.rcx);
-    printReg("RDX: ", toPrint.rdx);
-    printReg("RSI: ", toPrint.rsi);
-    printReg("RDI: ", toPrint.rdi);
-    printReg("RSP: ", toPrint.rsp);
-    printReg("RBP: ", toPrint.rbp);
-    printReg("R8: ", toPrint.r8);
-    printReg("R9: ", toPrint.r9);
-    printReg("R10: ", toPrint.r10);
-    printReg("R11: ", toPrint.r11);
-    printReg("R12: ", toPrint.r12);
-    printReg("R13: ", toPrint.r13);
-    printReg("R14: ", toPrint.r14);
-    printReg("R15: ", toPrint.r15);
-    printReg("RFLAGS: ", toPrint.rflags);
-    printReg("RIP: ", toPrint.rip);
+void printAllRegs() {
+    printReg("RAX: ", register_status.rax);
+    printReg("RBX: ", register_status.rbx);
+    printReg("RCX: ", register_status.rcx);
+    printReg("RDX: ", register_status.rdx);
+    printReg("RSI: ", register_status.rsi);
+    printReg("RDI: ", register_status.rdi);
+    printReg("RSP: ", register_status.rsp);
+    printReg("RBP: ", register_status.rbp);
+    printReg("R8: ", register_status.r8);
+    printReg("R9: ", register_status.r9);
+    printReg("R10: ", register_status.r10);
+    printReg("R11: ", register_status.r11);
+    printReg("R12: ", register_status.r12);
+    printReg("R13: ", register_status.r13);
+    printReg("R14: ", register_status.r14);
+    printReg("R15: ", register_status.r15);
+    printReg("RFLAGS: ", register_status.rflags);
+    printReg("RIP: ", register_status.rip);
     return;
 }
 
@@ -72,26 +71,26 @@ static uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
 int64_t setRegisters(register_set_t *regs) {
     if (!saved_registers_flag) { return 0; }
 
-    regs->rax = saved_registers.rax;
-    regs->rbx = saved_registers.rbx;
-    regs->rcx = saved_registers.rcx;
-    regs->rdx = saved_registers.rdx;
+    regs->rax = register_status.rax;
+    regs->rbx = register_status.rbx;
+    regs->rcx = register_status.rcx;
+    regs->rdx = register_status.rdx;
 
-    regs->rsi = saved_registers.rsi;
-    regs->rdi = saved_registers.rdi;
-    regs->rsp = saved_registers.rsp;
-    regs->rbp = saved_registers.rbp;
+    regs->rsi = register_status.rsi;
+    regs->rdi = register_status.rdi;
+    regs->rsp = register_status.rsp;
+    regs->rbp = register_status.rbp;
 
-    regs->r8 = saved_registers.r8;
-    regs->r9 = saved_registers.r9;
-    regs->r10 = saved_registers.r10;
-    regs->r11 = saved_registers.r11;
-    regs->r12 = saved_registers.r12;
-    regs->r13 = saved_registers.r13;
-    regs->r14 = saved_registers.r14;
-    regs->r15 = saved_registers.r15;
+    regs->r8 = register_status.r8;
+    regs->r9 = register_status.r9;
+    regs->r10 = register_status.r10;
+    regs->r11 = register_status.r11;
+    regs->r12 = register_status.r12;
+    regs->r13 = register_status.r13;
+    regs->r14 = register_status.r14;
+    regs->r15 = register_status.r15;
 
-    regs->rflags = saved_registers.rflags;
-    regs->rip = saved_registers.rip;
+    regs->rflags = register_status.rflags;
+    regs->rip = register_status.rip;
     return 1;
 }
