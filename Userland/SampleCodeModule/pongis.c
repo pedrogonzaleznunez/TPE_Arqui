@@ -133,7 +133,8 @@ void moveBall(void);
 // Funcion llamada desde el main del userland
 void startGame(void) {
 
-
+    // resetear TODOS los valores de inicio de juego - si no se guardan desde la ultima llamada a pongis
+    end_of_game = 0;
     welcome();
     pongis();
 
@@ -145,29 +146,31 @@ void welcome() {
     // sys_beep(200, 20);
     sys_fill_screen(BACKGROUND_COLOR);
 
-    printf("Bienvenido a Pongis Golf!\n");
-    printf("Seleccione la cantidad de jugadores:\n");
-    printf("Presione 1 para un jugador.\n");
-    printf("Presione 2 para dos jugadores.\n");
+    putsWidthCenter("Bienvenido a Pongis Golf!\n");
+    putsWidthCenter("Seleccione la cantidad de jugadores:\n");
+    putsWidthCenter("Presione 1 para un jugador.\n");
+    putsWidthCenter("Presione 2 para dos jugadores.\n");
 
-    do {
-        key = getchar();// Espera a que el usuario presione una tecla
+   do {
+            key = getchar();// Espera a que el usuario presione una tecla
+            if (key == '1') {
+                putsWidthCenter("Has seleccionado un jugador.\n");
+                playerCount = 1;
+                break;
 
-        if (key == '1') {
-            printf("Has seleccionado un jugador.\n");
-            playerCount = 1;
-            break;
+            } else if (key == '2') {
+                putsWidthCenter("Has seleccionado dos jugadores.\n");
+                playerCount = 2;
+                break;
 
-        } else if (key == '2') {
-            printf("Has seleccionado dos jugadores.\n");
-            playerCount = 2;
-            break;
-
-        } else {
-            printf("Opcion no valida. Presiona 1 o 2.\n");
-        }
-    } while (1);
-
+            } else if(key == 'q'){
+                end_of_game = 1;
+                return;
+            } else {
+                putsWidthCenter("Opcion no valida. Presiona 1 o 2.\n");
+            }
+        
+  } while (!end_of_game);
 
     player1.score = 0;
     player2.score = 0;
@@ -444,9 +447,10 @@ void newLevel(int l) {
 
 void pongis(void) {
 
-    do {
-
+   // do { 
+    while(!end_of_game){
         newLevel(level);
+        printScore(&player1, &player2);// Imprimir el puntaje actualizado
 
         while (!end_of_game) {
             key = getchar();
@@ -468,8 +472,8 @@ void pongis(void) {
                 embocada = 0;
             }
         }
-
-    } while (!end_of_game);
+    }
+  //  } while (!end_of_game);
 }
 /**
  * @brief Verifica si dos círculos colisionan.

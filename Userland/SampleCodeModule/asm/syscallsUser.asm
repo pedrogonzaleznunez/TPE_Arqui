@@ -15,7 +15,8 @@ GLOBAL sys_draw_circle
 GLOBAL sys_draw_rec
 GLOBAL sys_fill_screen
 GLOBAL sys_draw_pixel
-
+GLOBAL sys_chars_width
+GLOBAL sys_chars_height
 SECTION .text
 
 %macro sysCallMaster 1
@@ -79,3 +80,9 @@ sys_fill_screen:
 
 sys_draw_pixel:
     sysCallMaster 34
+
+sys_chars_width:
+    sysCallMaster 35
+
+sys_chars_height:
+    sysCallMaster 36

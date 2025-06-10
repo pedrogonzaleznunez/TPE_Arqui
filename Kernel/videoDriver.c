@@ -352,3 +352,8 @@ void setMultiplier(int more) {
         if (currentMult != 0) { multiplier = multipliers[--currentMult]; }
     }
 }
+
+
+int getAmountCharsWidth(){
+    return VBE_mode_info->width / getFontWidth();
+}

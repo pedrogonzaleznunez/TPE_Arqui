@@ -133,6 +133,10 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
             uint32_t hexColor_pixel = va_arg(arguments, uint32_t);
             putPixel(hexColor_pixel, pos_x_pixel, pos_y_pixel);
             return 1;
+
+        // letras a lo ancho 
+        case 35:
+            return getAmountCharsWidth();
     }
 
     va_end(arguments);
