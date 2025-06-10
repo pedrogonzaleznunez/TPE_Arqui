@@ -124,7 +124,7 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
         case 33:
             uint32_t hexColor_fill_screen = va_arg(arguments, uint32_t);
             fillScreen(hexColor_fill_screen);
-            return 0;
+            return 1;
 
         // draw pixel
         case 34:
@@ -158,10 +158,11 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
 
 int64_t write(int64_t fd, const char *buf, int64_t count) {
     // handler de la syscall de write video
+    if (buf == NULL) return 0;
 
     int format = (fd == 1 ? DEFAULT_CHAR_COLOR : ERROR_CHAR_COLOR);
 
-    for (int64_t i = 0; i < count; i++) { putChar(buf[i], format); }
+    for (int64_t i = 0; i < count && buf[i]; i++) { putChar(buf[i], format); }
 
     return 0;
 }
