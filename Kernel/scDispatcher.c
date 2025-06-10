@@ -55,8 +55,8 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
 
         // get key state
         case 5:
-            int scancode_getState = va_arg(arguments, int);
-            return getKeyState(scancode_getState);
+            uint8_t *keys_getState = va_arg(arguments, uint8_t *);
+            return getKeyState(keys_getState);
 
         // zoom in
         case 6:

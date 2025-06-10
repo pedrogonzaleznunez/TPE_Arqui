@@ -302,8 +302,6 @@ void printReg(char *regName, int64_t value) {
     putLineInBuffer(buffer, 0);
 }
 
-// problema: qué pasa si hago zoomin/zoomout después de un clear
-// me vuelve a escribir todos los comandos
 void clear() {
     sys_clear_screen();
     return;

@@ -1,8 +1,6 @@
-#include "character_data.h"
-#include <math.h>
 #include <pongis.h>
+#include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <syscalls.h>
 
 // ################################# CONSTANTES #################################
@@ -46,6 +44,29 @@ typedef struct {
     int x, y;// Position of the hole
 } Hole;
 typedef Hole *HolePtr;
+
+typedef struct {
+    int x, y;
+} Point;
+
+Point initialPosPlayer1[] = {{INITIAL_POS_1_X_L1, INITIAL_POS_1_Y_L1},
+                             {INITIAL_POS_1_X_L2, INITIAL_POS_1_Y_L2},
+                             {INITIAL_POS_1_X_L3, INITIAL_POS_1_Y_L3}};
+
+Point initialPosPlayer2[] = {{INITIAL_POS_2_X_L1, INITIAL_POS_2_Y_L1},
+                             {INITIAL_POS_2_X_L2, INITIAL_POS_2_Y_L2},
+                             {INITIAL_POS_2_X_L3, INITIAL_POS_2_Y_L3}};
+
+Point initialPosBall[] = {{BALL_INITIAL_X_L1, BALL_INITIAL_Y_L1},
+                          {BALL_INITIAL_X_L2, BALL_INITIAL_Y_L2},
+                          {BALL_INITIAL_X_L3, BALL_INITIAL_Y_L3}};
+
+Point initialPosHole[] = {{HOLE_INITIAL_X_L1, HOLE_INITIAL_Y_L1},
+                          {HOLE_INITIAL_X_L2, HOLE_INITIAL_Y_L2},
+                          {HOLE_INITIAL_X_L3, HOLE_INITIAL_Y_L3}};
+
+#define MIN_LEVEL 1
+#define MAX_LEVEL 3
 
 // ################################# VARIABLES #################################
 
@@ -114,6 +135,9 @@ static int level = 1;
 static int embocada = 0;   // flag para saber si la pelota fue embocada
 static int end_of_game = 0;// flag para terminar la ejecucion del juego
 
+#define MAX_SCAN_CODE 0x53
+static uint8_t keysState[MAX_SCAN_CODE + 1];
+
 // ################################# NOTES #################################
 /*
     La idea principal es que sea un ciclo, y vaya valiando que end_game != 1
@@ -127,6 +151,9 @@ static int end_of_game = 0;// flag para terminar la ejecucion del juego
 void handleInput(PlayerPtr player1, PlayerPtr player2, int key);
 void movePlayer(PlayerPtr player1, PlayerPtr player2);
 void moveBall(void);
+void initializePlayers(int l);
+
+void printOptions(void);
 
 // ################################## SOUNDS #################################
 
@@ -158,51 +185,55 @@ void startGame(void) {
 
     // resetear TODOS los valores de inicio de juego - si no se guardan desde la ultima llamada a pongis
     end_of_game = 0;
+    playerCount = 0;
     welcome();
     pongis();
+
+    putsCenter("Juego finalizado\n");
+    sys_sleep(2);
 
     return;
 }
 
 void welcome() {
+    sys_fill_screen(BACKGROUND_COLOR);
+    printOptions();
 
+    // play welcome sound
     for (int i = 0; i < sizeof(welcome_theme) / sizeof(Note); i++) {
         sys_beep(welcome_theme[i].freq, welcome_theme[i].dur);
     }
 
-    sys_fill_screen(BACKGROUND_COLOR);
-
-    putsCenter("Bienvenido a Pongis Golf!\n");
-    putsCenter("Seleccione la cantidad de jugadores:\n");
-    putsCenter("Presione 1 para un jugador.\n");
-    putsCenter("Presione 2 para dos jugadores.\n");
-
-    do {
+    while (!end_of_game && !playerCount) {
         key = getchar();// Espera a que el usuario presione una tecla
         if (key == '1') {
             putsCenter("Has seleccionado un jugador.\n");
             playerCount = 1;
-            break;
-
         } else if (key == '2') {
             putsCenter("Has seleccionado dos jugadores.\n");
             playerCount = 2;
-            break;
-
         } else if (key == 'q') {
             end_of_game = 1;
             return;
         } else {
+            sys_fill_screen(BACKGROUND_COLOR);
+            printOptions();
             putsCenter("Opcion no valida. Presiona 1 o 2.\n");
         }
-
-    } while (!end_of_game);
+        sys_sleep(2);// Para que se llegue a leer la opción
+    }
 
     player1.score = 0;
     player2.score = 0;
     return;
 }
 
+void printOptions(void) {
+    putsCenter("Bienvenido a Pongis Golf!\n");
+    putsCenter("Seleccione la cantidad de jugadores:\n");
+    putsCenter("Presione 1 para un jugador.\n");
+    putsCenter("Presione 2 para dos jugadores.\n");
+}
 
 void printScore(PlayerPtr player1, PlayerPtr player2) {
     if (player1 == NULL || (playerCount > 1 && player2 == NULL)) { return; }
@@ -217,31 +248,12 @@ void printScore(PlayerPtr player1, PlayerPtr player2) {
     return;
 }
 
-void drawPlayers(int l) {
-
-    switch (l) {
-        case 1:
-            player1.x = INITIAL_POS_1_X_L1;
-            player1.y = INITIAL_POS_1_Y_L1;
-            player2.x = INITIAL_POS_2_X_L1;
-            player2.y = INITIAL_POS_2_Y_L1;
-            break;
-        case 2:
-            player1.x = INITIAL_POS_1_X_L2;
-            player1.y = INITIAL_POS_1_Y_L2;
-            player2.x = INITIAL_POS_2_X_L2;
-            player2.y = INITIAL_POS_2_Y_L2;
-            break;
-        case 3:
-            player1.x = INITIAL_POS_1_X_L3;
-            player1.y = INITIAL_POS_1_Y_L3;
-            player2.x = INITIAL_POS_2_X_L3;
-            player2.y = INITIAL_POS_2_Y_L3;
-            break;
-
-        default:
-            break;
-    }
+void initializePlayers(int l) {
+    if (l < MIN_LEVEL || l > MAX_LEVEL) { return; }
+    player1.x = initialPosPlayer1[l].x;
+    player1.y = initialPosPlayer1[l].y;
+    player2.x = initialPosPlayer2[l].x;
+    player2.y = initialPosPlayer2[l].y;
 
     // Inicializar velocidad y contador de teclas mantenidas
     player1.speed = PLAYER_ACCELERATION;
@@ -250,7 +262,6 @@ void drawPlayers(int l) {
     player2.hold_counter = 0;
 
     sys_draw_circle(player1.x, player1.y, PLAYER_RADIUS, PLAYER_COLOR_1);
-
     if (playerCount > 1) {
         sys_draw_circle(player2.x, player2.y, PLAYER_RADIUS, PLAYER_COLOR_2);
     }
@@ -262,52 +273,40 @@ void drawEnemy(int l) {
 }
 
 void drawBall(int l) {
+    if (l < MIN_LEVEL || l > MAX_LEVEL) { return; }
+    ball.x = initialPosBall[l].x;
+    ball.y = initialPosBall[l].y;
+    // switch (l) {
+    //     case 1:
+    //         ball.x = BALL_INITIAL_X_L1;
+    //         ball.y = BALL_INITIAL_Y_L1;
+    //         ball.dx = INITIAL_DIR_1_X;
+    //         ball.dy = INITIAL_DIR_1_Y;
+    //         break;
+    //     case 2:
+    //         ball.x = BALL_INITIAL_X_L2;
+    //         ball.y = BALL_INITIAL_Y_L2;
+    //         ball.dx = INITIAL_DIR_2_X;
+    //         ball.dy = INITIAL_DIR_2_Y;
+    //         break;
+    //     case 3:
+    //         ball.x = BALL_INITIAL_X_L3;
+    //         ball.y = BALL_INITIAL_Y_L3;
+    //         ball.dx = INITIAL_DIR_3_X;
+    //         ball.dy = INITIAL_DIR_3_Y;
+    //         break;
 
-    switch (l) {
-        case 1:
-            ball.x = BALL_INITIAL_X_L1;
-            ball.y = BALL_INITIAL_Y_L1;
-            ball.dx = INITIAL_DIR_1_X;
-            ball.dy = INITIAL_DIR_1_Y;
-            break;
-        case 2:
-            ball.x = BALL_INITIAL_X_L2;
-            ball.y = BALL_INITIAL_Y_L2;
-            ball.dx = INITIAL_DIR_2_X;
-            ball.dy = INITIAL_DIR_2_Y;
-            break;
-        case 3:
-            ball.x = BALL_INITIAL_X_L3;
-            ball.y = BALL_INITIAL_Y_L3;
-            ball.dx = INITIAL_DIR_3_X;
-            ball.dy = INITIAL_DIR_3_Y;
-            break;
-
-        default:
-            break;
-    }
+    //     default:
+    //         break;
+    // }
 
     sys_draw_circle(ball.x, ball.y, BALL_RADIUS, BALL_COLOR);
 }
 
 void drawHole(int l) {
-
-    switch (l) {
-        case 1:
-            hole.x = HOLE_INITIAL_X_L1;
-            hole.y = HOLE_INITIAL_Y_L1;
-            break;
-        case 2:
-            hole.x = HOLE_INITIAL_X_L2;
-            hole.y = HOLE_INITIAL_Y_L2;
-            break;
-        case 3:
-            hole.x = HOLE_INITIAL_X_L3;
-            hole.y = HOLE_INITIAL_Y_L3;
-            break;
-        default:
-            break;
-    }
+    if (l < MIN_LEVEL || l > MAX_LEVEL) { return; }
+    hole.x = initialPosHole[l].x;
+    hole.y = initialPosHole[l].y;
     sys_draw_circle(hole.x, hole.y, HOLE_SHADOW_RADIUS, SHADOW_COLOR);
     sys_draw_circle(hole.x, hole.y, HOLE_RADIUS, HOLE_COLOR);
 }
@@ -467,7 +466,7 @@ void newLevel(int l) {
 
     sys_clear_screen();
     sys_fill_screen(BACKGROUND_COLOR);
-    drawPlayers(l);// Dibuja los jugadores
+    initializePlayers(l);// Dibuja los jugadores
     drawHole(l);
     drawBall(l);
     embocada = 0;// Reiniciar el estado de embocada
@@ -544,17 +543,19 @@ void handleInput(PlayerPtr player1, PlayerPtr player2, int key) {
         return;
     }
 
+    sys_get_key_state(keysState);
+
     // Verificar teclas presionadas y establecer direcciones
-    if (sys_get_key_state(W_SCANCODE)) { player1->dy -= 1; }
-    if (sys_get_key_state(S_SCANCODE)) { player1->dy += 1; }
-    if (sys_get_key_state(A_SCANCODE)) { player1->dx -= 1; }
-    if (sys_get_key_state(D_SCANCODE)) { player1->dx += 1; }
+    if (keysState[W_SCANCODE]) { player1->dy -= 1; }
+    if (keysState[S_SCANCODE]) { player1->dy += 1; }
+    if (keysState[A_SCANCODE]) { player1->dx -= 1; }
+    if (keysState[D_SCANCODE]) { player1->dx += 1; }
 
     if (playerCount > 1) {
-        if (sys_get_key_state(ARROW_UP_SCANCODE)) { player2->dy -= 1; }
-        if (sys_get_key_state(ARROW_DOWN_SCANCODE)) { player2->dy += 1; }
-        if (sys_get_key_state(ARROW_LEFT_SCANCODE)) { player2->dx -= 1; }
-        if (sys_get_key_state(ARROW_RIGHT_SCANCODE)) { player2->dx += 1; }
+        if (keysState[ARROW_UP_SCANCODE]) { player2->dy -= 1; }
+        if (keysState[ARROW_DOWN_SCANCODE]) { player2->dy += 1; }
+        if (keysState[ARROW_LEFT_SCANCODE]) { player2->dx -= 1; }
+        if (keysState[ARROW_RIGHT_SCANCODE]) { player2->dx += 1; }
     }
 
     // Manejar aceleración para player1
@@ -623,7 +624,6 @@ void moveBall(void) {
     // Borrar la pelota de su posición anterior
     sys_draw_circle(ball.x, ball.y, BALL_RADIUS, BACKGROUND_COLOR);
 
-
     ball.x += ball.dx * SPEED;
     ball.y += ball.dy * SPEED;
 
@@ -648,7 +648,19 @@ void moveBall(void) {
             ball.dy++;
     }
 
-
     // Dibujar la pelota en su nueva posición
     sys_draw_circle(ball.x, ball.y, BALL_RADIUS, BALL_COLOR);
 }
+
+// void redraw(void) {
+//     sys_fill_screen(BACKGROUND_COLOR);
+//     // dibuja al hoyo
+//     sys_draw_circle(hole.x, hole.y, HOLE_SHADOW_RADIUS, SHADOW_COLOR);
+//     sys_draw_circle(hole.x, hole.y, HOLE_RADIUS, HOLE_COLOR);
+//     // dibuja la pelota
+//     sys_draw_circle(ball.x, ball.y, BALL_RADIUS, BALL_COLOR);
+//     // jugador 1
+//     sys_draw_circle(player1.x, player1.y, PLAYER_RADIUS, PLAYER_COLOR_1);
+//     // jugador 2
+//     sys_draw_circle(player2.x, player2.y, PLAYER_RADIUS, PLAYER_COLOR_2);
+// }

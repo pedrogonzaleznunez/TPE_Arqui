@@ -1,4 +1,6 @@
 #include <keyboard.h>
+#include <lib.h>
+#include <stddef.h>
 
 #define BUFFER_DEFAULT_SIZE 1024
 #define MAX_SCAN_CODE       0x53
@@ -180,7 +182,8 @@ int isBufferFull() {
     return (writeIdx + 1) % BUFFER_DEFAULT_SIZE == readIdx;
 }
 
-int8_t getKeyState(uint8_t scancode) {
-    if (scancode > 0 && scancode <= MAX_SCAN_CODE) { return keysState[scancode]; }
-    return -1;
+int64_t getKeyState(uint8_t *target) {
+    if (target == NULL) { return 0; }
+    memcpy(target, keysState, MAX_SCAN_CODE + 1);
+    return 1;
 }
