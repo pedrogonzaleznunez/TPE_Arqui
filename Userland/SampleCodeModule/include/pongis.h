@@ -12,6 +12,16 @@
 #define BALL_COLOR     0xffd714
 #define HOLE_COLOR     0x0f2120
 
+#define MAX_SPEED_X 3.0f
+#define MAX_SPEED_Y 4.0f
+
+#define PLAYER_ACCELERATION 1
+#define PLAYER_MAX_VELOCITY 5
+#define BALL_BASE_SPEED 3
+
+#define PLAYER_WIDTH  40   // o el valor real del sprite
+#define PLAYER_HEIGHT 40   // idem
+#define BALL_RADIUS   10   // o el tamaño correspondiente
 
 #define RADIUS_FIX 15// Ajuste para la colisión con el hoyo
 
@@ -40,7 +50,7 @@
 
 // ###### BALL INITIAL  ######
 
-#define BALL_RADIUS 15// Radio de la bola
+// #define BALL_RADIUS 15// Radio de la bola
 
 // Initial position of the ball per level
 // LEVEL 1
