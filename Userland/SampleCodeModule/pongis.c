@@ -179,7 +179,7 @@ void welcome() {
         key = getchar();// Espera a que el usuario presione una tecla
         if (key == '1') {
             putsWidthCenter("Has seleccionado un jugador.\n");
-            putsWidthCenter("Usa las teclas A  S  D para moverte\n");
+            putsWidthCenter("Usa las teclas WASD para moverte\n");
             playerCount = 1;
         } else if (key == '2') {
             putsWidthCenter("Has seleccionado dos jugadores.\n");
