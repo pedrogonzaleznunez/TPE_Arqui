@@ -226,19 +226,22 @@ void invalidCommand() {
 /* Commands */
 
 void help() {
-    char *helpMessages[] = {
-        "Available commands:",
-        "clear: clear terminal.",
-        "divzero: prompts zero division exception.",
-        "help: lists all available commands.",
-        "opcode: prompts invalid operation code exception.",
-        "pongis: starts pongis game.",
-        "registers: lists saved registers.",
-        "time [argument ... ]: displays current time.\n\tValid "
-        "arguements:\n\t\tnone\n\t\th for hour\n\t\td for date\n\t\ty for year",
-        "zoomin: zooms in text on the screen.",
-        "zoomout: zooms out text on the screen.",
-        "echo [string ... ]: echoes text input."};
+    char *helpMessages[] = {"Available commands:",
+                            "clear: clear terminal.",
+                            "divzero: prompts zero division exception.",
+                            "help: lists all available commands.",
+                            "opcode: prompts invalid operation code exception.",
+                            "pongis: starts pongis game.",
+                            "registers: lists saved registers.",
+                            "time [argument ... ]: displays current time.",
+                            "\tValid arguments:",
+                            "\t\tnone",
+                            "\t\th for hour",
+                            "\t\td for date",
+                            "\t\ty for year",
+                            "zoomin: zooms in text on the screen.",
+                            "zoomout: zooms out text on the screen.",
+                            "echo [string ... ]: echoes text input."};
 
     int elems = sizeof(helpMessages) / sizeof(char *);
 
