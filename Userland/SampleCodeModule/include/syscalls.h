@@ -62,9 +62,9 @@ int64_t sys_sleep(int64_t ticks);
 
 // ##################### sound syscalls ######################
 
-int64_t sys_start_beep(uint32_t frecuence);
+int64_t sys_start_beep(uint32_t frequency);
 
-int64_t sys_beep(uint32_t frecuence, int64_t ticks);
+int64_t sys_beep(uint32_t frequency, int64_t ticks);
 
 int64_t sys_stop_beep(void);
 
