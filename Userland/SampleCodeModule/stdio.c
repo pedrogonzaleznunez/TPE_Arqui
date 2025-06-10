@@ -18,19 +18,88 @@ void puts(const char *str) {
     putchar('\n');
 }
 
-void putsCenter(const char *str) {
-    // necesito el ancho de la screen
-    // necesito el ancho del string
-    int screen_width = sys_chars_width();
-    int str_length = strlen(str);
-    int padding = (screen_width - str_length) / 2;
-    for (int i = 0; i < padding; i++) {
-        putchar(' ');// Agregar espacios al inicio
-    }
-    for (int i = 0; i < str_length; i++) {
-        putchar(str[i]);// Imprimir el string
+// void putsWidthCenter(const char *str){
+//     // necesito el ancho de la screen 
+//     // necesito el ancho del string 
+//     int screen_width = sys_chars_width();
+//     int str_length = strlen(str);
+//     int padding = (screen_width - str_length) / 2;
+//     for (int i = 0; i < padding; i++) {
+//         putchar(' '); // Agregar espacios al inicio
+//     }
+//     for(int i = 0 ; i < str_length; i++){
+//         putchar(str[i]); // Imprimir el string
+//     }
+
+// }
+
+// void putsHeightFourthCenter(const char * str){
+//     // necesito el alto de la screen 
+//     // necesito el alto del string 
+//     int screen_height = sys_chars_height(); // cuantos chars entran verticalmente
+//     int str_length = strlen(str);
+
+//     int padding = (screen_height) / 4;
+//     for (int i = 0; i < padding; i++) {
+//         putchar('\n'); // Agregar saltos de línea al inicio
+//     }
+//     for(int i = 0 ; i < str_length; i++){
+//         putchar(str[i]); // Imprimir el string
+//     }
+// }
+
+// void putsCenterWidthHeightFourthCenter(const char * str){
+//     // necesito el ancho de la screen 
+//     // necesito el alto de la screen 
+//     // necesito el alto del string 
+//     int screen_width = sys_chars_width();
+//     int screen_height = sys_chars_height();
+//     int str_length = strlen(str);
+//     int padding_x = (screen_width - str_length) / 2;
+//     int padding_y = (screen_height) / 4;
+
+//     for (int i = 0; i < padding_y; i++) {
+//         putchar('\n'); // Agregar saltos de línea al inicio
+//     }
+//     for (int i = 0; i < padding_x; i++) {
+//         putchar(' '); // Agregar espacios al inicio
+//     }
+//     puts(str);
+// }
+
+void printPadding(char c, int count) {
+    for (int i = 0; i < count; i++) {
+        putchar(c);
     }
 }
+
+void putsWithPadding(const char *str, int pad_top, int pad_left) {
+    printPadding('\n', pad_top);
+    printPadding(' ', pad_left);
+    puts(str);
+}
+
+void putsWidthCenter(const char *str) {
+    int screen_width = sys_chars_width();
+    int pad_left = (screen_width - strlen(str)) / 2;
+    putsWithPadding(str, 0, pad_left);
+}
+
+void putsHeightFourthCenter(const char *str) {
+    int screen_height = sys_chars_height();
+    int pad_top = screen_height / 4;
+    putsWithPadding(str, pad_top, 0);
+}
+
+void putsCenterWidthHeightFourthCenter(const char *str) {
+    int screen_width = sys_chars_width();
+    int screen_height = sys_chars_height();
+    int pad_left = (screen_width - strlen(str)) / 2;
+    int pad_top = screen_height / 4;
+    putsWithPadding(str, pad_top, pad_left);
+}
+
+
 
 void putchar(const char c) {
     sys_write(FD_STDOUT, &c, 1);// syscall para escribir un caracter

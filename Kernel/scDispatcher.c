@@ -137,6 +137,10 @@ int64_t syscallDispatcher(uint64_t syscallId, ...) {
         // letras a lo ancho
         case 35:
             return getWidthInChars();
+
+        // letras a lo largo (lineas)
+        case 36:
+            return getHeightInChars();
     }
 
     va_end(arguments);

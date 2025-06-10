@@ -120,6 +120,9 @@ const unsigned char numero3[30][3] = {
     {0xF8, 0x1F, 0x00}, {0xF8, 0x1F, 0x00}, {0xF8, 0x1F, 0x00}, {0xF8, 0x1F, 0x00},// 0x0E
     {0x00, 0x00, 0x00}, {0x00, 0x00, 0x00}// relleno negro
 };
+
+
+
 // estas variables las voy a tener q inicializar cuando comience el juego
 // y actualizar en cada nivel
 
@@ -131,9 +134,11 @@ static Hole hole;
 
 static int key;// variable para almacenar la tecla presionada
 static int playerCount;
-static int level = 1;
-static int embocada = 0;   // flag para saber si la pelota fue embocada
-static int end_of_game = 0;// flag para terminar la ejecucion del juego
+static int level;
+static int embocada;   // flag para saber si la pelota fue embocada
+static int embocada1;
+static int embocada2;
+static int end_of_game;// flag para terminar la ejecucion del juego
 
 #define MAX_SCAN_CODE 0x53
 static uint8_t keysState[MAX_SCAN_CODE + 1];
@@ -177,6 +182,8 @@ typedef struct {
 
 Note welcome_theme[] = {{NOTE_C4, 2}, {NOTE_F4, 2}, {NOTE_C5, 2}};
 Note hit_ball_theme[] = {{NOTE_C4, 1}, {NOTE_F4, 1}};
+void initializeAllObjects();
+
 
 // ################################## GAME LOGIC #################################
 
@@ -184,8 +191,8 @@ Note hit_ball_theme[] = {{NOTE_C4, 1}, {NOTE_F4, 1}};
 void startGame(void) {
 
     // resetear TODOS los valores de inicio de juego - si no se guardan desde la ultima llamada a pongis
-    end_of_game = 0;
-    playerCount = 0;
+    initializeAllObjects();
+    
     welcome();
     pongis();
 
@@ -193,6 +200,16 @@ void startGame(void) {
     sys_sleep(2);
 
     return;
+}
+
+void initializeAllObjects(){
+    end_of_game = 0;
+    level = 1;
+    playerCount = 0;
+    player1.score = 0;
+    player2.score = 0;
+    embocada = 0;
+
 }
 
 void welcome() {
@@ -360,7 +377,7 @@ void checkCollisions(PlayerPtr player1, PlayerPtr player2) {
         level++;// Incrementar el nivel
         if (level > 3)
             end_of_game = 1;// Terminar el juego si se completan todos los niveles
-        printf("¡Jugador embocó la pelota en el hoyo!\n");
+        putsCenterWidthHeightFourthCenter("¡Jugador embocó la pelota en el hoyo!\n");
     }
 
     // 3. Colisión con la pelota (player1)
@@ -452,6 +469,8 @@ void printLevel(int l) {
 
 void newLevel(int l) {
 
+    // ####### Momento de new level ######3
+
     sys_fill_screen(BACKGROUND_COLOR);// Limpiar la pantalla
     // // Limpiar el campo dibujando un rectángulo negro en el centro de la pantalla
     // int rect_width = FIELD_WIDTH / 2;
@@ -460,9 +479,12 @@ void newLevel(int l) {
     // int rect_y = (FIELD_HEIGHT - rect_height) / 2;
 
     // sys_draw_rec(rect_x, rect_y, rect_width, rect_height, 0x000000);
+
     sys_draw_circle(FIELD_WIDTH / 2, FIELD_HEIGHT / 2, 40, 0x000000);
     printLevel(level);
     sys_sleep(50);
+
+    // ##### Arranca el new level #####
 
     sys_clear_screen();
     sys_fill_screen(BACKGROUND_COLOR);
@@ -477,7 +499,7 @@ void pongis(void) {
     // do {
     while (!end_of_game) {
         newLevel(level);
-        printScore(&player1, &player2);// Imprimir el puntaje actualizado
+        //printScore(&player1, &player2);// Imprimir el puntaje actualizado
 
         while (!end_of_game) {
             key = getchar();
@@ -489,13 +511,20 @@ void pongis(void) {
 
 
             if (embocada) {
-                newLevel(level);
                 if (playerCount == 1) {
                     player1.score += 10;// Incrementar el puntaje del jugador 1
                 } else if (playerCount == 2) {
-                    player1.score += 5;// Incrementar el puntaje del jugador 1
-                    player2.score += 5;// Incrementar el puntaje del jugador 2
+                    if(embocada1){
+
+                    } else if(embocada2){
+                        player1.score += 10;// Incrementar el puntaje del jugador 1
+                    } else {
+                        player2.score += 10;// Incrementar el puntaje del jugador 2
+                    }
+                    // player1.score += 5;// Incrementar el puntaje del jugador 1
+                    // player2.score += 5;// Incrementar el puntaje del jugador 2
                 }
+                newLevel(level);
                 embocada = 0;
             }
         }
