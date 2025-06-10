@@ -353,11 +353,10 @@ void setMultiplier(int more) {
     }
 }
 
-
-int getAmountCharsWidth(){
+int getWidthInChars(void) {
     return VBE_mode_info->width / getFontWidth();
 }
 
-int getAmountCharsHeight(){
+int getHeightInChars(){
     return (VBE_mode_info->height) / getFontHeight();
 }

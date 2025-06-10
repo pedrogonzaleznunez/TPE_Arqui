@@ -1,7 +1,7 @@
 #include "character_data.h"
+#include <math.h>
 #include <pongis.h>
 #include <stdio.h>
-#include <math.h>
 #include <stdlib.h>
 #include <syscalls.h>
 
@@ -33,11 +33,11 @@ typedef struct {
 typedef Enemy *EnemyPtr;
 
 typedef struct {
-    int score; // puntaje del jugador
-    int x, y;  // posicion
-    int dx, dy;// dirreccion y sentido actual
+    int score;       // puntaje del jugador
+    int x, y;        // posicion
+    int dx, dy;      // dirreccion y sentido actual
     int hold_counter;// contador para mantener la direccion
-    int speed;        // velocidad actual del jugador
+    int speed;       // velocidad actual del jugador
     int last_key;
 } Player;
 typedef Player *PlayerPtr;
@@ -111,7 +111,7 @@ static Player player1;
 static Player player2;// si hay dos jugadores
 static Hole hole;
 
-static int key;    // variable para almacenar la tecla presionada
+static int key;// variable para almacenar la tecla presionada
 static int playerCount;
 static int level;
 static int embocada;   // flag para saber si la pelota fue embocada
@@ -132,6 +132,29 @@ static int end_of_game;// flag para terminar la ejecucion del juego
 void handleInput(PlayerPtr player1, PlayerPtr player2, int key);
 void movePlayer(PlayerPtr player1, PlayerPtr player2);
 void moveBall(void);
+
+// ################################## SOUNDS #################################
+
+typedef struct {
+    uint32_t freq;
+    uint32_t dur;
+} Note;
+
+// Algunas notas
+#define NOTE_G3 196
+#define NOTE_C4 261
+#define NOTE_D4 294
+#define NOTE_E4 329
+#define NOTE_F4 349
+#define NOTE_G4 392
+#define NOTE_A4 440
+#define NOTE_B4 494
+#define NOTE_C5 523
+#define NOTE_D5 587
+#define NOTE_E5 659
+
+Note welcome_theme[] = {{NOTE_C4, 2}, {NOTE_F4, 2}, {NOTE_C5, 2}};
+Note hit_ball_theme[] = {{NOTE_C4, 1}, {NOTE_F4, 1}};
 void initializeAllObjects();
 
 
@@ -161,7 +184,10 @@ void initializeAllObjects(){
 
 void welcome() {
 
-    // sys_beep(200, 20);
+    for (int i = 0; i < sizeof(welcome_theme) / sizeof(Note); i++) {
+        sys_beep(welcome_theme[i].freq, welcome_theme[i].dur);
+    }
+
     sys_fill_screen(BACKGROUND_COLOR);
 
     putsCenterWidthHeightFourthCenter("Bienvenido a Pongis Golf!\n");
@@ -169,32 +195,31 @@ void welcome() {
     putsWidthCenter("Presione 1 para un jugador.\n");
     putsWidthCenter("Presione 2 para dos jugadores.\n");
 
-   do {
-            key = getchar();// Espera a que el usuario presione una tecla
-            if (key == '1') {
-                putsWidthCenter("Has seleccionado un jugador.\n");
-                playerCount = 1;
-                break;
+    do {
+        key = getchar();// Espera a que el usuario presione una tecla
+        if (key == '1') {
+            putsCenter("Has seleccionado un jugador.\n");
+            playerCount = 1;
+            break;
 
-            } else if (key == '2') {
-                putsWidthCenter("Has seleccionado dos jugadores.\n");
-                playerCount = 2;
-                break;
+        } else if (key == '2') {
+            putsCenter("Has seleccionado dos jugadores.\n");
+            playerCount = 2;
+            break;
 
-            } else if(key == 'q'){
-                end_of_game = 1;
-                return;
-            } else {
-                putsWidthCenter("Opcion no valida. Presiona 1 o 2.\n");
-            }
-        
-  } while (!end_of_game);
+        } else if (key == 'q') {
+            end_of_game = 1;
+            return;
+        } else {
+            putsCenter("Opcion no valida. Presiona 1 o 2.\n");
+        }
+
+    } while (!end_of_game);
 
     player1.score = 0;
     player2.score = 0;
     return;
 }
-
 
 
 void printScore(PlayerPtr player1, PlayerPtr player2) {
@@ -241,7 +266,7 @@ void drawPlayers(int l) {
     player1.hold_counter = 0;
     player2.speed = PLAYER_ACCELERATION;
     player2.hold_counter = 0;
-    
+
     sys_draw_circle(player1.x, player1.y, PLAYER_RADIUS, PLAYER_COLOR_1);
 
     if (playerCount > 1) {
@@ -309,10 +334,13 @@ void kickBallIfNear(PlayerPtr player) {
     if (collided(player->x, player->y, ball.x, ball.y, 30)) {
         // Si el jugador está cerca de la pelota, la patea
         int kickFactor = 3 + player->speed;
-        
+
+        for (int i = 0; i < sizeof(hit_ball_theme) / sizeof(Note); i++) {
+            sys_beep(hit_ball_theme[i].freq, hit_ball_theme[i].dur);
+        }
+
         ball.dx = player->dx * kickFactor;
         ball.dy = player->dy * kickFactor;
-        
     }
 }
 
@@ -471,8 +499,8 @@ void newLevel(int l) {
 
 void pongis(void) {
 
-   // do { 
-    while(!end_of_game){
+    // do {
+    while (!end_of_game) {
         newLevel(level);
         //printScore(&player1, &player2);// Imprimir el puntaje actualizado
 
@@ -504,7 +532,7 @@ void pongis(void) {
             }
         }
     }
-  //  } while (!end_of_game);
+    //  } while (!end_of_game);
 }
 /**
  * @brief Verifica si dos círculos colisionan.
@@ -535,7 +563,7 @@ void handleInput(PlayerPtr player1, PlayerPtr player2, int key) {
     int prev_dy1 = player1->dy;
     int prev_dx2 = player2->dx;
     int prev_dy2 = player2->dy;
-    
+
     // Reset default
     player1->dx = 0;
     player1->dy = 0;
@@ -552,16 +580,17 @@ void handleInput(PlayerPtr player1, PlayerPtr player2, int key) {
     if (sys_get_key_state(S_SCANCODE)) { player1->dy += 1; }
     if (sys_get_key_state(A_SCANCODE)) { player1->dx -= 1; }
     if (sys_get_key_state(D_SCANCODE)) { player1->dx += 1; }
-    
+
     if (playerCount > 1) {
         if (sys_get_key_state(ARROW_UP_SCANCODE)) { player2->dy -= 1; }
         if (sys_get_key_state(ARROW_DOWN_SCANCODE)) { player2->dy += 1; }
         if (sys_get_key_state(ARROW_LEFT_SCANCODE)) { player2->dx -= 1; }
         if (sys_get_key_state(ARROW_RIGHT_SCANCODE)) { player2->dx += 1; }
     }
-    
+
     // Manejar aceleración para player1
-    if (player1->dx == prev_dx1 && player1->dy == prev_dy1 && (player1->dx != 0 || player1->dy != 0)) {
+    if (player1->dx == prev_dx1 && player1->dy == prev_dy1 &&
+        (player1->dx != 0 || player1->dy != 0)) {
         // Si la dirección no cambió y hay movimiento, incrementar contador
         player1->hold_counter += 1;
         // Ajustar velocidad según el tiempo que se ha mantenido la tecla presionada
@@ -575,10 +604,11 @@ void handleInput(PlayerPtr player1, PlayerPtr player2, int key) {
         player1->hold_counter = 0;
         player1->speed = PLAYER_ACCELERATION;
     }
-    
+
     // Manejar aceleración para player2 si está en juego
     if (playerCount > 1) {
-        if (player2->dx == prev_dx2 && player2->dy == prev_dy2 && (player2->dx != 0 || player2->dy != 0)) {
+        if (player2->dx == prev_dx2 && player2->dy == prev_dy2 &&
+            (player2->dx != 0 || player2->dy != 0)) {
             player2->hold_counter += 1;
             player2->speed = PLAYER_ACCELERATION + (player2->hold_counter / 5);
             if (player2->speed > PLAYER_MAX_VELOCITY) {
@@ -590,6 +620,7 @@ void handleInput(PlayerPtr player1, PlayerPtr player2, int key) {
         }
     }
 }
+
 void movePlayer(PlayerPtr player1, PlayerPtr player2) {
 
     if (player1 == NULL || (playerCount > 1 && player2 == NULL)) return;
@@ -607,10 +638,10 @@ void movePlayer(PlayerPtr player1, PlayerPtr player2) {
     if (playerCount > 1) {
         int old_x2 = player2->x;
         int old_y2 = player2->y;
-        
+
         player2->x += player2->dx * player2->speed;
         player2->y += player2->dy * player2->speed;
-        
+
         sys_draw_circle(old_x2, old_y2, PLAYER_RADIUS, BACKGROUND_COLOR);
         sys_draw_circle(player2->x, player2->y, PLAYER_RADIUS, PLAYER_COLOR_2);
     }

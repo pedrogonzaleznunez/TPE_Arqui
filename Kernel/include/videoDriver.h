@@ -36,4 +36,12 @@ int getAmountCharsWidth();
 
 int getAmountCharsHeight();
 
+int getAmountCharsWidth();
+
+int getAmountCharsHeight();
+
+int getWidthInChars(void);
+
+ int getHeightInChars(void);
+
 #endif
