@@ -122,7 +122,6 @@ const unsigned char numero3[30][3] = {
 };
 
 
-
 // estas variables las voy a tener q inicializar cuando comience el juego
 // y actualizar en cada nivel
 
@@ -135,7 +134,7 @@ static Hole hole;
 static int key;// variable para almacenar la tecla presionada
 static int playerCount;
 static int level;
-static int embocada;   // flag para saber si la pelota fue embocada
+static int embocada;// flag para saber si la pelota fue embocada
 static int embocada1;
 static int embocada2;
 static int end_of_game;// flag para terminar la ejecucion del juego
@@ -192,7 +191,7 @@ void startGame(void) {
 
     // resetear TODOS los valores de inicio de juego - si no se guardan desde la ultima llamada a pongis
     initializeAllObjects();
-    
+
     welcome();
     pongis();
 
@@ -202,14 +201,13 @@ void startGame(void) {
     return;
 }
 
-void initializeAllObjects(){
+void initializeAllObjects() {
     end_of_game = 0;
     level = 1;
     playerCount = 0;
     player1.score = 0;
     player2.score = 0;
     embocada = 0;
-
 }
 
 void welcome() {
@@ -266,11 +264,13 @@ void printScore(PlayerPtr player1, PlayerPtr player2) {
 }
 
 void initializePlayers(int l) {
-    if (l < MIN_LEVEL || l > MAX_LEVEL) { return; }
-    player1.x = initialPosPlayer1[l].x;
-    player1.y = initialPosPlayer1[l].y;
-    player2.x = initialPosPlayer2[l].x;
-    player2.y = initialPosPlayer2[l].y;
+    if (l < 0 || l > MAX_LEVEL) { return; }
+    player1.x = initialPosPlayer1[l - 1].x;
+    player1.y = initialPosPlayer1[l - 1].y;
+    player2.x = initialPosPlayer2[l - 1].x;
+    player2.y = initialPosPlayer2[l - 1].y;
+
+    player1.dx = player1.dy = player2.dx = player2.dy = 0;
 
     // Inicializar velocidad y contador de teclas mantenidas
     player1.speed = PLAYER_ACCELERATION;
@@ -290,40 +290,18 @@ void drawEnemy(int l) {
 }
 
 void drawBall(int l) {
-    if (l < MIN_LEVEL || l > MAX_LEVEL) { return; }
-    ball.x = initialPosBall[l].x;
-    ball.y = initialPosBall[l].y;
-    // switch (l) {
-    //     case 1:
-    //         ball.x = BALL_INITIAL_X_L1;
-    //         ball.y = BALL_INITIAL_Y_L1;
-    //         ball.dx = INITIAL_DIR_1_X;
-    //         ball.dy = INITIAL_DIR_1_Y;
-    //         break;
-    //     case 2:
-    //         ball.x = BALL_INITIAL_X_L2;
-    //         ball.y = BALL_INITIAL_Y_L2;
-    //         ball.dx = INITIAL_DIR_2_X;
-    //         ball.dy = INITIAL_DIR_2_Y;
-    //         break;
-    //     case 3:
-    //         ball.x = BALL_INITIAL_X_L3;
-    //         ball.y = BALL_INITIAL_Y_L3;
-    //         ball.dx = INITIAL_DIR_3_X;
-    //         ball.dy = INITIAL_DIR_3_Y;
-    //         break;
-
-    //     default:
-    //         break;
-    // }
+    if (l < 0 || l > MAX_LEVEL) { return; }
+    ball.x = initialPosBall[l - 1].x;
+    ball.y = initialPosBall[l - 1].y;
+    ball.dx = ball.dy = 0;
 
     sys_draw_circle(ball.x, ball.y, BALL_RADIUS, BALL_COLOR);
 }
 
 void drawHole(int l) {
-    if (l < MIN_LEVEL || l > MAX_LEVEL) { return; }
-    hole.x = initialPosHole[l].x;
-    hole.y = initialPosHole[l].y;
+    if (l < 0 || l > MAX_LEVEL) { return; }
+    hole.x = initialPosHole[l - 1].x;
+    hole.y = initialPosHole[l - 1].y;
     sys_draw_circle(hole.x, hole.y, HOLE_SHADOW_RADIUS, SHADOW_COLOR);
     sys_draw_circle(hole.x, hole.y, HOLE_RADIUS, HOLE_COLOR);
 }
@@ -469,7 +447,7 @@ void printLevel(int l) {
 
 void newLevel(int l) {
 
-    // ####### Momento de new level ######3
+    // ####### Momento de new level #######
 
     sys_fill_screen(BACKGROUND_COLOR);// Limpiar la pantalla
     // // Limpiar el campo dibujando un rectángulo negro en el centro de la pantalla
@@ -486,7 +464,6 @@ void newLevel(int l) {
 
     // ##### Arranca el new level #####
 
-    sys_clear_screen();
     sys_fill_screen(BACKGROUND_COLOR);
     initializePlayers(l);// Dibuja los jugadores
     printScore(&player1, &player2);
@@ -500,14 +477,15 @@ void pongis(void) {
     // do {
     while (!end_of_game) {
         newLevel(level);
+        embocada = 0;
         //printScore(&player1, &player2);// Imprimir el puntaje actualizado
 
         while (!end_of_game) {
             key = getchar();
             handleInput(&player1, &player2, key);
-            movePlayer(&player1, &player2);     // Mover al jugador
-            checkCollisions(&player1, &player2);// Verificar colisiones
+            movePlayer(&player1, &player2);// Mover al jugador
             moveBall();// Mover la pelota después de procesar colisiones
+            checkCollisions(&player1, &player2);// Verificar colisiones
             // lastKey = getchar(); // Actualizar la última tecla presionada
 
 
@@ -515,9 +493,9 @@ void pongis(void) {
                 if (playerCount == 1) {
                     player1.score += 10;// Incrementar el puntaje del jugador 1
                 } else if (playerCount == 2) {
-                    if(embocada1){
+                    if (embocada1) {
 
-                    } else if(embocada2){
+                    } else if (embocada2) {
                         player1.score += 10;// Incrementar el puntaje del jugador 1
                     } else {
                         player2.score += 10;// Incrementar el puntaje del jugador 2
@@ -526,7 +504,6 @@ void pongis(void) {
                     // player2.score += 5;// Incrementar el puntaje del jugador 2
                 }
                 newLevel(level);
-                embocada = 0;
             }
         }
     }
