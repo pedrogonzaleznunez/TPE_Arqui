@@ -27,7 +27,7 @@ typedef struct register_set {
     uint64_t rip;   // Instruction pointer
 } register_set_t;
 
-void printAllRegs();
+void printAllRegs(int32_t color);
 
 int64_t setRegisters(register_set_t *regs);
 

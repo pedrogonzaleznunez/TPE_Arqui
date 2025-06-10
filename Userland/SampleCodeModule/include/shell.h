@@ -4,7 +4,7 @@
 #define WELCOME_MESSAGE         "Welcome to PongüixOS"
 #define PROMPT_SYMBOL           "$"
 #define INVALID_COMMAND_MESSAGE "Invalid command."
-#define MAX_COMMAND_LENGTH      50
+#define MAX_COMMAND_LENGTH      100
 #define TIME_ARGS_MSG "Invalid arguments...\nValid arguments:\nnone\nh for hour\nd for date\ny for year"
 
 void shell(void);

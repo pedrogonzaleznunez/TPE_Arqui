@@ -5,36 +5,36 @@
 register_set_t register_status;
 extern uint8_t saved_registers_flag;
 
-void printReg(char *name, int64_t value);
+void printReg(char *name, int64_t value, int32_t color);
 
-void printAllRegs() {
-    printReg("RAX: ", register_status.rax);
-    printReg("RBX: ", register_status.rbx);
-    printReg("RCX: ", register_status.rcx);
-    printReg("RDX: ", register_status.rdx);
-    printReg("RSI: ", register_status.rsi);
-    printReg("RDI: ", register_status.rdi);
-    printReg("RSP: ", register_status.rsp);
-    printReg("RBP: ", register_status.rbp);
-    printReg("R8: ", register_status.r8);
-    printReg("R9: ", register_status.r9);
-    printReg("R10: ", register_status.r10);
-    printReg("R11: ", register_status.r11);
-    printReg("R12: ", register_status.r12);
-    printReg("R13: ", register_status.r13);
-    printReg("R14: ", register_status.r14);
-    printReg("R15: ", register_status.r15);
-    printReg("RFLAGS: ", register_status.rflags);
-    printReg("RIP: ", register_status.rip);
+void printAllRegs(int32_t color) {
+    printReg("RAX: ", register_status.rax, color);
+    printReg("RBX: ", register_status.rbx, color);
+    printReg("RCX: ", register_status.rcx, color);
+    printReg("RDX: ", register_status.rdx, color);
+    printReg("RSI: ", register_status.rsi, color);
+    printReg("RDI: ", register_status.rdi, color);
+    printReg("RSP: ", register_status.rsp, color);
+    printReg("RBP: ", register_status.rbp, color);
+    printReg("R8: ", register_status.r8, color);
+    printReg("R9: ", register_status.r9, color);
+    printReg("R10: ", register_status.r10, color);
+    printReg("R11: ", register_status.r11, color);
+    printReg("R12: ", register_status.r12, color);
+    printReg("R13: ", register_status.r13, color);
+    printReg("R14: ", register_status.r14, color);
+    printReg("R15: ", register_status.r15, color);
+    printReg("RFLAGS: ", register_status.rflags, color);
+    printReg("RIP: ", register_status.rip, color);
     return;
 }
 
-void printReg(char *name, int64_t value) {
+void printReg(char *name, int64_t value, int32_t color) {
     char numBuffer[20] = {0};
-    putString(name, 0x00FF00);
+    putString(name, color);
     uintToBase(value, numBuffer, 16);
-    putString(numBuffer, 0x00FF00);
-    putChar('\n', 0x00FF00);
+    putString(numBuffer, color);
+    putChar('\n', color);
     return;
 }
 

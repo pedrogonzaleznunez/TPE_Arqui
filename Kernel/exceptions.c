@@ -25,7 +25,7 @@ void exceptionDispatcher(int exception) {
 void exceptionHelper(char *msg) {
     putString(msg, 0xFF0000);
     putString("Registers at exception show: \n", 0xFF0000);
-    printAllRegs();
+    printAllRegs(0xFF0000);
 
     while (!isBufferEmpty()) { bufferRead(); }// vacío el buffer
 
