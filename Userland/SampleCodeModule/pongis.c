@@ -99,6 +99,9 @@ const unsigned char numero3[30][3] = {
     {0xF8, 0x1F, 0x00}, {0xF8, 0x1F, 0x00}, {0xF8, 0x1F, 0x00}, {0xF8, 0x1F, 0x00},// 0x0E
     {0x00, 0x00, 0x00}, {0x00, 0x00, 0x00}// relleno negro
 };
+
+
+
 // estas variables las voy a tener q inicializar cuando comience el juego
 // y actualizar en cada nivel
 
@@ -110,9 +113,11 @@ static Hole hole;
 
 static int key;    // variable para almacenar la tecla presionada
 static int playerCount;
-static int level = 1;
-static int embocada = 0;   // flag para saber si la pelota fue embocada
-static int end_of_game = 0;// flag para terminar la ejecucion del juego
+static int level;
+static int embocada;   // flag para saber si la pelota fue embocada
+static int embocada1;
+static int embocada2;
+static int end_of_game;// flag para terminar la ejecucion del juego
 
 // ################################# NOTES #################################
 /*
@@ -127,6 +132,8 @@ static int end_of_game = 0;// flag para terminar la ejecucion del juego
 void handleInput(PlayerPtr player1, PlayerPtr player2, int key);
 void movePlayer(PlayerPtr player1, PlayerPtr player2);
 void moveBall(void);
+void initializeAllObjects();
+
 
 // ################################## GAME LOGIC #################################
 
@@ -134,11 +141,22 @@ void moveBall(void);
 void startGame(void) {
 
     // resetear TODOS los valores de inicio de juego - si no se guardan desde la ultima llamada a pongis
-    end_of_game = 0;
+    initializeAllObjects();
+    
     welcome();
     pongis();
 
     return;
+}
+
+void initializeAllObjects(){
+    end_of_game = 0;
+    level = 1;
+    playerCount = 0;
+    player1.score = 0;
+    player2.score = 0;
+    embocada = 0;
+
 }
 
 void welcome() {
@@ -146,7 +164,7 @@ void welcome() {
     // sys_beep(200, 20);
     sys_fill_screen(BACKGROUND_COLOR);
 
-    putsWidthCenter("Bienvenido a Pongis Golf!\n");
+    putsCenterWidthHeightFourthCenter("Bienvenido a Pongis Golf!\n");
     putsWidthCenter("Seleccione la cantidad de jugadores:\n");
     putsWidthCenter("Presione 1 para un jugador.\n");
     putsWidthCenter("Presione 2 para dos jugadores.\n");
@@ -333,7 +351,7 @@ void checkCollisions(PlayerPtr player1, PlayerPtr player2) {
         level++;// Incrementar el nivel
         if (level > 3)
             end_of_game = 1;// Terminar el juego si se completan todos los niveles
-        printf("¡Jugador embocó la pelota en el hoyo!\n");
+        putsCenterWidthHeightFourthCenter("¡Jugador embocó la pelota en el hoyo!\n");
     }
 
     // 3. Colisión con la pelota (player1)
@@ -425,6 +443,8 @@ void printLevel(int l) {
 
 void newLevel(int l) {
 
+    // ####### Momento de new level ######3
+
     sys_fill_screen(BACKGROUND_COLOR);// Limpiar la pantalla
     // // Limpiar el campo dibujando un rectángulo negro en el centro de la pantalla
     // int rect_width = FIELD_WIDTH / 2;
@@ -433,12 +453,16 @@ void newLevel(int l) {
     // int rect_y = (FIELD_HEIGHT - rect_height) / 2;
 
     // sys_draw_rec(rect_x, rect_y, rect_width, rect_height, 0x000000);
+
     sys_draw_circle(FIELD_WIDTH / 2, FIELD_HEIGHT / 2, 40, 0x000000);
     printLevel(level);
     sys_sleep(50);
 
+    // ##### Arranca el new level #####
+
     sys_clear_screen();
     sys_fill_screen(BACKGROUND_COLOR);
+    printScore(&player1, &player2);
     drawPlayers(l);// Dibuja los jugadores
     drawHole(l);
     drawBall(l);
@@ -450,7 +474,7 @@ void pongis(void) {
    // do { 
     while(!end_of_game){
         newLevel(level);
-        printScore(&player1, &player2);// Imprimir el puntaje actualizado
+        //printScore(&player1, &player2);// Imprimir el puntaje actualizado
 
         while (!end_of_game) {
             key = getchar();
@@ -462,13 +486,20 @@ void pongis(void) {
 
 
             if (embocada) {
-                newLevel(level);
                 if (playerCount == 1) {
                     player1.score += 10;// Incrementar el puntaje del jugador 1
                 } else if (playerCount == 2) {
-                    player1.score += 5;// Incrementar el puntaje del jugador 1
-                    player2.score += 5;// Incrementar el puntaje del jugador 2
+                    if(embocada1){
+
+                    } else if(embocada2){
+                        player1.score += 10;// Incrementar el puntaje del jugador 1
+                    } else {
+                        player2.score += 10;// Incrementar el puntaje del jugador 2
+                    }
+                    // player1.score += 5;// Incrementar el puntaje del jugador 1
+                    // player2.score += 5;// Incrementar el puntaje del jugador 2
                 }
+                newLevel(level);
                 embocada = 0;
             }
         }
