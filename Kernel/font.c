@@ -1,10 +1,5 @@
 #include <font.h>
 
-#define MIN_CHAR ' '
-#define MAX_CHAR '~'
-
-#define DEFAULT_WIDTH  8
-#define DEFAULT_HEIGHT 16
 
 static uint8_t font_width = DEFAULT_WIDTH;
 static uint8_t font_height = DEFAULT_HEIGHT;

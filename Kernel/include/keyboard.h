@@ -13,6 +13,9 @@
 #define ARROW_LEFT_CODE  19
 #define ARROW_RIGHT_CODE 20
 
+#define BUFFER_DEFAULT_SIZE 1024
+#define MAX_SCAN_CODE       0x53
+
 #include <stdint.h>
 
 // imprime el valor dado si es que es imprimible

@@ -21,10 +21,6 @@ void printLines(void);
 extern void throwZeroDivisionException(void);
 extern void throwInvalidOpcodeException(void);
 
-typedef struct line {
-    char characters[MAX_COMMAND_LENGTH];
-    int isCommand;
-} line_t;
 
 static line_t lineBuffer[MAX_LINES_SAVED];
 static int firstLine = 0;

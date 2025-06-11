@@ -5,6 +5,11 @@
 #include <stdint.h>
 
 #define CHAR_U_UMLAUT_OFFSET 95 // Adjust based on your fontBitmap size
+#define MIN_CHAR ' '
+#define MAX_CHAR '~'
+
+#define DEFAULT_WIDTH  8
+#define DEFAULT_HEIGHT 16
 
 uint8_t getFontWidth();
 

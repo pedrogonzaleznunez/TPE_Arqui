@@ -7,6 +7,11 @@
 #define MAX_COMMAND_LENGTH      100
 #define TIME_ARGS_MSG "Invalid arguments...\nValid arguments:\nnone\nh for hour\nd for date\ny for year"
 
+typedef struct line {
+    char characters[MAX_COMMAND_LENGTH];
+    int isCommand;
+} line_t;
+
 void shell(void);
 
 void processCommands(char *command);

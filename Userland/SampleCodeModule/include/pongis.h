@@ -116,6 +116,61 @@
 #define MIN_LEVEL 1
 #define MAX_LEVEL 3
 
+// ################################## SOUNDS #################################
+
+// Algunas notas
+#define NOTE_G3 196
+#define NOTE_C4 261
+#define NOTE_D4 294
+#define NOTE_E4 329
+#define NOTE_F4 349
+#define NOTE_G4 392
+#define NOTE_A4 440
+#define NOTE_B4 494
+#define NOTE_C5 523
+#define NOTE_D5 587
+#define NOTE_E5 659
+
+
+
+// ################################# DATA STRUCTURES #################################
+
+// Esta estructura representa la bola que hay que embocar
+typedef struct {
+    int x, y;  // posicion
+    int dx, dy;// dirreccion y sentido actual
+} Ball;
+typedef Ball *BallPtr;
+
+typedef struct {
+    int score;       // puntaje del jugador
+    int x, y;        // posicion
+    int dx, dy;      // dirreccion y sentido actual
+    int hold_counter;// contador para mantener la direccion
+    int speed;       // velocidad actual del jugador
+    int last_key;
+    int color;
+} Player;
+typedef Player *PlayerPtr;
+
+typedef struct {
+    int x, y;// Position of the hole
+    int radius;
+    int shadow_radius;
+} Hole;
+
+typedef Hole *HolePtr;
+
+typedef struct {
+    int x, y;
+} Point;
+
+
+typedef struct {
+    uint32_t freq;
+    uint32_t dur;
+} Note;
+
 // ###### FUNCTIONS ######
 
 void startGame(void);

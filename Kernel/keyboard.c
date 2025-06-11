@@ -2,8 +2,7 @@
 #include <lib.h>
 #include <stddef.h>
 
-#define BUFFER_DEFAULT_SIZE 1024
-#define MAX_SCAN_CODE       0x53
+
 
 static uint8_t buffer[BUFFER_DEFAULT_SIZE] = {0};
 static uint8_t keysState[MAX_SCAN_CODE + 1] = {0};
