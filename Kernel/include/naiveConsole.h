@@ -19,4 +19,4 @@ void ncDeleteChar(char amount);
 
 uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
 
-#endif
+#endif /* NAIVE_CONSOLE_H */

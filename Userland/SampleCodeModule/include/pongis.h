@@ -52,8 +52,6 @@
 
 // ###### BALL INITIAL  ######
 
-// #define BALL_RADIUS 15// Radio de la bola
-
 // Initial position of the ball per level
 // LEVEL 1
 #define BALL_INITIAL_X_L1 300
@@ -177,4 +175,4 @@ typedef struct {
 
 void startGame(void);
 
-#endif
+#endif /* PONGIS_H_ */

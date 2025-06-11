@@ -34,4 +34,5 @@ unsigned int rtcTypeToDecimal(unsigned char time);
 
 void setTime(time_t *time);
 
-#endif
+#endif /* RTC_H */
+

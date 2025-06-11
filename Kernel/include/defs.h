@@ -1,7 +1,3 @@
-/***************************************************
-  Defs.h
-****************************************************/
-
 #ifndef _defs_
 #define _defs_
 
@@ -22,4 +18,4 @@
 #define ACS_STACK (ACS_PRESENT | ACS_DSEG | ACS_WRITE)
 
 
-#endif
+#endif /* _defs_ */

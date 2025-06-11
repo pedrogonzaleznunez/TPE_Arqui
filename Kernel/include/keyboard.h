@@ -36,4 +36,4 @@ int isBufferFull();
 
 int64_t getKeyState(uint8_t *target);
 
-#endif
+#endif /* KEYBOARD_H */

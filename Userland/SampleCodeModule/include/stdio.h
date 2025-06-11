@@ -27,12 +27,10 @@ uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
 
 void putsCenter(const char *str);
 
-// antes de llamarlas, la pantalla no tiene que tener otros caracteres
-// para que funcione bien
 void printPadding(char c, int count);
 void putsWithPadding(const char *str, int pad_top, int pad_left);
 void putsWidthCenter(const char *str);
 void putsHeightFourthCenter(const char *str);
 void putsCenterWidthHeightFourthCenter(const char *str);
 
-#endif
+#endif /* _STDIO_H_ */

@@ -9,4 +9,4 @@ int seconds_elapsed();
 
 void timerWait(uint32_t ticksToWait);
 
-#endif
+#endif /* _TIME_H_ */

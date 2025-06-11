@@ -3,8 +3,6 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-// todo manejar colores ??
-
 static char buffer[64] = {0};
 
 static void printBase(int fd, int num, int base);
@@ -69,8 +67,6 @@ int getchar() {
 void printf(const char *format, ...) {
     va_list args;
     va_start(args, format);
-    // tira error, pero compila bien.
-    // es porque quiere encontrar la cte FD_STDOUT en la lib estandar posta
     vfprintf(FD_STDOUT, format, args);
     va_end(args);
 }
@@ -82,7 +78,7 @@ void fprintf(int fd, const char *str, ...) {
     va_end(args);
 }
 
-void vfprintf(int fd, const char *format, va_list args) {
+void vfprintf(int fd, const char *format, va_list args) { // sin %f
 
     int i = 0;
 
@@ -106,7 +102,6 @@ void vfprintf(int fd, const char *format, va_list args) {
                     case 'b':
                         printBase(fd, va_arg(args, int), 2);
                         break;
-                    // case 'f': printFloat(fd, va_arg(args, double)); break ;
                     case 'c': {
                         char c = (char) va_arg(args, int);
                         sys_write(fd, &c, 1);// syscall para escribir un caracter
@@ -275,7 +270,6 @@ static void printBase(int fd, int num, int base) {
     fprintf(fd, buffer);
 }
 
-//static
 uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
     char *p = buffer;
     char digits[] = "0123456789ABCDEF";
@@ -310,7 +304,7 @@ uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base) {
     return length;
 }
 
-void sprintf(char *str, const char *format, ...) {
+void sprintf(char *str, const char *format, ...) { // sin %f
     va_list args;
     va_start(args, format);
 
@@ -345,7 +339,6 @@ void sprintf(char *str, const char *format, ...) {
                         strcpy(str + a, buffer);
                         a += strlen(buffer);
                         break;
-                    // case 'f': printFloat(fd, va_arg(args, double)); break ;
                     case 'c': {
                         char c = (char) va_arg(args, int);
                         str[a++] = c;

@@ -90,4 +90,5 @@ int64_t sys_get_screen_width();
 
 int64_t sys_get_screen_height();
 
-#endif
+#endif /* SYSCALLS_H */
+

@@ -3,4 +3,4 @@
 
 void loadModules(void *payloadStart, void **moduleTargetAddress);
 
-#endif
+#endif /* MODULELOADER_H */

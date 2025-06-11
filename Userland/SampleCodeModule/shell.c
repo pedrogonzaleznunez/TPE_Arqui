@@ -41,7 +41,7 @@ void shell(void) {
     putLineInBuffer(WELCOME_MESSAGE, 0);
     help();
 
-    while (1) {// agregar forma de salir?? con un boolean (int) done/exit/quit
+    while (1) {
         activateShell();
     }
 }
@@ -108,10 +108,9 @@ void activateShell(void) {
             }
 
         } else {
-            //if(i < MAX_COMMAND_LENGTH - 1){
             shell_buffer[i++] = c;
             putchar(c);// mostrar en pantalla
-            // }
+            
         }
         // ignorar otros caracteres
     }
@@ -157,7 +156,7 @@ char *getCommandFromHistory(int historyIndex) {
 }
 
 void processCommands(char *command) {
-    char instruction[MAX_COMMAND_LENGTH];// ver tema longitud
+    char instruction[MAX_COMMAND_LENGTH];
     char arg1[MAX_COMMAND_LENGTH];
     char arg2[MAX_COMMAND_LENGTH];
 
@@ -198,7 +197,6 @@ void processCommands(char *command) {
 
     } else if (strcmp(instruction, "pongis") == 0) {
         startGame();
-        // + putLineInBuffer si hace falta
         clear();
         printLines();
     } else if (isEmpty(instruction)) {
@@ -355,7 +353,7 @@ int correctArguments(int argsExpected, int argsRead, char *command) {
         putLineInBuffer(buffer, 0);
         return 0;
     }
-    return 1;// todo bien
+    return 1;// todo bien its correct
 }
 
 void processTime(char *arg1, int argsRead) {
@@ -369,7 +367,7 @@ void processTime(char *arg1, int argsRead) {
         sys_get_time(&time);
         char buffer[50];
         if (*(arg1 + 1) !=
-            '\0') {// esta bien porque arg1 es un vector de chars que yo se tiene mas de una posicion
+            '\0') {// esta bien 
             puts(TIME_ARGS_MSG);
             putLineInBuffer(TIME_ARGS_MSG, 0);
             return;

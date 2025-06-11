@@ -40,4 +40,4 @@ int64_t getScreenWidth(void);
 
 int64_t getScreenHeight(void);
 
-#endif
+#endif /* VIDEO_DRIVER_H */

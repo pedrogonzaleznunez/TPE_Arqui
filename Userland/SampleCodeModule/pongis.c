@@ -47,14 +47,6 @@ static uint8_t keysState[MAX_SCAN_CODE + 1];
 
 int height, width;
 
-// ################################# NOTES #################################
-/*
-    La idea principal es que sea un ciclo, y vaya valiando que end_game != 1
-    El juego se puede terminar si:
-        - el jugador aborta el nivel (alguna combinacion de teclas)                 --> salida forzada
-        - el jugador presiona un futuro "boton" que diga, salir del juego           --> salida premeditada
-*/
-
 // ################################# FUNCTIONS #################################
 
 void handleInput(PlayerPtr player1, PlayerPtr player2, int key);
@@ -79,7 +71,7 @@ Note new_level[] = {{NOTE_C4, 2}, {NOTE_E4, 2}, {NOTE_G4, 2}, {NOTE_C5, 2}};
 
 // ################################## GAME LOGIC #################################
 
-// Funcion llamada desde el main del userland
+// Funcion llamada desde al ingresar el comando pongis desde la terminal
 void startGame(void) {
     initializeAllObjects();
 
@@ -303,8 +295,6 @@ void newLevel(int l) {
     printLevel(l);
     sys_sleep(30);
 
-    // ##### Arranca el new level #####
-
     sys_fill_screen(BACKGROUND_COLOR);
     initializePlayer(l, &player1, initialPosPlayer1, PLAYER_COLOR_1);
     if (playerCount > 1) {
@@ -324,7 +314,6 @@ void pongis(void) {
     while (!end_of_game) {
         newLevel(level);
         scored = 0;
-        // printScore(&player1, &player2);// Imprimir el puntaje actualizado
 
         while (!end_of_game && !scored) {
             key = getchar();
@@ -334,7 +323,6 @@ void pongis(void) {
             if (playerCount > 1) { movePlayer(&player2); }
             moveBall();       // Mover la pelota después de procesar colisiones
             checkCollisions();// Verificar colisiones
-            // lastKey = getchar(); // Actualizar la última tecla presionada
 
             if (scored) {
                 if (playerCount == 1) {

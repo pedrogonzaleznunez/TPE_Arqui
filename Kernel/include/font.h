@@ -17,4 +17,4 @@ uint8_t getFontHeight();
 
 uint8_t *getFontChar(char c);
 
-#endif
+#endif /* __FONT_H_ */

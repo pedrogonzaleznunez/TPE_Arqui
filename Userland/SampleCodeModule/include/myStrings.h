@@ -31,4 +31,4 @@ char *strrchr(const char *s, char c);
 // Elimina espacios iniciales, intermedios repetidos y finales
 void trim(char *str);
 
-#endif
+#endif /* __MY_STRINGS_H_ */
