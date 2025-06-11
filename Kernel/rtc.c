@@ -1,7 +1,5 @@
 #include <rtc.h>
 
-// TODO HOMOGENEIZAR LOS TIPOS DE DATOS QUE USA
-
 int64_t getSeconds() {
     return rtcTypeToDecimal(getTimeFragment(SECONDS));
 }
