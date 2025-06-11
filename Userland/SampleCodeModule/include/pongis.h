@@ -1,5 +1,7 @@
 #ifndef PONGIS_H_
 #define PONGIS_H_
+#include <stddef.h>
+#include <stdint.h>
 
 // ###### COLORS ######
 #define BACKGROUND_COLOR 0x006400// 0x329bab
